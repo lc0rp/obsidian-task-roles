@@ -11,8 +11,8 @@ After making any code changes, edits, or modifications to files in the workspace
 ## Commit Message Format
 Use conventional commits format with scope:
 - **Format**: `type(scope): description`
-- **Types**: feat, fix, docs, style, refactor, test, chore, api
-- **Scope**: Use appropriate scope based on what was changed (e.g., modal, settings, ui, docs)
+- **Types**: feat, fix, docs, style, refactor, test, chore
+- **Scope**: Use appropriate scope based on what was changed (e.g., modal, settings, ui, docs, api)
 - **Description**: Brief description of what was changed
 
 ## Required Final Message
@@ -54,4 +54,3 @@ git add . && git commit -m "style: improve help link appearance and responsivene
 - `docs` - Documentation updates
 - `build` - Build system changes
 - `test` - Testing related changes
-- `api` - API changes

@@ -99,6 +99,22 @@ This approach is similar to how TaskNotes implements their functionality, provid
 
 This plugin is built with TypeScript and follows Obsidian's plugin development guidelines.
 
+### Project Structure
+
+```
+obsidian-task-assignment/
+├── docs/           # Documentation files
+├── src/            # TypeScript source code
+│   └── main.ts     # Main plugin entry point
+├── styles/         # CSS stylesheets
+│   └── styles.css  # Plugin styles
+├── tests/          # Test files (future)
+├── media/          # Media assets (icons, images)
+├── manifest.json   # Plugin manifest
+├── package.json    # Dependencies and scripts
+└── README.md       # This file
+```
+
 ### Building
 
 ```bash
