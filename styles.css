@@ -6,3 +6,341 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+/* Task Assignment Plugin Styles */
+
+.roles-container {
+    margin: 1em 0;
+}
+
+.role-row {
+    margin-bottom: 1em;
+    padding: 0.5em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-secondary);
+}
+
+.role-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.role-icon {
+    font-size: 1.2em;
+    min-width: 1.5em;
+}
+
+.role-name-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+}
+
+.role-name {
+    font-weight: 500;
+}
+
+.role-description {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.add-assignee-btn {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-assignee-btn:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.assignee-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+    margin-top: 0.5em;
+}
+
+.assignee-tag {
+    background: var(--tag-background);
+    color: var(--tag-color);
+    padding: 0.2em 0.5em;
+    border-radius: 12px;
+    font-size: 0.85em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.remove-assignee {
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.7;
+    margin-left: 0.25em;
+}
+
+.remove-assignee:hover {
+    opacity: 1;
+    color: var(--text-error);
+}
+
+.new-role-row {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+    margin: 1em 0;
+    padding: 0.5em;
+    border: 1px dashed var(--background-modifier-border);
+    border-radius: 4px;
+}
+
+.new-role-row input {
+    padding: 0.25em 0.5em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+}
+
+.new-role-row button {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.new-role-row button:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.button-container {
+    display: flex;
+    gap: 0.5em;
+    justify-content: flex-end;
+    margin-top: 1.5em;
+    padding-top: 1em;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.button-container button {
+    padding: 0.5em 1em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--background-primary);
+    color: var(--text-normal);
+}
+
+.button-container button:hover {
+    background: var(--background-modifier-hover);
+}
+
+.button-container button.mod-cta {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+}
+
+.button-container button.mod-cta:hover {
+    background: var(--interactive-accent-hover);
+}
+
+/* Settings page styles */
+.setting-item-description {
+    margin-bottom: 0.5em;
+}
+
+.mod-warning {
+    background: var(--text-error) !important;
+    color: var(--text-on-accent) !important;
+    border-color: var(--text-error) !important;
+}
+
+.mod-warning:hover {
+    opacity: 0.8;
+}
+
+/* Suggestion modal styles */
+.suggestion-item {
+    padding: 0.5em;
+    cursor: pointer;
+}
+
+.suggestion-item:hover,
+.suggestion-item.is-selected {
+    background: var(--background-modifier-hover);
+}
+
+.suggestion-item.is-selected {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+/* Editor suggest styles */
+.suggestion-container {
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    box-shadow: var(--shadow-s);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 0.5em;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .role-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25em;
+    }
+    
+    .new-role-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .button-container {
+        flex-direction: column;
+    }
+}
+
+/* Task Assignment Icon Styles */
+.task-assignment-icon-container button.task-assignment-icon-button {
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Sizing */
+    width: 15px;
+    height: 15px;
+    margin-left: 8px;
+    padding: 0;
+    
+    /* Visual styling */
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-radius: 3px;
+    
+    /* Interactivity */
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+    
+    /* Reset button styles */
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1;
+    box-sizing: border-box;
+    outline: none;
+    text-decoration: none;
+    vertical-align: baseline;
+}
+
+.task-assignment-icon-container button.task-assignment-icon-button:hover {
+    opacity: 1;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.task-assignment-icon-container button.task-assignment-icon-button:active {
+    transform: scale(0.95);
+}
+
+.task-assignment-icon-container button.task-assignment-icon-button:focus {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 1px;
+}
+
+/* Hide assignment icons in reading view */
+.markdown-reading-view .task-assignment-icon-container button.task-assignment-icon-button {
+    display: none;
+}
+
+/* Ensure icons appear after task content */
+.cm-line:has(.task-assignment-icon-container button.task-assignment-icon-button) {
+    position: relative;
+}
+
+/* Style for task lines with assignment icons */
+.cm-content .cm-line {
+    position: relative;
+}
+
+.task-assignment-icon-container button.task-assignment-icon-button {
+    position: relative;
+    z-index: 1;
+}
+
+/* Icon inside the convert button */
+.task-assignment-icon-container .task-assignment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+}
+
+.task-assignment-icon-container .task-assignment-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 768px) {
+    .task-assignment-icon-container button.task-assignment-icon-button {
+        font-size: 16px;
+        margin-left: 6px;
+    }
+}
+
+/* Help link styles */
+.help-link-container {
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top: 1px solid var(--background-modifier-border);
+    text-align: center;
+}
+
+.help-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9em;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.help-link:hover {
+    color: var(--interactive-accent);
+    opacity: 1;
+    text-decoration: underline;
+}

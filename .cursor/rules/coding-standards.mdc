@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Coding Standards
+   
+## TypeScript Guidelines
+
+- Follow TypeScript strict mode as configured in [tsconfig.json](mdc:tsconfig.json)
+- Use proper type annotations and avoid `any` types
+- Implement interfaces for settings and configuration objects
+- Use async/await for asynchronous operations
+
+## Code Quality
+
+- All code must pass ESLint checks (see [.eslintrc](mdc:.eslintrc))
+- Run `npm run build` to ensure TypeScript compilation succeeds
+- Use meaningful variable and function names
+- Add comments for complex regex patterns and business logic
+
+## Markdown Documentation
+
+- All .md files must pass markdownlint checks
+- Run `npm run lint:md` to validate markdown files
+- Run `npm run lint:md:fix` to automatically fix formatting issues
+- Maximum line length: 120 characters (excluding code blocks and tables)
+- Use consistent heading styles and proper list formatting
+- Specify language for code blocks
+
+## Project Documentation
+
+Project documentation is stored in README.md and the docs folder
+
+When making changes:
+1. Update @README.md for user-facing changes
+2. Update @docs/*.md for technical changes
+3. Ensure all markdown passes linting
+4. Update examples if functionality changes

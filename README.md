@@ -1,94 +1,130 @@
-# Obsidian Sample Plugin
+# Task Assignment
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Contributors, Informed) methodology.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### 🎯 Quick Task Assignment
 
-## First time developing plugins?
+- **One-click assignment**: A person icon (👤) appears at the end of every task line for instant access
+- **Smart detection**: Icons appear automatically when you start typing task content
+- **Natural workflow**: The cursor stays between the checkbox and icon, so you can type naturally
 
-Quick starting guide for new plugin devs:
+### 👥 Contact & Company Management
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- Link tasks to contacts using `@` prefix (e.g., `@John`)
+- Link tasks to companies using `+` prefix (e.g., `+AcmeCorp`)
+- Auto-complete suggestions from configured directories
+- Special `@me` contact for self-assignment
 
-## Releasing new releases
+### 🎭 Role-Based Assignment (DACI)
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+- **Drivers** 🚗: Who is responsible for driving the task forward
+- **Approvers** 👍: Who needs to approve the task
+- **Contributors** 👥: Who will contribute to the task
+- **Informed** 📢: Who needs to be kept informed
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### ⚙️ Customizable Roles
 
-## Adding your plugin to the community plugin list
+- Add custom roles with your own icons
+- Hide default roles you don't need
+- Reorder roles by priority
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Usage
 
-## How to use
+### Quick Assignment with Icons
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. Create a task: `- [ ] Complete project documentation`
+2. Start typing after the checkbox - a users icon automatically appears at the end
+3. Click the icon to open the assignment dialog
+4. Select roles and assign contacts/companies
 
-## Manually installing the plugin
+### Assignment Format
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+When you assign people to a task, it gets formatted like this:
+`[icon] [comma-separated contact links]`
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]]`
 
-## Funding URL
+## Ways to Assign
 
-You can include funding URLs where people who use your plugin can financially support it.
+1. **Click the person icon**: Appears automatically at the end of task lines
+2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
+3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
+4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+## Editing Assignments
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+Select "Assign task roles to People/Companies" on a task that already has roles to edit existing assignments. Only known, unhidden roles will be parsed and displayed.
+
+## Settings
+
+- **Change @ symbol**: Customize contact prefix (affects future data only)
+- **Change + symbol**: Customize company prefix (affects future data only)
+- **Select @ directory**: Choose directory for contacts (affects future data only)
+- **Select + directory**: Choose directory for companies (affects future data only)
+- **Create @me contact**: Button to create the special @me contact if it doesn't exist
+- **Manage roles**:
+  - Hide default roles (prevents them from appearing in future dialogs)
+  - Add, edit, and delete custom roles
+  - Note: Editing custom roles won't update historical records
+
+## Installation
+
+### From Obsidian Community Plugins
+
+1. Open Obsidian Settings
+2. Go to Community Plugins
+3. Search for "Task Assignment"
+4. Install and enable the plugin
+
+### Manual Installation
+
+1. Download the latest release from GitHub
+2. Extract the files to your vault's `.obsidian/plugins/obsidian-task-assignment/` folder
+3. Reload Obsidian and enable the plugin in settings
+
+## How It Works
+
+The plugin uses CodeMirror editor extensions to:
+
+- Detect task lines in real-time
+- Add clickable person icons at the end of task lines
+- Maintain cursor position between checkbox and icon
+- Trigger assignment dialogs when icons are clicked
+
+This approach is similar to how TaskNotes implements their functionality, providing a seamless user experience.
+
+## Development
+
+This plugin is built with TypeScript and follows Obsidian's plugin development guidelines.
+
+### Building
+
+```bash
+npm install
+npm run build
 ```
 
-If you have multiple URLs, you can also do:
+### Development Mode
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```bash
+npm run dev
 ```
 
-## API Documentation
+## Contributing
 
-See https://github.com/obsidianmd/obsidian-api
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+## License
+
+MIT
+
+## Support
+
+If you find this plugin helpful, consider supporting its development:
+
+- ⭐ Star this repository
+- 🐛 Report bugs and request features
+- 💡 Contribute code improvements
+- ☕ [Buy me a coffee](https://buymeacoffee.com) (if funding URL is configured)
