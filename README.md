@@ -103,17 +103,40 @@ This plugin is built with TypeScript and follows Obsidian's plugin development g
 
 ```
 obsidian-task-assignment/
-├── docs/           # Documentation files
-├── src/            # TypeScript source code
-│   └── main.ts     # Main plugin entry point
-├── styles/         # CSS stylesheets
-│   └── styles.css  # Plugin styles
-├── tests/          # Test files (future)
-├── media/          # Media assets (icons, images)
-├── manifest.json   # Plugin manifest
-├── package.json    # Dependencies and scripts
-└── README.md       # This file
+├── docs/                    # Documentation files
+├── src/                     # TypeScript source code
+│   ├── main.ts             # Main plugin entry point
+│   ├── types/              # TypeScript interfaces and constants
+│   ├── services/           # Business logic and data processing
+│   ├── components/         # Reusable UI components and widgets
+│   ├── editor/             # Editor extensions and suggestions
+│   ├── modals/             # Modal dialogs and popups
+│   ├── settings/           # Plugin settings and configuration
+│   ├── ui/                 # UI utilities (reserved for future use)
+│   ├── utils/              # General utilities (reserved for future use)
+│   └── views/              # Custom views (reserved for future use)
+├── styles/                 # CSS stylesheets
+│   └── styles.css          # Plugin styles
+├── tests/                  # Test files (future)
+├── media/                  # Media assets (icons, images)
+├── manifest.json           # Plugin manifest
+├── package.json            # Dependencies and scripts
+└── README.md               # This file
 ```
+
+### Architecture
+
+The plugin follows a modular architecture with clear separation of concerns:
+
+- **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
+- **Types** (`types/`) - TypeScript interfaces and constants
+- **Services** (`services/`) - Business logic and data processing
+- **Components** (`components/`) - Reusable UI widgets
+- **Editor** (`editor/`) - CodeMirror extensions and suggestions
+- **Modals** (`modals/`) - Dialog windows and user interactions
+- **Settings** (`settings/`) - Configuration and preferences
+
+This modular design makes the codebase more maintainable, testable, and extensible for future features.
 
 ### Building
 

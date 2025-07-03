@@ -49,3 +49,27 @@ Selecting "Assign task roles" on a task that already has roles will display the 
 - "Assign task roles" command to pull up dialog (only if the cursor is on a checkbox item, aka task)
 - A keyboard shortcut to trigger the command
 - When typing on a task, you can type the relevant icon, a space <@ or +>, which will trigger an autosuggest search of the contact or company in the preconfigured directories.
+
+## Architecture
+
+The plugin follows a modular architecture with clear separation of concerns:
+
+### Core Structure
+
+- **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
+- **Types** (`types/`) - TypeScript interfaces and constants
+- **Services** (`services/`) - Business logic and data processing
+- **Components** (`components/`) - Reusable UI widgets
+- **Editor** (`editor/`) - CodeMirror extensions and suggestions
+- **Modals** (`modals/`) - Dialog windows and user interactions
+- **Settings** (`settings/`) - Configuration and preferences
+
+### Key Components
+
+- **TaskAssignmentService** - Handles parsing, formatting, and file operations
+- **TaskAssignmentWidget** - Inline assignment icon for tasks
+- **AssignmentModal** - Main role assignment dialog
+- **AssignmentSuggest** - Editor autocompletion for inline assignments
+- **TaskAssignmentExtension** - CodeMirror extension for task decoration
+
+This modular design makes the codebase more maintainable, testable, and extensible for future features.
