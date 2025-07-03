@@ -12,6 +12,10 @@ node_modules
 # They should be uploaded to GitHub releases instead.
 main.js
 
+# Don't include the copied styles.css file in the repo.
+# It's copied from styles/styles.css during build.
+styles.css
+
 # Exclude sourcemaps
 *.map
 

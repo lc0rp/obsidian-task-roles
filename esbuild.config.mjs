@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import fs from "fs";
 
 const banner =
 `/*
@@ -41,9 +42,34 @@ const context = await esbuild.context({
 	minify: prod,
 });
 
+// Copy styles.css to root directory
+const copyStyles = () => {
+	try {
+		fs.copyFileSync("styles/styles.css", "styles.css");
+		console.log("✓ Copied styles.css");
+	} catch (error) {
+		console.error("Failed to copy styles.css:", error.message);
+	}
+};
+
+// Watch styles directory in development mode
+const watchStyles = () => {
+	if (!prod) {
+		fs.watchFile("styles/styles.css", (curr, prev) => {
+			if (curr.mtime !== prev.mtime) {
+				copyStyles();
+				console.log("✓ Styles updated");
+			}
+		});
+	}
+};
+
 if (prod) {
 	await context.rebuild();
+	copyStyles();
 	process.exit(0);
 } else {
 	await context.watch();
+	copyStyles();
+	watchStyles();
 }
