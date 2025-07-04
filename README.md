@@ -30,6 +30,20 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 - Hide default roles you don't need
 - Reorder roles by priority
 
+### 📋 Task Assignment View
+
+- **Kanban-Style Layout**: Organize tasks by status, role, person, company, or date
+- **Advanced Filtering**: Filter by entity, date range, content, status, priority, and tags
+- **Real-Time Task Cache**: Background task scanning with automatic updates
+- **Interactive Task Cards**: Clickable status toggles and detailed side panels
+- **Saved Views**: Save and recall custom filter and layout configurations
+- **Multiple View Layouts**:
+  - **Status View**: Organize by task completion status
+  - **Role View**: Group by assigned roles (with user/others separation)
+  - **Person/Contact View**: Organize by individual assignees
+  - **Company/Group View**: Group by organizational entities
+  - **Date View**: Organize by date categories (overdue, today, this week, etc.)
+
 ## Usage
 
 ### Quick Assignment with Icons
@@ -52,6 +66,31 @@ Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]
 2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
 3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
+
+## Using the Task Assignment View
+
+### Opening the View
+
+1. **Command Palette**: Use "Open Task Assignment View" command
+2. **Ribbon Icon**: Click the users icon in the left ribbon (if enabled)
+3. **Hotkey**: Configure a keyboard shortcut for quick access
+
+### View Features
+
+- **Layout Switching**: Use the dropdown to switch between Status, Role, Person, Company, or Date views
+- **Filtering**: Click the "Filters" button to access advanced filtering options
+- **Task Interaction**: Click task cards to view details in the side panel
+- **Status Updates**: Toggle task completion directly from the cards
+- **Cache Refresh**: Use the refresh button to manually update the task cache
+- **Save Views**: Save your current filter and layout configuration for later use
+
+### Task Cache
+
+The view uses a background task cache that:
+- Automatically scans all markdown files for tasks
+- Updates in real-time when files are modified
+- Parses task metadata including assignments, dates, priorities, and tags
+- Stores cache data in `.obsidian/task-assignment-cache.json`
 
 ## Editing Assignments
 

@@ -50,6 +50,18 @@ const copyStyles = () => {
 	} catch (error) {
 		console.error("Failed to copy styles.css:", error.message);
 	}
+	
+	// Also copy task assignment view styles
+	try {
+		if (fs.existsSync("styles/task-assignment-view.css")) {
+			const mainStyles = fs.readFileSync("styles.css", "utf8");
+			const viewStyles = fs.readFileSync("styles/task-assignment-view.css", "utf8");
+			fs.writeFileSync("styles.css", mainStyles + "\n\n" + viewStyles);
+			console.log("✓ Merged task assignment view styles");
+		}
+	} catch (error) {
+		console.error("Failed to merge task assignment view styles:", error.message);
+	}
 };
 
 // Watch styles directory in development mode
@@ -61,6 +73,16 @@ const watchStyles = () => {
 				console.log("✓ Styles updated");
 			}
 		});
+		
+		// Also watch task assignment view styles
+		if (fs.existsSync("styles/task-assignment-view.css")) {
+			fs.watchFile("styles/task-assignment-view.css", (curr, prev) => {
+				if (curr.mtime !== prev.mtime) {
+					copyStyles();
+					console.log("✓ Task assignment view styles updated");
+				}
+			});
+		}
 	}
 };
 
