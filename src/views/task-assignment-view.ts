@@ -73,6 +73,10 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			this.updateLayout(layoutSelect.value as ViewLayout);
 		};
 
+		// Add dropdown arrow icon
+		const layoutArrow = layoutContainer.createSpan('task-assignment-dropdown-arrow');
+		setIcon(layoutArrow, 'chevron-down');
+
 		// Save view button
 		const saveViewBtn = controlsEl.createEl('button', { cls: 'task-assignment-save-view-btn' });
 		saveViewBtn.setText('Save Config');
@@ -81,7 +85,8 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		// Saved views dropdown
 		const savedViews = this.viewConfigService.getAllViewConfigurations();
 		if (savedViews.length > 0) {
-			const savedViewsSelect = controlsEl.createEl('select', { cls: 'task-assignment-saved-views-select' });
+			const savedViewsContainer = controlsEl.createDiv('task-assignment-layout-container');
+			const savedViewsSelect = savedViewsContainer.createEl('select', { cls: 'task-assignment-saved-views-select' });
 			const defaultOption = savedViewsSelect.createEl('option', { value: '' });
 			defaultOption.setText('Load Config...');
 			
@@ -96,6 +101,10 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 					savedViewsSelect.value = ''; // Reset selection
 				}
 			};
+
+			// Add dropdown arrow icon
+			const savedViewsArrow = savedViewsContainer.createSpan('task-assignment-dropdown-arrow');
+			setIcon(savedViewsArrow, 'chevron-down');
 		}
 
 		// Divider before refresh button
@@ -180,7 +189,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		priorityGroup.createEl('label', { text: 'Priority' });
 		const priorityContainer = priorityGroup.createDiv('filter-checkboxes');
 		
-		// Add "None Set" option for priority (tasks with default MEDIUM priority but no explicit priority indicators)
+		// Add "None" option for priority (tasks with default MEDIUM priority but no explicit priority indicators)
 		const noneSetPriorityLabel = priorityContainer.createEl('label');
 		const noneSetPriorityCheckbox = noneSetPriorityLabel.createEl('input', { type: 'checkbox' });
 		noneSetPriorityCheckbox.checked = this.currentFilters.priorities?.includes('none-set') || false;
@@ -191,7 +200,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				: currentPriorities.filter(p => p !== 'none-set');
 			this.updateFilters({ priorities: newPriorities });
 		};
-		noneSetPriorityLabel.createSpan().setText('None Set');
+		noneSetPriorityLabel.createSpan().setText('None');
 		
 		const priorities = [
 			{ value: TaskPriority.URGENT, label: 'Urgent' },
@@ -219,7 +228,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		roleGroup.createEl('label', { text: 'Roles' });
 		const roleContainer = roleGroup.createDiv('filter-checkboxes');
 		
-		// Add "None Set" option for roles
+		// Add "None" option for roles
 		const noneSetRoleLabel = roleContainer.createEl('label');
 		const noneSetRoleCheckbox = noneSetRoleLabel.createEl('input', { type: 'checkbox' });
 		noneSetRoleCheckbox.checked = this.currentFilters.roles?.includes('none-set') || false;
@@ -230,7 +239,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				: currentRoles.filter(r => r !== 'none-set');
 			this.updateFilters({ roles: newRoles });
 		};
-		noneSetRoleLabel.createSpan().setText('None Set');
+		noneSetRoleLabel.createSpan().setText('None');
 		
 		const visibleRoles = this.plugin.getVisibleRoles();
 		for (const role of visibleRoles) {
