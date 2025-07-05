@@ -42,20 +42,13 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		// Current view name display
 		if (this.currentViewName) {
 			const viewNameEl = titleEl.createDiv('task-assignment-current-view');
-			viewNameEl.createSpan('task-assignment-current-view-label').setText('View:');
+			viewNameEl.createSpan('task-assignment-current-view-label').setText('Loaded Config:');
 			viewNameEl.createSpan('task-assignment-current-view-name').setText(this.currentViewName);
 		}
 
 		// Controls
 		const controlsEl = headerEl.createDiv('task-assignment-controls');
 		
-		// Refresh button
-		const refreshBtn = controlsEl.createEl('button', { cls: 'task-assignment-refresh-btn' });
-		setIcon(refreshBtn, 'refresh-cw');
-		refreshBtn.setAttribute('aria-label', 'Refresh cache');
-		refreshBtn.setAttribute('title', 'Refresh cache');
-		refreshBtn.onclick = () => this.taskCacheService.refreshCache();
-
 		// Layout selector with label
 		const layoutContainer = controlsEl.createDiv('task-assignment-layout-container');
 		layoutContainer.createSpan('task-assignment-layout-label').setText('Show:');
@@ -82,7 +75,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 
 		// Save view button
 		const saveViewBtn = controlsEl.createEl('button', { cls: 'task-assignment-save-view-btn' });
-		saveViewBtn.setText('Save View');
+		saveViewBtn.setText('Save Config');
 		saveViewBtn.onclick = () => this.showSaveViewDialog();
 
 		// Saved views dropdown
@@ -90,7 +83,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		if (savedViews.length > 0) {
 			const savedViewsSelect = controlsEl.createEl('select', { cls: 'task-assignment-saved-views-select' });
 			const defaultOption = savedViewsSelect.createEl('option', { value: '' });
-			defaultOption.setText('Load Saved View...');
+			defaultOption.setText('Load Config...');
 			
 			for (const view of savedViews) {
 				const option = savedViewsSelect.createEl('option', { value: view.id });
@@ -104,6 +97,16 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				}
 			};
 		}
+
+		// Divider before refresh button
+		controlsEl.createDiv('task-assignment-controls-divider');
+		
+		// Refresh button (moved to last position)
+		const refreshBtn = controlsEl.createEl('button', { cls: 'task-assignment-refresh-btn' });
+		setIcon(refreshBtn, 'refresh-cw');
+		refreshBtn.setAttribute('aria-label', 'Rebuild cache');
+		refreshBtn.setAttribute('title', 'Rebuild cache');
+		refreshBtn.onclick = () => this.taskCacheService.refreshCache();
 	}
 
 	private renderFilters(): void {
@@ -114,6 +117,10 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		setIcon(filterToggle, 'filter');
 		filterToggle.setText('Filters');
 		
+		// Add arrow icon
+		const arrowIcon = filterToggle.createSpan('task-assignment-filter-arrow');
+		setIcon(arrowIcon, 'chevron-down');
+		
 		const filtersContent = this.filtersEl.createDiv('task-assignment-filters-content');
 		filtersContent.style.display = 'none';
 		
@@ -121,6 +128,10 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			const isVisible = filtersContent.style.display !== 'none';
 			filtersContent.style.display = isVisible ? 'none' : 'block';
 			filterToggle.toggleClass('active', !isVisible);
+			
+			// Update arrow direction
+			arrowIcon.empty();
+			setIcon(arrowIcon, isVisible ? 'chevron-down' : 'chevron-up');
 		};
 
 		this.renderFilterControls(filtersContent);
@@ -151,7 +162,8 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		];
 		
 		for (const status of statuses) {
-			const checkbox = statusContainer.createEl('input', { type: 'checkbox' });
+			const label = statusContainer.createEl('label');
+			const checkbox = label.createEl('input', { type: 'checkbox' });
 			checkbox.checked = this.currentFilters.statuses?.includes(status.value) || false;
 			checkbox.onchange = () => {
 				const currentStatuses = this.currentFilters.statuses || [];
@@ -160,13 +172,26 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 					: currentStatuses.filter(s => s !== status.value);
 				this.updateFilters({ statuses: newStatuses });
 			};
-			statusContainer.createSpan().setText(status.label);
+			label.createSpan().setText(status.label);
 		}
 
 		// Priority filter
 		const priorityGroup = filterGrid.createDiv('filter-group');
 		priorityGroup.createEl('label', { text: 'Priority' });
 		const priorityContainer = priorityGroup.createDiv('filter-checkboxes');
+		
+		// Add "None Set" option for priority (tasks with default MEDIUM priority but no explicit priority indicators)
+		const noneSetPriorityLabel = priorityContainer.createEl('label');
+		const noneSetPriorityCheckbox = noneSetPriorityLabel.createEl('input', { type: 'checkbox' });
+		noneSetPriorityCheckbox.checked = this.currentFilters.priorities?.includes('none-set') || false;
+		noneSetPriorityCheckbox.onchange = () => {
+			const currentPriorities = this.currentFilters.priorities || [];
+			const newPriorities = noneSetPriorityCheckbox.checked
+				? [...currentPriorities, 'none-set' as const]
+				: currentPriorities.filter(p => p !== 'none-set');
+			this.updateFilters({ priorities: newPriorities });
+		};
+		noneSetPriorityLabel.createSpan().setText('None Set');
 		
 		const priorities = [
 			{ value: TaskPriority.URGENT, label: 'Urgent' },
@@ -176,7 +201,8 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		];
 		
 		for (const priority of priorities) {
-			const checkbox = priorityContainer.createEl('input', { type: 'checkbox' });
+			const label = priorityContainer.createEl('label');
+			const checkbox = label.createEl('input', { type: 'checkbox' });
 			checkbox.checked = this.currentFilters.priorities?.includes(priority.value) || false;
 			checkbox.onchange = () => {
 				const currentPriorities = this.currentFilters.priorities || [];
@@ -185,7 +211,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 					: currentPriorities.filter(p => p !== priority.value);
 				this.updateFilters({ priorities: newPriorities });
 			};
-			priorityContainer.createSpan().setText(priority.label);
+			label.createSpan().setText(priority.label);
 		}
 
 		// Role filter
@@ -193,9 +219,23 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		roleGroup.createEl('label', { text: 'Roles' });
 		const roleContainer = roleGroup.createDiv('filter-checkboxes');
 		
+		// Add "None Set" option for roles
+		const noneSetRoleLabel = roleContainer.createEl('label');
+		const noneSetRoleCheckbox = noneSetRoleLabel.createEl('input', { type: 'checkbox' });
+		noneSetRoleCheckbox.checked = this.currentFilters.roles?.includes('none-set') || false;
+		noneSetRoleCheckbox.onchange = () => {
+			const currentRoles = this.currentFilters.roles || [];
+			const newRoles = noneSetRoleCheckbox.checked
+				? [...currentRoles, 'none-set']
+				: currentRoles.filter(r => r !== 'none-set');
+			this.updateFilters({ roles: newRoles });
+		};
+		noneSetRoleLabel.createSpan().setText('None Set');
+		
 		const visibleRoles = this.plugin.getVisibleRoles();
 		for (const role of visibleRoles) {
-			const checkbox = roleContainer.createEl('input', { type: 'checkbox' });
+			const label = roleContainer.createEl('label');
+			const checkbox = label.createEl('input', { type: 'checkbox' });
 			checkbox.checked = this.currentFilters.roles?.includes(role.id) || false;
 			checkbox.onchange = () => {
 				const currentRoles = this.currentFilters.roles || [];
@@ -204,7 +244,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 					: currentRoles.filter(r => r !== role.id);
 				this.updateFilters({ roles: newRoles });
 			};
-			roleContainer.createSpan().setText(`${role.icon} ${role.name}`);
+			label.createSpan().setText(`${role.icon} ${role.name}`);
 		}
 
 		// Date filter
@@ -257,7 +297,8 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			});
 		};
 
-		const includeNotSetCheckbox = dateRangeContainer.createEl('input', { type: 'checkbox' });
+		const includeNotSetLabel = dateRangeContainer.createEl('label');
+		const includeNotSetCheckbox = includeNotSetLabel.createEl('input', { type: 'checkbox' });
 		includeNotSetCheckbox.checked = this.currentFilters.dateRange?.includeNotSet || false;
 		includeNotSetCheckbox.onchange = () => {
 			this.updateFilters({ 
@@ -267,7 +308,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				} 
 			});
 		};
-		dateRangeContainer.createSpan().setText('Include tasks without dates');
+		includeNotSetLabel.createSpan().setText('Include tasks without dates');
 
 		// Clear filters button
 		const clearFiltersBtn = filterGrid.createEl('button', { cls: 'task-assignment-clear-filters-btn' });

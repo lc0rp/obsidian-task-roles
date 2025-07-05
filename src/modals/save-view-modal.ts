@@ -37,7 +37,7 @@ export class SaveViewModal extends Modal {
 
 		// View name input with datalist for autocomplete
 		const viewNameSetting = new Setting(contentEl)
-			.setName('View Name')
+			.setName('Configuration Name')
 			.setDesc('Enter a name for this view configuration. Select from existing names to overwrite.')
 			.addText(text => {
 				const input = text.inputEl;
@@ -70,7 +70,7 @@ export class SaveViewModal extends Modal {
 		overwriteWarning.style.color = 'var(--text-warning)';
 		overwriteWarning.style.marginTop = '8px';
 		overwriteWarning.style.fontSize = '14px';
-		overwriteWarning.setText('⚠️ This will overwrite an existing view with the same name.');
+		overwriteWarning.setText('⚠️ This will overwrite an existing configuration with the same name.');
 
 		// Show current configuration summary
 		const summaryEl = contentEl.createDiv('view-config-summary');
@@ -97,12 +97,12 @@ export class SaveViewModal extends Modal {
 		const buttonContainer = contentEl.createDiv('modal-button-container');
 		
 		const saveButton = buttonContainer.createEl('button', { 
-			text: 'Save View',
+			text: 'Save',
 			cls: 'mod-cta'
 		});
 		saveButton.onclick = async () => {
 			if (!viewName.trim()) {
-				this.showError('Please enter a view name');
+				this.showError('Please enter a configuration name');
 				return;
 			}
 
@@ -121,7 +121,7 @@ export class SaveViewModal extends Modal {
 					this.onSave();
 					this.close();
 				} else {
-					this.showError(result.error || 'Failed to save view');
+					this.showError(result.error || 'Failed to save view configuration');
 				}
 			} catch (error) {
 				console.error('Error saving view configuration:', error);

@@ -1,8 +1,8 @@
-# Task Assignment View Requirements
+# Task Center Requirements
 
 ## Filtering Capabilities
 
-The view should support filtering tasks by multiple criteria:
+The Task Center should support filtering tasks by multiple criteria:
 
 ### Entity-Based Filters
 
@@ -28,9 +28,9 @@ The view should support filtering tasks by multiple criteria:
 - **Tags**: Filter by task tags
 - **Text Search**: Full-text search capability
 
-## View Layout Options
+## Layout Options
 
-The view should support different organizational layouts:
+The Task Center should support different organizational layouts:
 
 ### Status View
 
@@ -60,10 +60,10 @@ The view should support different organizational layouts:
   - Next week
   - All
 
-## View Management
+## Layout Configuration Management
 
 - **Save View Configurations**: Ability to save current filter and view settings with a custom name
-- **Recall Saved Views**: Ability to quickly summon previously saved view configurations
+- **Load View Configurations**: Ability to quickly summon previously saved view configurations
 
 ## Task cards
 

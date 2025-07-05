@@ -67,11 +67,11 @@ Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]
 3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
 
-## Using the Task Assignment View
+## Using the Task Center
 
-### Opening the View
+### Opening the Task Center
 
-1. **Command Palette**: Use "Open Task Assignment View" command
+1. **Command Palette**: Use "Open Task Center" command
 2. **Ribbon Icon**: Click the users icon in the left ribbon (if enabled)
 3. **Hotkey**: Configure a keyboard shortcut for quick access
 
@@ -82,11 +82,12 @@ Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]
 - **Task Interaction**: Click task cards to view details in the side panel
 - **Status Updates**: Toggle task completion directly from the cards
 - **Cache Refresh**: Use the refresh button to manually update the task cache
-- **Save Views**: Save your current filter and layout configuration for later use
+- **Save View Config.**: Save your current filter and layout configuration for later use
 
 ### Task Cache
 
-The view uses a background task cache that:
+The Task Center uses a background task cache that:
+
 - Automatically scans all markdown files for tasks
 - Updates in real-time when files are modified
 - Parses task metadata including assignments, dates, priorities, and tags

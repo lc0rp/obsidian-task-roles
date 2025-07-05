@@ -85,7 +85,7 @@ export interface ViewFilters {
 	people?: string[];
 	companies?: string[];
 	statuses?: TaskStatus[];
-	priorities?: TaskPriority[];
+	priorities?: (TaskPriority | 'none-set')[];
 	tags?: string[];
 	dateRange?: DateRange;
 	dateType?: DateType;

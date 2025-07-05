@@ -64,6 +64,13 @@
 	gap: 12px;
 }
 
+.task-assignment-controls-divider {
+	width: 1px;
+	height: 24px;
+	background-color: var(--background-modifier-border);
+	margin: 0 4px;
+}
+
 .task-assignment-refresh-btn {
 	padding: 6px 8px;
 	border: 1px solid var(--background-modifier-border);
@@ -92,7 +99,8 @@
 	color: var(--text-normal);
 }
 
-.task-assignment-layout-select {
+.task-assignment-layout-select,
+.task-assignment-saved-views-select {
 	padding: 6px 24px 6px 8px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
@@ -150,66 +158,98 @@
 	border-color: var(--interactive-accent);
 }
 
+.task-assignment-filter-arrow {
+	margin-left: auto;
+	color: inherit;
+}
+
 .task-assignment-filters-content {
 	margin-top: 12px;
-	padding: 16px;
+	padding: 20px;
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
+	border-radius: 6px;
 	background-color: var(--background-secondary);
 }
 
 .task-assignment-filter-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-	gap: 16px;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px 32px;
+	max-width: 1200px;
 }
 
 .filter-group {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 12px;
 }
 
 .filter-group label {
 	font-weight: 600;
 	color: var(--text-normal);
 	font-size: 14px;
+	margin-bottom: 4px;
 }
 
 .filter-group input[type="text"],
 .filter-group input[type="date"],
 .filter-group select {
-	padding: 6px 8px;
+	padding: 8px 12px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	background-color: var(--background-primary);
 	color: var(--text-normal);
+	font-size: 14px;
 }
 
 .filter-checkboxes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 8px;
+	align-items: start;
+}
+
+.filter-checkboxes label {
 	display: flex;
-	flex-direction: column;
-	gap: 6px;
+	align-items: center;
+	gap: 8px;
+	font-weight: 400;
+	font-size: 13px;
+	cursor: pointer;
+	padding: 4px 0;
 }
 
 .filter-checkboxes input[type="checkbox"] {
-	margin-right: 6px;
+	margin: 0;
+	cursor: pointer;
 }
 
 .date-range-container {
 	display: flex;
 	flex-direction: column;
+	gap: 12px;
+}
+
+.date-range-container label {
+	display: flex;
+	align-items: center;
 	gap: 8px;
+	font-weight: 400;
+	font-size: 13px;
+	cursor: pointer;
 }
 
 .task-assignment-clear-filters-btn {
-	padding: 8px 16px;
+	grid-column: 1 / -1;
+	justify-self: center;
+	padding: 10px 20px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	background-color: var(--background-secondary);
 	color: var(--text-normal);
 	cursor: pointer;
 	font-weight: 500;
+	margin-top: 8px;
 }
 
 .task-assignment-clear-filters-btn:hover {

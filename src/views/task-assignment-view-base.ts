@@ -44,7 +44,22 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			// Role filter
 			if (this.currentFilters.roles && this.currentFilters.roles.length > 0) {
 				const taskRoles = task.assignments.map(a => a.role.id);
-				if (!this.currentFilters.roles.some(roleId => taskRoles.includes(roleId))) {
+				const hasNoneSetFilter = this.currentFilters.roles.includes('none-set');
+				
+				// Check if task matches any of the selected role filters
+				let roleMatches = false;
+				
+				// Check for "none-set" filter (tasks with no role assignments)
+				if (hasNoneSetFilter && task.assignments.length === 0) {
+					roleMatches = true;
+				}
+				
+				// Check for explicit role matches
+				if (this.currentFilters.roles.some(roleId => roleId !== 'none-set' && taskRoles.includes(roleId))) {
+					roleMatches = true;
+				}
+				
+				if (!roleMatches) {
 					return false;
 				}
 			}
@@ -74,7 +89,23 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 
 			// Priority filter
 			if (this.currentFilters.priorities && this.currentFilters.priorities.length > 0) {
-				if (!this.currentFilters.priorities.includes(task.priority)) {
+				const hasNoneSetFilter = this.currentFilters.priorities.includes('none-set');
+				const hasExplicitPriority = this.hasExplicitPriority(task);
+				
+				// Check if task matches any of the selected priority filters
+				let priorityMatches = false;
+				
+				// Check for "none-set" filter (tasks with MEDIUM priority but no explicit priority indicators)
+				if (hasNoneSetFilter && task.priority === TaskPriority.MEDIUM && !hasExplicitPriority) {
+					priorityMatches = true;
+				}
+				
+				// Check for explicit priority matches
+				if (this.currentFilters.priorities.some(p => p !== 'none-set' && p === task.priority)) {
+					priorityMatches = true;
+				}
+				
+				if (!priorityMatches) {
 					return false;
 				}
 			}
@@ -133,6 +164,14 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			default:
 				return undefined;
 		}
+	}
+
+	private hasExplicitPriority(task: TaskData): boolean {
+		// Check if task content contains explicit priority indicators
+		const content = task.content.toLowerCase();
+		return content.includes('🔴') || content.includes('🟡') || content.includes('🟢') ||
+			   content.includes('[urgent]') || content.includes('[high]') || content.includes('[low]') ||
+			   content.includes('!!!') || content.includes('!!');
 	}
 
 	// Sorting methods
