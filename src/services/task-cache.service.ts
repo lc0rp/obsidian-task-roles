@@ -1,5 +1,5 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role } from '../types';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedAssignment } from '../types';
 import { TaskAssignmentService } from './task-assignment.service';
 
 export class TaskCacheService {
@@ -57,16 +57,21 @@ export class TaskCacheService {
 	async refreshCache(): Promise<void> {
 		if (this.isUpdating) return;
 
+
 		this.isUpdating = true;
 		new Notice('Refreshing task cache...');
+
 
 		try {
 			this.cache.clear();
 
+
 			const markdownFiles = this.app.vault.getMarkdownFiles();
-			for (const file of markdownFiles) {
-				await this.updateTasksFromFile(file);
-			}
+			await Promise.all(markdownFiles.map(file =>
+				this.updateTasksFromFile(file).catch(error => {
+					console.error(`Error updating tasks from file ${file.path}:`, error);
+				})
+			));
 
 			await this.saveCacheToFile();
 			new Notice('Task cache refreshed successfully');
@@ -83,16 +88,20 @@ export class TaskCacheService {
 			const content = await this.app.vault.read(file);
 			const lines = content.split('\n');
 
+
 			// Remove existing tasks from this file
 			this.removeTasksFromFile(file);
 
+
 			// Parse tasks from file
 			const fileTasks = this.parseTasksFromContent(file, lines);
+
 
 			// Add new tasks to cache
 			for (const task of fileTasks) {
 				this.cache.set(task.id, task);
 			}
+
 
 			// Save cache periodically (debounced)
 			this.debouncedSave();
@@ -105,6 +114,7 @@ export class TaskCacheService {
 		const tasksToRemove = Array.from(this.cache.values())
 			.filter(task => task.filePath === file.path);
 
+
 		for (const task of tasksToRemove) {
 			this.cache.delete(task.id);
 		}
@@ -114,10 +124,12 @@ export class TaskCacheService {
 		const tasksToUpdate = Array.from(this.cache.values())
 			.filter(task => task.filePath === oldPath);
 
+
 		for (const task of tasksToUpdate) {
 			task.filePath = file.path;
 			task.modifiedDate = new Date();
 		}
+
 
 		this.debouncedSave();
 	}
@@ -125,9 +137,11 @@ export class TaskCacheService {
 	private parseTasksFromContent(file: TFile, lines: string[]): TaskData[] {
 		const tasks: TaskData[] = [];
 
+
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			const taskMatch = line.match(/^(\s*)[-*+]\s*\[([x\s])\]\s*(.+)$/);
+
 
 			if (taskMatch) {
 				const [, , statusChar, content] = taskMatch;
@@ -171,12 +185,15 @@ export class TaskCacheService {
 			const createdDate = new Date(file.stat.ctime);
 			const modifiedDate = new Date(file.stat.mtime);
 
+			const searchText = this.buildSearchText(description, file.path, tags, assignments);
+
 			return {
 				id: taskId,
 				filePath: file.path,
 				lineNumber,
 				content: fullLine,
 				description,
+				searchText,
 				status,
 				priority,
 				tags,
@@ -280,6 +297,15 @@ export class TaskCacheService {
 		return description;
 	}
 
+	private buildSearchText(description: string, filePath: string, tags: string[], assignments: ParsedAssignment[]): string {
+		return [
+			description,
+			filePath,
+			...tags,
+			...assignments.flatMap(a => a.assignees)
+		].join(' ').toLowerCase();
+	}
+
 	private saveTimeout: NodeJS.Timeout | null = null;
 
 	private debouncedSave(): void {
@@ -336,6 +362,10 @@ export class TaskCacheService {
 							scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
 						}
 					};
+
+					if (!task.searchText) {
+						task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.assignments);
+					}
 
 					this.cache.set(task.id, task);
 				}

@@ -45,20 +45,20 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			if (this.currentFilters.roles && this.currentFilters.roles.length > 0) {
 				const taskRoles = task.assignments.map(a => a.role.id);
 				const hasNoneSetFilter = this.currentFilters.roles.includes('none-set');
-				
+
 				// Check if task matches any of the selected role filters
 				let roleMatches = false;
-				
+
 				// Check for "none-set" filter (tasks with no role assignments)
 				if (hasNoneSetFilter && task.assignments.length === 0) {
 					roleMatches = true;
 				}
-				
+
 				// Check for explicit role matches
 				if (this.currentFilters.roles.some(roleId => roleId !== 'none-set' && taskRoles.includes(roleId))) {
 					roleMatches = true;
 				}
-				
+
 				if (!roleMatches) {
 					return false;
 				}
@@ -91,20 +91,20 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			if (this.currentFilters.priorities && this.currentFilters.priorities.length > 0) {
 				const hasNoneSetFilter = this.currentFilters.priorities.includes('none-set');
 				const hasExplicitPriority = this.hasExplicitPriority(task);
-				
+
 				// Check if task matches any of the selected priority filters
 				let priorityMatches = false;
-				
+
 				// Check for "none-set" filter (tasks with MEDIUM priority but no explicit priority indicators)
 				if (hasNoneSetFilter && task.priority === TaskPriority.MEDIUM && !hasExplicitPriority) {
 					priorityMatches = true;
 				}
-				
+
 				// Check for explicit priority matches
 				if (this.currentFilters.priorities.some(p => p !== 'none-set' && p === task.priority)) {
 					priorityMatches = true;
 				}
-				
+
 				if (!priorityMatches) {
 					return false;
 				}
@@ -120,11 +120,11 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			// Date range filter
 			if (this.currentFilters.dateRange && this.currentFilters.dateType) {
 				const taskDate = this.getTaskDateByType(task, this.currentFilters.dateType);
-				
+
 				if (!taskDate && !this.currentFilters.dateRange.includeNotSet) {
 					return false;
 				}
-				
+
 				if (taskDate) {
 					const { from, to } = this.currentFilters.dateRange;
 					if (from && taskDate < from) return false;
@@ -135,14 +135,7 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 			// Text search filter
 			if (this.currentFilters.textSearch && this.currentFilters.textSearch.trim()) {
 				const searchTerm = this.currentFilters.textSearch.toLowerCase();
-				const searchableText = [
-					task.description,
-					task.filePath,
-					...task.tags,
-					...task.assignments.flatMap(a => a.assignees)
-				].join(' ').toLowerCase();
-				
-				if (!searchableText.includes(searchTerm)) {
+				if (!task.searchText.includes(searchTerm)) {
 					return false;
 				}
 			}
@@ -220,17 +213,17 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 		const now = new Date();
 		const aDue = a.dates.due;
 		const bDue = b.dates.due;
-		
+
 		if (aDue && bDue) {
 			const aOverdue = aDue < now;
 			const bOverdue = bDue < now;
-			
+
 			if (aOverdue && !bOverdue) return 1;
 			if (!aOverdue && bOverdue) return -1;
-			
+
 			return aDue.getTime() - bDue.getTime();
 		}
-		
+
 		if (aDue && !bDue) return 1;
 		if (!aDue && bDue) return -1;
 
@@ -320,14 +313,14 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 						// Determine type for display
 						const isCompany = assignee.startsWith(this.plugin.settings.companySymbol);
 						const displayTitle = isCompany ? `${assignee} (Company)` : assignee;
-						
+
 						assigneeColumns.set(assignee, {
 							id: assignee,
 							title: displayTitle,
 							tasks: []
 						});
 					}
-					
+
 					// Avoid duplicate tasks in the same column
 					const column = assigneeColumns.get(assignee)!;
 					if (!column.tasks.includes(task)) {
@@ -342,11 +335,11 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 		columns.sort((a, b) => {
 			const aIsCompany = a.id.startsWith(this.plugin.settings.companySymbol);
 			const bIsCompany = b.id.startsWith(this.plugin.settings.companySymbol);
-			
+
 			// Companies first
 			if (aIsCompany && !bIsCompany) return -1;
 			if (!aIsCompany && bIsCompany) return 1;
-			
+
 			// Then alphabetical within each group
 			return a.title.localeCompare(b.title);
 		});
