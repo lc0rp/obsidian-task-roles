@@ -23,8 +23,8 @@ export default class TaskAssignmentPlugin extends Plugin {
 		await this.loadSettings();
 		
 		// Initialize services
-		this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
-		this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles());
+                this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
+                this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
 		
 		// Initialize task cache
 		await this.taskCacheService.initializeCache();
@@ -133,18 +133,18 @@ export default class TaskAssignmentPlugin extends Plugin {
 		if (this.taskAssignmentService) {
 			this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
 		}
-		if (this.taskCacheService) {
-			this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles());
-		}
+                if (this.taskCacheService) {
+                        this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+                }
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 		// Update services with new settings
 		this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
-		if (this.taskCacheService) {
-			this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles());
-		}
+                if (this.taskCacheService) {
+                        this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+                }
 	}
 
 	openAssignmentModal(editor: Editor) {

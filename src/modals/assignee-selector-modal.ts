@@ -138,7 +138,9 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-		console.log("No suggestions for input: ", this.inputEl.value, " with query: ", query, " and query length ", query.length);
+                if (this.plugin.settings.debug) {
+                        console.log("No suggestions for input: ", this.inputEl.value, " with query: ", query, " and query length ", query.length);
+                }
 		if (!query.startsWith(this.plugin.settings.contactSymbol) && !query.startsWith(this.plugin.settings.companySymbol)) {
 			this.emptyStateText = `Start typing with ${this.plugin.settings.contactSymbol} or ${this.plugin.settings.companySymbol}.`;
 			return;
@@ -149,7 +151,9 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-		console.log("No results, setting noResults to true for ", this.inputEl.value, " with query ", query);
+                if (this.plugin.settings.debug) {
+                        console.log("No results, setting noResults to true for ", this.inputEl.value, " with query ", query);
+                }
 		this.noResults = true;
 
 		// In add mode, show creation hint

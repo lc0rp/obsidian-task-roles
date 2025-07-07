@@ -7,13 +7,14 @@ export class TaskCacheService {
 	private cacheFilePath = '.obsidian/task-assignment-cache.json';
 	private isUpdating = false;
 
-	constructor(
-		private app: App,
-		private taskAssignmentService: TaskAssignmentService,
-		private visibleRoles: Role[]
-	) {
-		this.setupEventListeners();
-	}
+        constructor(
+                private app: App,
+                private taskAssignmentService: TaskAssignmentService,
+                private visibleRoles: Role[],
+                private debug: boolean
+        ) {
+                this.setupEventListeners();
+        }
 
 	private setupEventListeners() {
 		// Listen for file changes
@@ -43,13 +44,15 @@ export class TaskCacheService {
 	}
 
 	async initializeCache(): Promise<void> {
-		try {
-			await this.loadCacheFromFile();
-		} catch (error) {
-			console.log('No existing cache found, building new cache...');
-			await this.refreshCache();
-		}
-	}
+                try {
+                        await this.loadCacheFromFile();
+                } catch (error) {
+                        if (this.debug) {
+                                console.log('No existing cache found, building new cache...');
+                        }
+                        await this.refreshCache();
+                }
+        }
 
 	async refreshCache(): Promise<void> {
 		if (this.isUpdating) return;

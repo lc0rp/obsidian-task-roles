@@ -1,12 +1,13 @@
 export interface TaskAssignmentSettings {
-	contactSymbol: string;
-	companySymbol: string;
-	contactDirectory: string;
-	companyDirectory: string;
-	roles: Role[];
-	hiddenDefaultRoles: string[];
-	savedViews: ViewConfiguration[];
-	autoApplyFilters: boolean;
+        contactSymbol: string;
+        companySymbol: string;
+        contactDirectory: string;
+        companyDirectory: string;
+        roles: Role[];
+        hiddenDefaultRoles: string[];
+        savedViews: ViewConfiguration[];
+        autoApplyFilters: boolean;
+        debug: boolean;
 }
 
 export interface Role {
@@ -139,7 +140,8 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	contactDirectory: 'Contacts',
 	companyDirectory: 'Companies',
 	roles: DEFAULT_ROLES,
-	hiddenDefaultRoles: [],
-	savedViews: [],
-	autoApplyFilters: true
-}; 
+        hiddenDefaultRoles: [],
+        savedViews: [],
+        autoApplyFilters: true,
+        debug: false
+};

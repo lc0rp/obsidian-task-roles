@@ -66,14 +66,25 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 				}));
 
 		// Create @me contact button
-		new Setting(containerEl)
-			.setName('Create @me contact')
-			.setDesc('Create a special contact file for yourself')
-			.addButton(button => button
-				.setButtonText('Create @me')
-				.onClick(async () => {
-					await this.plugin.taskAssignmentService.createMeContact();
-				}));
+                new Setting(containerEl)
+                        .setName('Create @me contact')
+                        .setDesc('Create a special contact file for yourself')
+                        .addButton(button => button
+                                .setButtonText('Create @me')
+                                .onClick(async () => {
+                                        await this.plugin.taskAssignmentService.createMeContact();
+                                }));
+
+                // Debug logging toggle
+                new Setting(containerEl)
+                        .setName('Enable debug logging')
+                        .setDesc('Log additional information to the console')
+                        .addToggle(toggle => toggle
+                                .setValue(this.plugin.settings.debug)
+                                .onChange(async (value) => {
+                                        this.plugin.settings.debug = value;
+                                        await this.plugin.saveSettings();
+                                }));
 
 		// Role management
 		containerEl.createEl('h3', { text: 'Role management' });
