@@ -385,6 +385,8 @@
 	border-radius: 8px;
 	padding: 16px;
 	border: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: column;
 }
 
 .task-assignment-column-header {
@@ -414,8 +416,9 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	max-height: calc(100vh - 200px);
+	flex: 1;
 	overflow-y: auto;
+	min-height: 0;
 }
 
 /* Task Card Styles */
