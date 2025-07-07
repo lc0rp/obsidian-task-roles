@@ -100,17 +100,17 @@ export interface DateRange {
 }
 
 export enum DateType {
-        CREATED = 'created',
-        DUE = 'due',
-        COMPLETED = 'completed',
-        SCHEDULED = 'scheduled'
+	CREATED = 'created',
+	DUE = 'due',
+	COMPLETED = 'completed',
+	SCHEDULED = 'scheduled'
 }
 
 export const TASK_DATE_ICONS: Record<keyof TaskDates, string> = {
-        due: '📅',
-        scheduled: '⏳',
-        completed: '✅',
-        created: '🗓️'
+	due: '📅',
+	scheduled: '⏳',
+	completed: '✅',
+	created: '🗓️'
 };
 
 export interface SortOption {
