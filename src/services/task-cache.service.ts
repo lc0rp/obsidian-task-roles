@@ -59,12 +59,14 @@ export class TaskCacheService {
 		
 		try {
 			this.cache.clear();
-			
+
 			const markdownFiles = this.app.vault.getMarkdownFiles();
-			for (const file of markdownFiles) {
-				await this.updateTasksFromFile(file);
-			}
-			
+			await Promise.all(markdownFiles.map(file =>
+				this.updateTasksFromFile(file).catch(error => {
+					console.error(`Error updating tasks from file ${file.path}:`, error);
+				})
+			));
+
 			await this.saveCacheToFile();
 			new Notice('Task cache refreshed successfully');
 		} catch (error) {
