@@ -148,6 +148,36 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 
 	private renderFilterControls(container: HTMLElement): void {
 		const filterGrid = container.createDiv('task-assignment-filter-grid');
+		
+		// Store reference to assignees display update function
+		let updateAssigneesDisplay: (() => void) | null = null;
+
+        // Assignees filter
+		const assigneesGroup = filterGrid.createDiv('filter-group');
+		assigneesGroup.createEl('label', { text: 'Assignees' });
+		const assigneesInput = assigneesGroup.createEl('input', { 
+			type: 'text', 
+			placeholder: 'Select assignees',
+			cls: 'task-assignment-assignees-input'
+		});
+		assigneesInput.readOnly = true;
+		
+		// Display selected assignees
+		updateAssigneesDisplay = () => {
+			const selectedAssignees = [
+				...(this.currentFilters.people || []),
+				...(this.currentFilters.companies || [])
+			];
+			assigneesInput.value = selectedAssignees.length > 0 
+				? selectedAssignees.join(', ') 
+				: '';
+		};
+		
+		updateAssigneesDisplay();
+		
+		assigneesInput.onclick = () => {
+			this.showAssigneeSelector(updateAssigneesDisplay);
+		};
 
 		// Text search
 		const searchGroup = filterGrid.createDiv('filter-group');
@@ -157,6 +187,39 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		searchInput.oninput = () => {
 			this.updateFilters({ textSearch: searchInput.value });
 		};
+
+        // Role filter
+		const roleGroup = filterGrid.createDiv('filter-group');
+		roleGroup.createEl('label', { text: 'Roles' });
+		const roleContainer = roleGroup.createDiv('filter-checkboxes');
+		
+		// Add "None" option for roles
+		const noneSetRoleLabel = roleContainer.createEl('label');
+		const noneSetRoleCheckbox = noneSetRoleLabel.createEl('input', { type: 'checkbox' });
+		noneSetRoleCheckbox.checked = this.currentFilters.roles?.includes('none-set') || false;
+		noneSetRoleCheckbox.onchange = () => {
+			const currentRoles = this.currentFilters.roles || [];
+			const newRoles = noneSetRoleCheckbox.checked
+				? [...currentRoles, 'none-set']
+				: currentRoles.filter(r => r !== 'none-set');
+			this.updateFilters({ roles: newRoles });
+		};
+		noneSetRoleLabel.createSpan().setText('None');
+		
+		const visibleRoles = this.plugin.getVisibleRoles();
+		for (const role of visibleRoles) {
+			const label = roleContainer.createEl('label');
+			const checkbox = label.createEl('input', { type: 'checkbox' });
+			checkbox.checked = this.currentFilters.roles?.includes(role.id) || false;
+			checkbox.onchange = () => {
+				const currentRoles = this.currentFilters.roles || [];
+				const newRoles = checkbox.checked
+					? [...currentRoles, role.id]
+					: currentRoles.filter(r => r !== role.id);
+				this.updateFilters({ roles: newRoles });
+			};
+			label.createSpan().setText(`${role.icon} ${role.name}`);
+		}
 
 		// Status filter
 		const statusGroup = filterGrid.createDiv('filter-group');
@@ -223,44 +286,12 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			label.createSpan().setText(priority.label);
 		}
 
-		// Role filter
-		const roleGroup = filterGrid.createDiv('filter-group');
-		roleGroup.createEl('label', { text: 'Roles' });
-		const roleContainer = roleGroup.createDiv('filter-checkboxes');
-		
-		// Add "None" option for roles
-		const noneSetRoleLabel = roleContainer.createEl('label');
-		const noneSetRoleCheckbox = noneSetRoleLabel.createEl('input', { type: 'checkbox' });
-		noneSetRoleCheckbox.checked = this.currentFilters.roles?.includes('none-set') || false;
-		noneSetRoleCheckbox.onchange = () => {
-			const currentRoles = this.currentFilters.roles || [];
-			const newRoles = noneSetRoleCheckbox.checked
-				? [...currentRoles, 'none-set']
-				: currentRoles.filter(r => r !== 'none-set');
-			this.updateFilters({ roles: newRoles });
-		};
-		noneSetRoleLabel.createSpan().setText('None');
-		
-		const visibleRoles = this.plugin.getVisibleRoles();
-		for (const role of visibleRoles) {
-			const label = roleContainer.createEl('label');
-			const checkbox = label.createEl('input', { type: 'checkbox' });
-			checkbox.checked = this.currentFilters.roles?.includes(role.id) || false;
-			checkbox.onchange = () => {
-				const currentRoles = this.currentFilters.roles || [];
-				const newRoles = checkbox.checked
-					? [...currentRoles, role.id]
-					: currentRoles.filter(r => r !== role.id);
-				this.updateFilters({ roles: newRoles });
-			};
-			label.createSpan().setText(`${role.icon} ${role.name}`);
-		}
-
 		// Date filter
 		const dateGroup = filterGrid.createDiv('filter-group');
 		dateGroup.createEl('label', { text: 'Date Filter' });
 		
-		const dateTypeSelect = dateGroup.createEl('select');
+		const dateTypeContainer = dateGroup.createDiv('task-assignment-layout-container');
+		const dateTypeSelect = dateTypeContainer.createEl('select', { cls: 'task-assignment-date-type-select' });
 		const dateTypes = [
 			{ value: DateType.DUE, label: 'Due Date' },
 			{ value: DateType.CREATED, label: 'Created Date' },
@@ -280,9 +311,16 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			this.updateFilters({ dateType: dateTypeSelect.value as DateType });
 		};
 
+		// Add dropdown arrow icon
+		const dateTypeArrow = dateTypeContainer.createSpan('task-assignment-dropdown-arrow');
+		setIcon(dateTypeArrow, 'chevron-down');
+
 		const dateRangeContainer = dateGroup.createDiv('date-range-container');
 		
-		const fromInput = dateRangeContainer.createEl('input', { type: 'date' });
+		// Create inline date range with dash separator
+		const dateRangeRow = dateRangeContainer.createDiv('date-range-row');
+		
+		const fromInput = dateRangeRow.createEl('input', { type: 'date', cls: 'date-range-input' });
 		fromInput.value = this.currentFilters.dateRange?.from?.toISOString().split('T')[0] || '';
 		fromInput.onchange = () => {
 			const from = fromInput.value ? new Date(fromInput.value) : undefined;
@@ -294,7 +332,10 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			});
 		};
 
-		const toInput = dateRangeContainer.createEl('input', { type: 'date' });
+		const dashSeparator = dateRangeRow.createSpan('date-range-separator');
+		dashSeparator.setText('—');
+
+		const toInput = dateRangeRow.createEl('input', { type: 'date', cls: 'date-range-input' });
 		toInput.value = this.currentFilters.dateRange?.to?.toISOString().split('T')[0] || '';
 		toInput.onchange = () => {
 			const to = toInput.value ? new Date(toInput.value) : undefined;
@@ -544,5 +585,34 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			this.currentViewName = config.name;
 			this.render();
 		}
+	}
+
+	private showAssigneeSelector(updateCallback?: (() => void) | null): void {
+		import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
+			new AssigneeSelectorModal(this.app, this.plugin, (selectedAssignee: string) => {
+				// Determine if it's a person or company based on the symbol
+				const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
+				const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);
+				
+				if (isPerson) {
+					const currentPeople = this.currentFilters.people || [];
+					const newPeople = currentPeople.includes(selectedAssignee)
+						? currentPeople.filter(p => p !== selectedAssignee)
+						: [...currentPeople, selectedAssignee];
+					this.updateFilters({ people: newPeople });
+				} else if (isCompany) {
+					const currentCompanies = this.currentFilters.companies || [];
+					const newCompanies = currentCompanies.includes(selectedAssignee)
+						? currentCompanies.filter(c => c !== selectedAssignee)
+						: [...currentCompanies, selectedAssignee];
+					this.updateFilters({ companies: newCompanies });
+				}
+				
+				// Update the display
+				if (updateCallback) {
+					updateCallback();
+				}
+			}, { mode: 'readonly', keepOpen: true }).open();
+		});
 	}
 } 

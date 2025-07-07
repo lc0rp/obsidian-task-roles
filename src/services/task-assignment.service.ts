@@ -106,4 +106,39 @@ export class TaskAssignmentService {
 		await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
 		new Notice('Created @me contact');
 	}
+
+	async createContactOrCompany(assignee: string): Promise<void> {
+		const isContact = assignee.startsWith(this.settings.contactSymbol);
+		const isCompany = assignee.startsWith(this.settings.companySymbol);
+		
+		if (!isContact && !isCompany) {
+			return;
+		}
+
+		const name = assignee.substring(1); // Remove @ or +
+		const directory = isContact ? this.settings.contactDirectory : this.settings.companyDirectory;
+		const filePath = `${directory}/${name}.md`;
+		
+		// Check if file already exists
+		if (await this.app.vault.adapter.exists(filePath)) {
+			return; // File already exists, no need to create
+		}
+
+		// Ensure directory exists
+		if (!await this.app.vault.adapter.exists(directory)) {
+			await this.app.vault.createFolder(directory);
+		}
+
+		// Create the file with basic content
+		const fileType = isContact ? 'contact' : 'company';
+		const content = `# ${name}\n\nThis is a ${fileType} file.`;
+		
+		try {
+			await this.app.vault.create(filePath, content);
+			new Notice(`Created ${fileType}: ${assignee}`, 2000);
+		} catch (error) {
+			console.error(`Error creating ${fileType} file:`, error);
+			new Notice(`Failed to create ${fileType}: ${assignee}`, 3000);
+		}
+	}
 } 

@@ -1,5 +1,5 @@
-import { App, TFile, TFolder, Notice, MetadataCache, CachedMetadata } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, ParsedAssignment, Role } from '../types';
+import { App, TFile, Notice } from 'obsidian';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role } from '../types';
 import { TaskAssignmentService } from './task-assignment.service';
 
 export class TaskCacheService {
@@ -47,9 +47,8 @@ export class TaskCacheService {
 			await this.loadCacheFromFile();
 		} catch (error) {
 			console.log('No existing cache found, building new cache...');
+			await this.refreshCache();
 		}
-		
-		await this.refreshCache();
 	}
 
 	async refreshCache(): Promise<void> {
@@ -128,7 +127,7 @@ export class TaskCacheService {
 			const taskMatch = line.match(/^(\s*)[-*+]\s*\[([x\s])\]\s*(.+)$/);
 			
 			if (taskMatch) {
-				const [, indent, statusChar, content] = taskMatch;
+				const [,, statusChar, content] = taskMatch;
 				const task = this.parseTaskFromLine(file, i, line, content, statusChar);
 				if (task) {
 					tasks.push(task);
@@ -166,7 +165,6 @@ export class TaskCacheService {
 			const dates = this.parseTaskDates(content);
 			
 			// Get file dates
-			const fileStats = this.app.vault.adapter.stat(file.path);
 			const createdDate = new Date(file.stat.ctime);
 			const modifiedDate = new Date(file.stat.mtime);
 			

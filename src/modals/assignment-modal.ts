@@ -99,11 +99,14 @@ export class AssignmentModal extends Modal {
 	}
 
 	showAssigneeSelector(roleId: string, container: HTMLElement) {
-		new AssigneeSelectorModal(this.app, this.plugin, (assignee: string) => {
+		new AssigneeSelectorModal(this.app, this.plugin, async (assignee: string) => {
+			// Create the contact/company file if it doesn't exist
+			await this.plugin.taskAssignmentService.createContactOrCompany(assignee);
+			
 			this.addAssignee(roleId, assignee);
 			const assignment = this.assignments.find(a => a.roleId === roleId);
 			this.renderAssignees(container, roleId, assignment?.assignees || []);
-		}).open();
+		}, { mode: 'add', keepOpen: true }).open();
 	}
 
 	addAssignee(roleId: string, assignee: string) {

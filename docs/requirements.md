@@ -6,7 +6,7 @@ By default, contacts are created with @<contact_name> and groups or companies ar
 
 These are linked to the directory from which the contact originates, using the Mention plugin.
 
-When writing a task, you can trigger the Assign modal, which contains the configured roles and a "+" next to each role, allowing you to add multiple contacts or companies to each role. Clicking the + displays an auto-complete field that you can type in. It has placeholder text stating, "Type @ or + to find assignee."
+When writing a task, you can trigger the Assign modal, which contains the configured roles and a "+" next to each role, allowing you to add multiple contacts or companies to each role. Clicking the + displays an auto-complete field that you can type in. It has placeholder text stating, "Type @contact or +company to search or create."
 
 When you type @, it searches the contact directory; when you type +, it searches the company directory. In both cases, suggestions are displayed below the field and can be selected by clicking on them, using the arrow keys to scroll up or down; alternatively, pressing "Enter" will select the first one. The selected contact or company is displayed as a link to that file, using the filename as an alias. E.g. [[Luke|@Luke]]
 

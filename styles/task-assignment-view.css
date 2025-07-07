@@ -119,18 +119,19 @@
 /* Style for dropdown arrow icon */
 .task-assignment-dropdown-arrow {
 	position: absolute;
-	right: 6px;
+	right: 8px;
 	top: 50%;
 	transform: translateY(-50%);
 	width: 16px;
 	height: 16px;
 	color: var(--text-normal);
 	pointer-events: none;
+	z-index: 1;
 }
 
 .task-assignment-save-view-btn {
 	padding: 6px 12px;
-	border: 1px solid var(--interactive-accent);
+	border: 1px solid var(--background-modifier-borderefccc);
 	border-radius: 4px;
 	background-color: var(--interactive-accent);
 	color: var(--text-on-accent);
@@ -212,6 +213,48 @@
 	background-color: var(--background-primary);
 	color: var(--text-normal);
 	font-size: 14px;
+}
+
+/* Date type select specific styling */
+.task-assignment-date-type-select {
+	padding: 10px 32px 10px 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 14px;
+	line-height: 1.4;
+	min-height: 40px;
+	width: 100%;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+}
+
+/* Assignees input styling */
+.task-assignment-assignees-input {
+	cursor: pointer;
+}
+
+.task-assignment-assignees-input:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+/* Date range styling */
+.date-range-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.date-range-input {
+	flex: 1;
+}
+
+.date-range-separator {
+	color: var(--text-muted);
+	font-weight: 500;
 }
 
 .filter-checkboxes {
