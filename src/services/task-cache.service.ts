@@ -1,5 +1,5 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role } from '../types';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedAssignment } from '../types';
 import { TaskAssignmentService } from './task-assignment.service';
 
 export class TaskCacheService {
@@ -53,10 +53,10 @@ export class TaskCacheService {
 
 	async refreshCache(): Promise<void> {
 		if (this.isUpdating) return;
-		
+
 		this.isUpdating = true;
 		new Notice('Refreshing task cache...');
-		
+
 		try {
 			this.cache.clear();
 
@@ -81,18 +81,18 @@ export class TaskCacheService {
 		try {
 			const content = await this.app.vault.read(file);
 			const lines = content.split('\n');
-			
+
 			// Remove existing tasks from this file
 			this.removeTasksFromFile(file);
-			
+
 			// Parse tasks from file
 			const fileTasks = this.parseTasksFromContent(file, lines);
-			
+
 			// Add new tasks to cache
 			for (const task of fileTasks) {
 				this.cache.set(task.id, task);
 			}
-			
+
 			// Save cache periodically (debounced)
 			this.debouncedSave();
 		} catch (error) {
@@ -103,7 +103,7 @@ export class TaskCacheService {
 	private removeTasksFromFile(file: TFile): void {
 		const tasksToRemove = Array.from(this.cache.values())
 			.filter(task => task.filePath === file.path);
-		
+
 		for (const task of tasksToRemove) {
 			this.cache.delete(task.id);
 		}
@@ -112,31 +112,31 @@ export class TaskCacheService {
 	private handleFileRename(file: TFile, oldPath: string): void {
 		const tasksToUpdate = Array.from(this.cache.values())
 			.filter(task => task.filePath === oldPath);
-		
+
 		for (const task of tasksToUpdate) {
 			task.filePath = file.path;
 			task.modifiedDate = new Date();
 		}
-		
+
 		this.debouncedSave();
 	}
 
 	private parseTasksFromContent(file: TFile, lines: string[]): TaskData[] {
 		const tasks: TaskData[] = [];
-		
+
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			const taskMatch = line.match(/^(\s*)[-*+]\s*\[([x\s])\]\s*(.+)$/);
-			
+
 			if (taskMatch) {
-				const [,, statusChar, content] = taskMatch;
+				const [, , statusChar, content] = taskMatch;
 				const task = this.parseTaskFromLine(file, i, line, content, statusChar);
 				if (task) {
 					tasks.push(task);
 				}
 			}
 		}
-		
+
 		return tasks;
 	}
 
@@ -149,33 +149,36 @@ export class TaskCacheService {
 	): TaskData | null {
 		try {
 			const taskId = `${file.path}:${lineNumber}`;
-			
+
 			// Parse status
 			const status = this.parseTaskStatus(statusChar, content);
-			
+
 			// Parse assignments
 			const assignments = this.taskAssignmentService.parseTaskAssignments(content, this.visibleRoles);
-			
+
 			// Parse description (remove assignments and metadata)
 			const description = this.extractTaskDescription(content);
-			
+
 			// Parse priority and tags
 			const priority = this.parseTaskPriority(content);
 			const tags = this.parseTaskTags(content);
-			
+
 			// Parse dates
 			const dates = this.parseTaskDates(content);
-			
+
 			// Get file dates
 			const createdDate = new Date(file.stat.ctime);
 			const modifiedDate = new Date(file.stat.mtime);
-			
+
+			const searchText = this.buildSearchText(description, file.path, tags, assignments);
+
 			return {
 				id: taskId,
 				filePath: file.path,
 				lineNumber,
 				content: fullLine,
 				description,
+				searchText,
 				status,
 				priority,
 				tags,
@@ -194,16 +197,16 @@ export class TaskCacheService {
 		if (statusChar === 'x' || statusChar === 'X') {
 			return TaskStatus.DONE;
 		}
-		
+
 		// Check for custom status indicators in content
 		if (content.includes('🚧') || content.includes('[in-progress]')) {
 			return TaskStatus.IN_PROGRESS;
 		}
-		
+
 		if (content.includes('❌') || content.includes('[cancelled]')) {
 			return TaskStatus.CANCELLED;
 		}
-		
+
 		return TaskStatus.TODO;
 	}
 
@@ -211,15 +214,15 @@ export class TaskCacheService {
 		if (content.includes('🔴') || content.includes('[urgent]') || content.includes('!!!')) {
 			return TaskPriority.URGENT;
 		}
-		
+
 		if (content.includes('🟡') || content.includes('[high]') || content.includes('!!')) {
 			return TaskPriority.HIGH;
 		}
-		
+
 		if (content.includes('🟢') || content.includes('[low]')) {
 			return TaskPriority.LOW;
 		}
-		
+
 		return TaskPriority.MEDIUM;
 	}
 
@@ -231,7 +234,7 @@ export class TaskCacheService {
 
 	private parseTaskDates(content: string): TaskDates {
 		const dates: TaskDates = {};
-		
+
 		// Parse various date formats
 		const datePatterns = [
 			{ type: 'due', pattern: /due:\s*(\d{4}-\d{2}-\d{2})/i },
@@ -240,7 +243,7 @@ export class TaskCacheService {
 			{ type: 'due', pattern: /📅\s*(\d{4}-\d{2}-\d{2})/i },
 			{ type: 'due', pattern: /\[due::\s*(\d{4}-\d{2}-\d{2})\]/i }
 		];
-		
+
 		for (const { type, pattern } of datePatterns) {
 			const match = content.match(pattern);
 			if (match) {
@@ -251,20 +254,20 @@ export class TaskCacheService {
 				}
 			}
 		}
-		
+
 		return dates;
 	}
 
 	private extractTaskDescription(content: string): string {
 		// Remove assignments, dates, priority indicators, and tags
 		let description = content;
-		
+
 		// Remove role assignments
 		for (const role of this.visibleRoles) {
 			const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('')}]*`, 'gu');
 			description = description.replace(regex, '');
 		}
-		
+
 		// Remove dates, priority, and tags
 		description = description
 			.replace(/\s*(due|scheduled|completed):\s*\d{4}-\d{2}-\d{2}/gi, '')
@@ -275,8 +278,17 @@ export class TaskCacheService {
 			.replace(/\s*!{1,3}/g, '')
 			.replace(/\s*#[\w-]+/g, '')
 			.trim();
-		
+
 		return description;
+	}
+
+	private buildSearchText(description: string, filePath: string, tags: string[], assignments: ParsedAssignment[]): string {
+		return [
+			description,
+			filePath,
+			...tags,
+			...assignments.flatMap(a => a.assignees)
+		].join(' ').toLowerCase();
 	}
 
 	private saveTimeout: NodeJS.Timeout | null = null;
@@ -285,7 +297,7 @@ export class TaskCacheService {
 		if (this.saveTimeout) {
 			clearTimeout(this.saveTimeout);
 		}
-		
+
 		this.saveTimeout = setTimeout(() => {
 			this.saveCacheToFile();
 		}, 1000);
@@ -308,7 +320,7 @@ export class TaskCacheService {
 					}
 				}))
 			};
-			
+
 			await this.app.vault.adapter.write(this.cacheFilePath, JSON.stringify(cacheData, null, 2));
 		} catch (error) {
 			console.error('Error saving cache to file:', error);
@@ -319,10 +331,10 @@ export class TaskCacheService {
 		try {
 			const cacheContent = await this.app.vault.adapter.read(this.cacheFilePath);
 			const cacheData = JSON.parse(cacheContent);
-			
+
 			if (cacheData.version === 1 && cacheData.tasks) {
 				this.cache.clear();
-				
+
 				for (const taskData of cacheData.tasks) {
 					const task: TaskData = {
 						...taskData,
@@ -335,7 +347,11 @@ export class TaskCacheService {
 							scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
 						}
 					};
-					
+
+					if (!task.searchText) {
+						task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.assignments);
+					}
+
 					this.cache.set(task.id, task);
 				}
 			}
@@ -360,22 +376,22 @@ export class TaskCacheService {
 	async updateTaskStatus(taskId: string, newStatus: TaskStatus): Promise<void> {
 		const task = this.cache.get(taskId);
 		if (!task) return;
-		
+
 		try {
 			const file = this.app.vault.getAbstractFileByPath(task.filePath);
 			if (!file || !(file instanceof TFile)) return;
-			
+
 			const content = await this.app.vault.read(file);
 			const lines = content.split('\n');
-			
+
 			if (task.lineNumber < lines.length) {
 				const line = lines[task.lineNumber];
 				const statusChar = newStatus === TaskStatus.DONE ? 'x' : ' ';
 				const newLine = line.replace(/^(\s*[-*+]\s*\[)[x\s](\]\s*.+)$/, `$1${statusChar}$2`);
-				
+
 				lines[task.lineNumber] = newLine;
 				await this.app.vault.modify(file, lines.join('\n'));
-				
+
 				// Update cache
 				task.status = newStatus;
 				task.modifiedDate = new Date();

@@ -34,6 +34,7 @@ export interface TaskData {
 	lineNumber: number;
 	content: string;
 	description: string;
+	searchText: string;
 	status: TaskStatus;
 	priority: TaskPriority;
 	tags: string[];
