@@ -1,6 +1,6 @@
-import { 
-	Editor, 
-	MarkdownView, 
+import {
+	Editor,
+	MarkdownView,
 	Plugin,
 	WorkspaceLeaf
 } from 'obsidian';
@@ -21,14 +21,14 @@ export default class TaskAssignmentPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		
+
 		// Initialize services
-                this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
-                this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
-		
+		this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
+		this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+
 		// Initialize task cache
 		await this.taskCacheService.initializeCache();
-		
+
 		// Register view
 		this.registerView(
 			'task-assignment-view',
@@ -42,7 +42,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
 				const line = editor.getLine(editor.getCursor().line);
 				const isTask = /^\s*- \[[ x]\]/.test(line);
-				
+
 				if (isTask) {
 					if (!checking) {
 						this.openAssignmentModal(editor);
@@ -89,10 +89,10 @@ export default class TaskAssignmentPlugin extends Plugin {
 
 	async activateView() {
 		const { workspace } = this.app;
-		
+
 		let leaf: WorkspaceLeaf;
 		const leaves = workspace.getLeavesOfType('task-assignment-view');
-		
+
 		if (leaves.length > 0) {
 			// A view is already open, use it
 			leaf = leaves[0];
@@ -101,19 +101,19 @@ export default class TaskAssignmentPlugin extends Plugin {
 			leaf = workspace.getLeaf() || workspace.getRightLeaf(false);
 			await leaf.setViewState({ type: 'task-assignment-view', active: true });
 		}
-		
+
 		// Reveal the leaf
 		workspace.revealLeaf(leaf);
 	}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		
+
 		// Ensure default roles exist and have correct icons
 		const { DEFAULT_ROLES } = await import('./types');
 		for (const defaultRole of DEFAULT_ROLES) {
 			const existingRole = this.settings.roles.find(r => r.id === defaultRole.id);
-			
+
 			if (existingRole) {
 				// Update existing default role with correct icon and other properties
 				existingRole.icon = defaultRole.icon;
@@ -125,26 +125,26 @@ export default class TaskAssignmentPlugin extends Plugin {
 				this.settings.roles.push(defaultRole);
 			}
 		}
-		
+
 		// Sort roles by order
 		this.settings.roles.sort((a, b) => a.order - b.order);
-		
+
 		// Update services with new settings
 		if (this.taskAssignmentService) {
 			this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
 		}
-                if (this.taskCacheService) {
-                        this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
-                }
+		if (this.taskCacheService) {
+			this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+		}
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 		// Update services with new settings
 		this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
-                if (this.taskCacheService) {
-                        this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
-                }
+		if (this.taskCacheService) {
+			this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+		}
 	}
 
 	openAssignmentModal(editor: Editor) {
@@ -152,7 +152,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 	}
 
 	getVisibleRoles(): Role[] {
-		return this.settings.roles.filter(role => 
+		return this.settings.roles.filter(role =>
 			!role.isDefault || !this.settings.hiddenDefaultRoles.includes(role.id)
 		);
 	}

@@ -27,7 +27,7 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 	private updatePlaceholder() {
 		const contactSymbol = this.plugin.settings.contactSymbol;
 		const companySymbol = this.plugin.settings.companySymbol;
-		
+
 		if (this.options.mode === 'readonly') {
 			this.setPlaceholder(`Type ${contactSymbol}contact or ${companySymbol}company to search.`);
 		} else {
@@ -44,33 +44,33 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 	getItems(): string[] {
 		this.currentQuery = this.inputEl.value;
 		const items: string[] = [];
-		
+
 		if (this.currentQuery.startsWith(this.plugin.settings.contactSymbol)) {
 			const searchTerm = this.currentQuery.substring(1).toLowerCase().replace(/\s+/g, ' ').trim();
-			
+
 			// Add existing contacts that match
 			items.push(...this.contacts
 				.filter(contact => contact.toLowerCase().includes(searchTerm))
 				.map(contact => `${this.plugin.settings.contactSymbol}${contact}`)
 			);
-			
+
 			// Add @me as special case
 			if ('me'.includes(searchTerm)) {
 				if (!items.includes(`${this.plugin.settings.contactSymbol}me`)) {
 					items.unshift(`${this.plugin.settings.contactSymbol}me`);
 				}
 			}
-			
+
 		} else if (this.currentQuery.startsWith(this.plugin.settings.companySymbol)) {
 			const searchTerm = this.currentQuery.substring(1).toLowerCase().replace(/\s+/g, ' ').trim();
-			
+
 			// Add existing companies that match
 			items.push(...this.companies
 				.filter(company => company.toLowerCase().includes(searchTerm))
 				.map(company => `${this.plugin.settings.companySymbol}${company}`)
 			);
 		}
-		
+
 		return items;
 	}
 
@@ -80,27 +80,27 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 
 	getEmptyStateText(): string {
 		const query = this.currentQuery;
-		
+
 		if (!query.startsWith(this.plugin.settings.contactSymbol) && !query.startsWith(this.plugin.settings.companySymbol)) {
 			return `Start typing with ${this.plugin.settings.contactSymbol} or ${this.plugin.settings.companySymbol}.`;
 		}
-		
+
 		if (this.options.mode === 'readonly') {
 			return 'No results found!';
 		}
-		
+
 		// In add mode, show creation hint
 		if (query.startsWith(this.plugin.settings.contactSymbol)) {
 			return 'No results found, press Enter to create a new contact.';
 		} else if (query.startsWith(this.plugin.settings.companySymbol)) {
 			return 'No results found, press Enter to create a new company.';
 		}
-		
+
 		return 'No results found!';
 	}
 
 	onChooseItem(item: string): void {
-		
+
 		if (this.noResults) {
 			// user pressed ↵ with no matches – create something new
 			// Only allow creation in add mode
@@ -118,7 +118,7 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 			// Clear the input but keep modal open
 			this.inputEl.value = '';
 			this.currentQuery = '';
-			
+
 			// Trigger input event to refresh suggestions
 			this.inputEl.dispatchEvent(new Event('input'));
 		}
@@ -138,9 +138,9 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-                if (this.plugin.settings.debug) {
-                        console.log("No suggestions for input: ", this.inputEl.value, " with query: ", query, " and query length ", query.length);
-                }
+		if (this.plugin.settings.debug) {
+			console.log("No suggestions for input: ", this.inputEl.value, " with query: ", query, " and query length ", query.length);
+		}
 		if (!query.startsWith(this.plugin.settings.contactSymbol) && !query.startsWith(this.plugin.settings.companySymbol)) {
 			this.emptyStateText = `Start typing with ${this.plugin.settings.contactSymbol} or ${this.plugin.settings.companySymbol}.`;
 			return;
@@ -151,9 +151,9 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-                if (this.plugin.settings.debug) {
-                        console.log("No results, setting noResults to true for ", this.inputEl.value, " with query ", query);
-                }
+		if (this.plugin.settings.debug) {
+			console.log("No results, setting noResults to true for ", this.inputEl.value, " with query ", query);
+		}
 		this.noResults = true;
 
 		// In add mode, show creation hint
@@ -167,7 +167,7 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 	close(): void {
 		if (this.options.keepOpen && this.disableClose) {
 			this.emptyStateText = 'Make another selection. All done? ESC or X twice to close.';
-            this.disableClose = false; // Reset the disableClose flag, so the modal can be closed, as long as the user doesn't make another selection
+			this.disableClose = false; // Reset the disableClose flag, so the modal can be closed, as long as the user doesn't make another selection
 			return;  // swallow the auto-close
 		}
 		super.close(); // otherwise shut down normally
