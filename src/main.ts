@@ -110,13 +110,20 @@ export default class TaskAssignmentPlugin extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 		
-		// Ensure default roles exist if not hidden
+		// Ensure default roles exist and have correct icons
 		const { DEFAULT_ROLES } = await import('./types');
 		for (const defaultRole of DEFAULT_ROLES) {
-			if (!this.settings.roles.find(r => r.id === defaultRole.id)) {
-				if (!this.settings.hiddenDefaultRoles.includes(defaultRole.id)) {
-					this.settings.roles.push(defaultRole);
-				}
+			const existingRole = this.settings.roles.find(r => r.id === defaultRole.id);
+			
+			if (existingRole) {
+				// Update existing default role with correct icon and other properties
+				existingRole.icon = defaultRole.icon;
+				existingRole.name = defaultRole.name;
+				existingRole.isDefault = defaultRole.isDefault;
+				existingRole.order = defaultRole.order;
+			} else if (!this.settings.hiddenDefaultRoles.includes(defaultRole.id)) {
+				// Add missing default role if not hidden
+				this.settings.roles.push(defaultRole);
 			}
 		}
 		

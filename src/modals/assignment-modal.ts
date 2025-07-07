@@ -66,7 +66,28 @@ export class AssignmentModal extends Modal {
 			const addButton = roleHeader.createEl('button', { text: '+', cls: 'add-assignee-btn' });
 			addButton.setAttribute('aria-label', 'Select people or groups');
 			addButton.setAttribute('title', 'Select people or groups');
-			addButton.onclick = () => this.showAssigneeSelector(role.id, roleDiv);
+			addButton.onclick = (e) => {
+				e.stopPropagation();
+				this.showAssigneeSelector(role.id, roleDiv);
+			};
+
+			// Make the entire role section clickable (except assignee tags)
+			roleDiv.classList.add('role-section-clickable');
+			roleDiv.onclick = (e) => {
+				// Don't trigger if clicking on assignee tags
+				const target = e.target as HTMLElement;
+				if (!target.closest('.assignee-tag')) {
+					this.showAssigneeSelector(role.id, roleDiv);
+				}
+			};
+
+			// Add hover effects for the entire role section
+			roleDiv.onmouseenter = () => {
+				addButton.classList.add('highlighted');
+			};
+			roleDiv.onmouseleave = () => {
+				addButton.classList.remove('highlighted');
+			};
 
 			// Show existing assignees
 			const assignment = this.assignments.find(a => a.roleId === role.id);
@@ -90,7 +111,28 @@ export class AssignmentModal extends Modal {
 			
 			const removeBtn = assigneeEl.createSpan('remove-assignee');
 			removeBtn.setText('×');
-			removeBtn.onclick = () => {
+			
+			// Make the entire assignee tag clickable for removal
+			assigneeEl.onclick = (e) => {
+				e.stopPropagation(); // Prevent triggering role section click
+				this.removeAssignee(roleId, assignee);
+				this.renderAssignees(container, roleId, 
+					this.assignments.find(a => a.roleId === roleId)?.assignees || []);
+			};
+
+			// Add hover effects to highlight the remove button
+			assigneeEl.onmouseenter = () => {
+				removeBtn.classList.add('highlighted');
+				assigneeEl.classList.add('removal-ready');
+			};
+			assigneeEl.onmouseleave = () => {
+				removeBtn.classList.remove('highlighted');
+				assigneeEl.classList.remove('removal-ready');
+			};
+
+			// Keep the original removeBtn click handler as fallback
+			removeBtn.onclick = (e) => {
+				e.stopPropagation();
 				this.removeAssignee(roleId, assignee);
 				this.renderAssignees(container, roleId, 
 					this.assignments.find(a => a.roleId === roleId)?.assignees || []);

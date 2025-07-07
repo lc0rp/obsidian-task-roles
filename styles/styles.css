@@ -21,6 +21,17 @@ If your plugin does not need CSS, delete this file.
     background: var(--background-secondary);
 }
 
+/* Enhanced clickable role section */
+.role-section-clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.role-section-clickable:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--interactive-accent);
+}
+
 .role-header {
     display: flex;
     align-items: center;
@@ -63,10 +74,15 @@ If your plugin does not need CSS, delete this file.
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    transform: scale(1);
 }
 
-.add-assignee-btn:hover {
+.add-assignee-btn:hover,
+.add-assignee-btn.highlighted {
     background: var(--interactive-accent-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .assignee-container {
@@ -85,6 +101,17 @@ If your plugin does not need CSS, delete this file.
     display: inline-flex;
     align-items: center;
     gap: 0.25em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.assignee-tag:hover,
+.assignee-tag.removal-ready {
+    background: var(--background-modifier-error);
+    border-color: var(--text-error);
+    color: var(--text-error);
+    transform: scale(1.05);
 }
 
 .remove-assignee {
@@ -92,11 +119,15 @@ If your plugin does not need CSS, delete this file.
     font-weight: bold;
     opacity: 0.7;
     margin-left: 0.25em;
+    transition: all 0.2s ease;
 }
 
-.remove-assignee:hover {
+.remove-assignee:hover,
+.remove-assignee.highlighted {
     opacity: 1;
     color: var(--text-error);
+    transform: scale(1.2);
+    text-shadow: 0 0 4px var(--text-error);
 }
 
 .new-role-row {
@@ -118,16 +149,19 @@ If your plugin does not need CSS, delete this file.
 }
 
 .new-role-row button {
-    background: var(--interactive-accent);
-    color: var(--text-on-accent);
-    border: none;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-border);
     padding: 0.5em 1em;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 0.9em;
+    opacity: 0.8;
 }
 
 .new-role-row button:hover {
-    background: var(--interactive-accent-hover);
+    background: var(--background-modifier-hover);
+    opacity: 1;
 }
 
 .button-container {
@@ -146,6 +180,7 @@ If your plugin does not need CSS, delete this file.
     cursor: pointer;
     background: var(--background-primary);
     color: var(--text-normal);
+    transition: all 0.2s ease;
 }
 
 .button-container button:hover {
@@ -156,10 +191,15 @@ If your plugin does not need CSS, delete this file.
     background: var(--interactive-accent);
     color: var(--text-on-accent);
     border-color: var(--interactive-accent);
+    font-weight: 600;
+    font-size: 1em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .button-container button.mod-cta:hover {
     background: var(--interactive-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Settings page styles */
