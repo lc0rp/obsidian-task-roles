@@ -9,10 +9,8 @@ import type TaskAssignmentPlugin from '../main';
 export class TaskAssignmentView extends TaskAssignmentViewBase {
 	private viewContainerEl: HTMLElement;
 	private filtersEl: HTMLElement;
-	private viewContentEl: HTMLElement;
-	private sidePanel: HTMLElement | null = null;
-	private selectedTask: TaskData | null = null;
-	private viewConfigService: ViewConfigurationService;
+        private viewContentEl: HTMLElement;
+        private viewConfigService: ViewConfigurationService;
 	private currentViewName: string | null = null;
 	private originalFilters: ViewFilters = {};
 
@@ -479,10 +477,6 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			this.renderColumn(columnsContainer, column);
 		}
 
-		// Render side panel if task is selected
-		if (this.selectedTask) {
-			this.renderSidePanel();
-		}
 	}
 
 	private renderColumn(container: HTMLElement, column: any): void {
@@ -564,122 +558,9 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			}
 		}
 
-		// Click handler to show side panel
-		cardEl.onclick = (e) => {
-			if (e.target !== checkboxEl) {
-				this.selectedTask = task;
-				this.renderSidePanel();
-			}
-		};
+                // Click handler previously opened task details; disabled per new design
 	}
 
-	private renderSidePanel(): void {
-		if (!this.selectedTask) return;
-
-		// Remove existing side panel
-		if (this.sidePanel) {
-			this.sidePanel.remove();
-		}
-
-		// Create side panel
-		this.sidePanel = this.viewContainerEl.createDiv('task-assignment-side-panel');
-		
-		// Header
-		const headerEl = this.sidePanel.createDiv('task-assignment-side-panel-header');
-		headerEl.createSpan('task-assignment-side-panel-title').setText('Task Details');
-		
-		const closeBtn = headerEl.createEl('button', { cls: 'task-assignment-side-panel-close' });
-		setIcon(closeBtn, 'x');
-		closeBtn.onclick = () => {
-			this.selectedTask = null;
-			if (this.sidePanel) {
-				this.sidePanel.remove();
-				this.sidePanel = null;
-			}
-		};
-
-		// Content
-		const contentEl = this.sidePanel.createDiv('task-assignment-side-panel-content');
-		
-		// Task description
-        const descriptionEl = contentEl.createDiv('task-detail-section');
-        descriptionEl.createEl('h3', { text: 'Description' });
-        const descriptionValue = descriptionEl.createDiv('task-detail-value');
-        MarkdownRenderer.renderMarkdown(
-			this.selectedTask.description,
-			descriptionValue,
-			this.selectedTask.filePath,
-			this
-		);
-
-		// File location
-		const locationEl = contentEl.createDiv('task-detail-section');
-		locationEl.createEl('h3', { text: 'Location' });
-		const locationValue = locationEl.createDiv('task-detail-value');
-		locationValue.setText(`${this.selectedTask.filePath}:${this.selectedTask.lineNumber + 1}`);
-
-		// Status
-		const statusEl = contentEl.createDiv('task-detail-section');
-		statusEl.createEl('h3', { text: 'Status' });
-		statusEl.createDiv('task-detail-value').setText(this.selectedTask.status.replace('-', ' ').toUpperCase());
-
-		// Priority
-		const priorityEl = contentEl.createDiv('task-detail-section');
-		priorityEl.createEl('h3', { text: 'Priority' });
-		priorityEl.createDiv('task-detail-value').setText(this.selectedTask.priority.toUpperCase());
-
-		// Tags
-		if (this.selectedTask.tags.length > 0) {
-			const tagsEl = contentEl.createDiv('task-detail-section');
-			tagsEl.createEl('h3', { text: 'Tags' });
-			const tagsValue = tagsEl.createDiv('task-detail-value');
-			tagsValue.setText(this.selectedTask.tags.map(tag => `#${tag}`).join(', '));
-		}
-
-		// Assignments
-		if (this.selectedTask.assignments.length > 0) {
-			const assignmentsEl = contentEl.createDiv('task-detail-section');
-			assignmentsEl.createEl('h3', { text: 'Assignments' });
-			const assignmentsValue = assignmentsEl.createDiv('task-detail-value');
-			
-			for (const assignment of this.selectedTask.assignments) {
-				const assignmentEl = assignmentsValue.createDiv('task-assignment-detail');
-				assignmentEl.createSpan('task-assignment-role').setText(`${assignment.role.icon} ${assignment.role.name}:`);
-				assignmentEl.createSpan('task-assignment-assignees').setText(assignment.assignees.join(', '));
-			}
-		}
-
-		// Dates
-		const datesEl = contentEl.createDiv('task-detail-section');
-		datesEl.createEl('h3', { text: 'Dates' });
-		const datesValue = datesEl.createDiv('task-detail-value');
-		
-		if (this.selectedTask.dates.due) {
-			const dueDateEl = datesValue.createDiv('task-date-detail');
-			dueDateEl.createSpan('task-date-label').setText('Due:');
-			dueDateEl.createSpan('task-date-value').setText(this.formatDate(this.selectedTask.dates.due));
-		}
-		
-		if (this.selectedTask.dates.scheduled) {
-			const scheduledDateEl = datesValue.createDiv('task-date-detail');
-			scheduledDateEl.createSpan('task-date-label').setText('Scheduled:');
-			scheduledDateEl.createSpan('task-date-value').setText(this.formatDate(this.selectedTask.dates.scheduled));
-		}
-		
-		if (this.selectedTask.dates.completed) {
-			const completedDateEl = datesValue.createDiv('task-date-detail');
-			completedDateEl.createSpan('task-date-label').setText('Completed:');
-			completedDateEl.createSpan('task-date-value').setText(this.formatDate(this.selectedTask.dates.completed));
-		}
-
-		const createdDateEl = datesValue.createDiv('task-date-detail');
-		createdDateEl.createSpan('task-date-label').setText('Created:');
-		createdDateEl.createSpan('task-date-value').setText(this.formatDate(this.selectedTask.createdDate));
-
-		const modifiedDateEl = datesValue.createDiv('task-date-detail');
-		modifiedDateEl.createSpan('task-date-label').setText('Modified:');
-		modifiedDateEl.createSpan('task-date-value').setText(this.formatDate(this.selectedTask.modifiedDate));
-	}
 
 	private showSaveViewDialog(): void {
 		new SaveViewModal(
