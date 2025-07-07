@@ -45,12 +45,12 @@ export class AssignmentSuggest extends EditorSuggest<string> {
 		return null;
 	}
 
-	async getSuggestions(context: EditorSuggestContext): Promise<string[]> {
-		const { query } = context;
-		const suggestions: string[] = [];
+        getSuggestions(context: EditorSuggestContext): string[] {
+                const { query } = context;
+                const suggestions: string[] = [];
 		
 		if (query.startsWith(this.plugin.settings.contactSymbol)) {
-			const contacts = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
+                        const contacts = this.plugin.taskAssignmentService.getCachedContacts();
 			const searchTerm = query.substring(1).toLowerCase();
 			
 			suggestions.push(...contacts
@@ -61,8 +61,8 @@ export class AssignmentSuggest extends EditorSuggest<string> {
 			if ('me'.includes(searchTerm)) {
 				suggestions.unshift(`${this.plugin.settings.contactSymbol}me`);
 			}
-		} else if (query.startsWith(this.plugin.settings.companySymbol)) {
-			const companies = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.companySymbol);
+                } else if (query.startsWith(this.plugin.settings.companySymbol)) {
+                        const companies = this.plugin.taskAssignmentService.getCachedCompanies();
 			const searchTerm = query.substring(1).toLowerCase();
 			
 			suggestions.push(...companies

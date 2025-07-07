@@ -2,27 +2,79 @@ import { App, TFile, TFolder, Notice } from 'obsidian';
 import { TaskAssignmentSettings, Role, Assignment, ParsedAssignment } from '../types';
 
 export class TaskAssignmentService {
-	constructor(private app: App, private settings: TaskAssignmentSettings) {}
+    private contactCache: string[] = [];
+    private companyCache: string[] = [];
+    private cacheInitialized = false;
 
-	async getContactsAndCompanies(symbol: string): Promise<string[]> {
-		const directory = symbol === this.settings.contactSymbol 
-			? this.settings.contactDirectory 
-			: this.settings.companyDirectory;
+    constructor(private app: App, private settings: TaskAssignmentSettings) {
+        // Build initial cache and listen for file system changes
+        void this.refreshAssigneeCache();
+        this.setupCacheWatchers();
+    }
 
-		const folder = this.app.vault.getAbstractFileByPath(directory);
-		if (!folder || !(folder instanceof TFolder)) {
-			return [];
-		}
+    private setupCacheWatchers(): void {
+        const refresh = (file: TFile) => {
+            if (file.extension !== 'md') return;
+            const path = file.path;
+            if (path.startsWith(`${this.settings.contactDirectory}/`) ||
+                path.startsWith(`${this.settings.companyDirectory}/`)) {
+                void this.refreshAssigneeCache();
+            }
+        };
 
-		const files: string[] = [];
-		for (const file of folder.children) {
-			if (file instanceof TFile && file.extension === 'md') {
-				files.push(file.basename);
-			}
-		}
+        if (typeof (this.app.vault as any).on === 'function') {
+            this.app.vault.on('create', refresh);
+            this.app.vault.on('delete', refresh);
+            this.app.vault.on('rename', refresh);
+        }
+    }
 
-		return files.sort();
-	}
+    async getContactsAndCompanies(symbol: string): Promise<string[]> {
+        if (!this.cacheInitialized) {
+            await this.refreshAssigneeCache();
+        }
+
+        return symbol === this.settings.contactSymbol
+            ? [...this.contactCache]
+            : [...this.companyCache];
+    }
+
+    getCachedContacts(): string[] {
+        return [...this.contactCache];
+    }
+
+    getCachedCompanies(): string[] {
+        return [...this.companyCache];
+    }
+
+    async refreshAssigneeCache(): Promise<void> {
+        if (typeof (this.app.vault as any).getAbstractFileByPath !== 'function') {
+            this.contactCache = [];
+            this.companyCache = [];
+            this.cacheInitialized = true;
+            return;
+        }
+
+        this.contactCache = await this.readDirectory(this.settings.contactDirectory);
+        this.companyCache = await this.readDirectory(this.settings.companyDirectory);
+        this.cacheInitialized = true;
+    }
+
+    private async readDirectory(directory: string): Promise<string[]> {
+        const folder = this.app.vault.getAbstractFileByPath(directory);
+        if (!folder || !(folder instanceof TFolder)) {
+            return [];
+        }
+
+        const files: string[] = [];
+        for (const file of folder.children) {
+            if (file instanceof TFile && file.extension === 'md') {
+                files.push(file.basename);
+            }
+        }
+
+        return files.sort();
+    }
 
 	parseTaskAssignments(taskText: string, visibleRoles: Role[]): ParsedAssignment[] {
 		const assignments: ParsedAssignment[] = [];
@@ -89,7 +141,7 @@ export class TaskAssignmentService {
 		return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	}
 
-	async createMeContact(): Promise<void> {
+        async createMeContact(): Promise<void> {
 		const contactPath = `${this.settings.contactDirectory}/Me.md`;
 		
 		if (await this.app.vault.adapter.exists(contactPath)) {
@@ -103,9 +155,10 @@ export class TaskAssignmentService {
 			await this.app.vault.createFolder(dir);
 		}
 
-		await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
-		new Notice('Created @me contact');
-	}
+                await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
+                new Notice('Created @me contact');
+                await this.refreshAssigneeCache();
+        }
 
 	async createContactOrCompany(assignee: string): Promise<void> {
 		const isContact = assignee.startsWith(this.settings.contactSymbol);
@@ -133,12 +186,13 @@ export class TaskAssignmentService {
 		const fileType = isContact ? 'contact' : 'company';
 		const content = `# ${name}\n\nThis is a ${fileType} file.`;
 		
-		try {
-			await this.app.vault.create(filePath, content);
-			new Notice(`Created ${fileType}: ${assignee}`, 2000);
-		} catch (error) {
-			console.error(`Error creating ${fileType} file:`, error);
-			new Notice(`Failed to create ${fileType}: ${assignee}`, 3000);
-		}
-	}
-} 
+                try {
+                        await this.app.vault.create(filePath, content);
+                        new Notice(`Created ${fileType}: ${assignee}`, 2000);
+                        await this.refreshAssigneeCache();
+                } catch (error) {
+                        console.error(`Error creating ${fileType} file:`, error);
+                        new Notice(`Failed to create ${fileType}: ${assignee}`, 3000);
+                }
+        }
+}
