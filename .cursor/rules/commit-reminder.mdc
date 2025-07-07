@@ -6,47 +6,57 @@ alwaysApply: true
 # Commit Reminder Rule
 
 ## When to Apply
-After making any code changes, edits, or modifications to files in the workspace, ALWAYS end your response with a commit reminder.
+
+After making any code changes, edits, or modifications to files in the workspace, ALWAYS end your response with a commit
+reminder.
 
 ## Commit Message Format
+
 Use conventional commits format with scope:
+
 - **Format**: `type(scope): description`
 - **Types**: feat, fix, docs, style, refactor, test, chore
 - **Scope**: Use appropriate scope based on what was changed (e.g., modal, settings, ui, docs, api)
 - **Description**: Brief description of what was changed
 
 ## Required Final Message
+
 The last line of your message should ALWAYS be:
 
 "Don't forget to commit!" followed by the git command with conventional commit message.
 
 ## Examples
 
-### For UI changes:
-```
+### For UI changes
+
+```text
 Don't forget to commit!
 git add . && git commit -m "feat(ui): add help links to modal and settings pages"
 ```
 
-### For bug fixes:
-```
+### For bug fixes
+
+```text
 Don't forget to commit!
 git add . && git commit -m "fix(modal): resolve assignment parsing issue"
 ```
 
-### For documentation:
-```
+### For documentation
+
+```text
 Don't forget to commit!
 git add . && git commit -m "docs: update README with new features"
 ```
 
-### For styling:
-```
+### For styling
+
+```text
 Don't forget to commit!
 git add . && git commit -m "style: improve help link appearance and responsiveness"
 ```
 
 ## Scope Guidelines
+
 - `ui` - User interface changes
 - `modal` - Changes to modal dialogs
 - `settings` - Settings page modifications
