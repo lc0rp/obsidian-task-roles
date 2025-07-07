@@ -163,7 +163,7 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 	close(): void {
 		if (this.options.keepOpen && this.disableClose) {
 			this.emptyStateText = 'Make another selection. All done? ESC or X twice to close.';
-                        this.disableClose = false; // Reset the disableClose flag, so the modal can be closed, as long as the user doesn't make another selection
+            this.disableClose = false; // Reset the disableClose flag, so the modal can be closed, as long as the user doesn't make another selection
 			return;  // swallow the auto-close
 		}
 		super.close(); // otherwise shut down normally

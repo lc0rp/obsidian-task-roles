@@ -131,7 +131,7 @@ and real-time task tracking.
   - You cannot edit or delete the default roles, but you can hide them, which prevents them from being displayed in future
     Assign dialogs.
   - You can add, edit, and delete custom roles, but this version of the plugin won't update any historical records that
-  utilize custom roles you edit later
+    utilize custom roles you edit later
 
 ## Default roles: based on DACI concept
 
