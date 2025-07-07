@@ -9,8 +9,8 @@ import type TaskAssignmentPlugin from '../main';
 export class TaskAssignmentView extends TaskAssignmentViewBase {
 	private viewContainerEl: HTMLElement;
 	private filtersEl: HTMLElement;
-        private viewContentEl: HTMLElement;
-        private viewConfigService: ViewConfigurationService;
+	private viewContentEl: HTMLElement;
+	private viewConfigService: ViewConfigurationService;
 	private currentViewName: string | null = null;
 	private originalFilters: ViewFilters = {};
 
@@ -557,8 +557,6 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				tagEl.setText(`#${tag}`);
 			}
 		}
-
-                // Click handler previously opened task details; disabled per new design
 	}
 
 
