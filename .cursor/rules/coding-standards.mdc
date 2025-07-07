@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 # Coding Standards
-   
+
 ## TypeScript Guidelines
 
 - Follow TypeScript strict mode as configured in [tsconfig.json](mdc:tsconfig.json)
@@ -33,6 +33,7 @@ alwaysApply: true
 Project documentation is stored in README.md and the docs folder
 
 When making changes:
+
 1. Update @README.md for user-facing changes
 2. Update @docs/*.md for technical changes
 3. Ensure all markdown passes linting

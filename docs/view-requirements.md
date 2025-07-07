@@ -31,6 +31,18 @@ The Task Center now supports comprehensive filtering across multiple criteria:
 - **Tags**: Filter by task tags ✅
 - **Text Search**: Full-text search capability across descriptions, file paths, tags, and assignees ✅
 
+#### **Filter Workflow Control** ✅ COMPLETED
+
+- **Auto Apply (Default)**: Filter changes apply immediately and automatically close the filter section ✅
+- **Manual Apply Mode**: When Auto Apply is disabled: ✅
+  - Filter changes update internal state without immediate rendering ✅
+  - Filter section remains open for further adjustments ✅
+  - Apply Filters button becomes enabled and applies all changes ✅
+  - Cancel button becomes enabled and reverts to original state ✅
+- **State Management**: Original filter state captured when filter section opens ✅
+- **Persistent Settings**: Auto Apply preference saved in plugin settings ✅
+- **Button States**: Apply and Cancel buttons disabled when Auto Apply is enabled ✅
+
 ### Layout Options ✅ COMPLETED
 
 The Task Center supports four different organizational layouts:
@@ -130,6 +142,13 @@ The Task Center uses a sophisticated caching system:
 - **Date Range Picker**: From/to date selection with type selection ✅
 - **Text Search**: Real-time text search input ✅
 - **Clear Visual Feedback**: Active filter indicators ✅
+- **Filter Control Options**: ✅
+  - **Auto Apply Mode**: Immediate filter application with section closure ✅
+  - **Manual Apply Mode**: Batch filter changes with explicit apply action ✅
+  - **Apply Filters Button**: Apply current settings and close section ✅
+  - **Cancel Button**: Revert changes and close section ✅
+  - **Clear Filters Button**: Remove all filters and refresh ✅
+  - **Auto Apply Toggle**: Persistent checkbox to control filter behavior ✅
 
 #### **Responsive Design** ✅ COMPLETED
 - **Kanban Layout**: Column-based task organization ✅

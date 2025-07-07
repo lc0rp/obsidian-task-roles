@@ -58,6 +58,11 @@ The Task Center is a comprehensive task management interface that provides advan
 - **Content Filters**: Status (multi-select), Priority (including none-set), Tags, Text search
 - **Date Filters**: Date ranges with type selection (Created, Due, Completed, Scheduled)
 - **Combination Filters**: Support for complex filtering combinations
+- **Filter Workflow Control**: 
+  - **Auto Apply Mode**: Immediate application of filter changes (default behavior)
+  - **Manual Apply Mode**: Batch filter changes with explicit apply/cancel actions
+  - **State Management**: Ability to revert filter changes to original state
+  - **Persistent Preferences**: Auto Apply setting saved across sessions
 
 #### **Interactive Task Cards**
 
@@ -84,8 +89,10 @@ The Task Center is a comprehensive task management interface that provides advan
 #### **User Interface**
 
 - **Responsive Layout**: Kanban-style columns with task cards
-- **Filter Toggle**: Collapsible filter panel
+- **Filter Toggle**: Collapsible filter panel with state management
 - **Header Controls**: Layout selector, save/load configurations, cache refresh
+- **Filter Action Buttons**: Clear Filters, Cancel, Apply Filters, and Auto Apply toggle
+- **Smart Button States**: Apply and Cancel buttons automatically disabled in Auto Apply mode
 - **Real-time Updates**: Immediate UI updates when cache changes
 
 ### Commands and Access

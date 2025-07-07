@@ -70,6 +70,18 @@ The Task Center supports comprehensive filtering across multiple criteria:
 - **Date Range**: From-to date selection with "include not set" option
 - **Date Types**: Filter by Created, Due, Completed, or Scheduled dates
 
+#### **Filter Control Options**
+
+The Task Center provides flexible filter control options:
+
+- **Auto Apply Mode** (default): Filter changes apply immediately and close the filter section
+- **Manual Apply Mode**: Experiment with filters before applying:
+  - **Apply Filters**: Apply current filter settings and close section
+  - **Cancel**: Revert all changes and close section (returns to original state when filter section was opened)
+  - **Clear Filters**: Remove all filters and refresh view
+- **Auto Apply Toggle**: Checkbox to switch between immediate and manual filter application
+- **Persistent Settings**: Auto Apply preference is saved and remembered across sessions
+
 #### **Interactive Task Cards**
 
 Task cards display:

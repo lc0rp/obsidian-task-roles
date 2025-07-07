@@ -19,6 +19,7 @@ The `styles.css` file is automatically copied to the root directory during the b
 The stylesheet is organized into sections:
 
 ### Core Components
+
 - `.roles-container` - Main roles container in assignment modal
 - `.role-row` - Individual role rows
 - `.role-header` - Role name and icon header
@@ -26,21 +27,25 @@ The stylesheet is organized into sections:
 - `.assignee-tag` - Individual assignee badges
 
 ### Interactive Elements
+
 - `.add-assignee-btn` - Add button for roles
 - `.remove-assignee` - Remove button in assignee tags
 - `.button-container` - Modal button containers
 
 ### Editor Components
+
 - `.task-assignment-icon-container` - Container for inline task icons
 - `.task-assignment-icon-button` - Clickable icon button
 - `.task-assignment-icon` - Icon styling
 
 ### Settings
+
 - Settings page specific styles
 - Custom role management styles
 - Form input styling
 
 ### Responsive Design
+
 - Mobile-friendly styles for smaller screens
 - Adaptive layout for different screen sizes
 
@@ -64,4 +69,4 @@ When making changes to styles:
 1. Edit `styles/styles.css`
 2. If running `npm run dev`, changes are automatically copied
 3. If not, run `npm run build` to copy changes
-4. Reload the plugin in Obsidian to see changes 
+4. Reload the plugin in Obsidian to see changes
