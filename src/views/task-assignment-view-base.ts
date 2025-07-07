@@ -132,20 +132,13 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 				}
 			}
 
-			// Text search filter
-			if (this.currentFilters.textSearch && this.currentFilters.textSearch.trim()) {
-				const searchTerm = this.currentFilters.textSearch.toLowerCase();
-				const searchableText = [
-					task.description,
-					task.filePath,
-					...task.tags,
-					...task.assignments.flatMap(a => a.assignees)
-				].join(' ').toLowerCase();
-				
-				if (!searchableText.includes(searchTerm)) {
-					return false;
-				}
-			}
+                        // Text search filter
+                        if (this.currentFilters.textSearch && this.currentFilters.textSearch.trim()) {
+                                const searchTerm = this.currentFilters.textSearch.toLowerCase();
+                                if (!task.searchText.includes(searchTerm)) {
+                                        return false;
+                                }
+                        }
 
 			return true;
 		});

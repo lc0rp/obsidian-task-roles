@@ -29,16 +29,17 @@ export interface ParsedAssignment {
 
 // Task data structures for caching and views
 export interface TaskData {
-	id: string;
-	filePath: string;
-	lineNumber: number;
-	content: string;
-	description: string;
-	status: TaskStatus;
-	priority: TaskPriority;
-	tags: string[];
-	assignments: ParsedAssignment[];
-	dates: TaskDates;
+        id: string;
+        filePath: string;
+        lineNumber: number;
+        content: string;
+        description: string;
+        searchText: string;
+        status: TaskStatus;
+        priority: TaskPriority;
+        tags: string[];
+        assignments: ParsedAssignment[];
+        dates: TaskDates;
 	createdDate: Date;
 	modifiedDate: Date;
 }

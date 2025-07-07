@@ -1,5 +1,5 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role } from '../types';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedAssignment } from '../types';
 import { TaskAssignmentService } from './task-assignment.service';
 
 export class TaskCacheService {
@@ -157,28 +157,31 @@ export class TaskCacheService {
 			// Parse description (remove assignments and metadata)
 			const description = this.extractTaskDescription(content);
 			
-			// Parse priority and tags
-			const priority = this.parseTaskPriority(content);
-			const tags = this.parseTaskTags(content);
-			
-			// Parse dates
-			const dates = this.parseTaskDates(content);
+                        // Parse priority and tags
+                        const priority = this.parseTaskPriority(content);
+                        const tags = this.parseTaskTags(content);
+
+                        // Parse dates
+                        const dates = this.parseTaskDates(content);
 			
 			// Get file dates
 			const createdDate = new Date(file.stat.ctime);
-			const modifiedDate = new Date(file.stat.mtime);
-			
-			return {
-				id: taskId,
-				filePath: file.path,
-				lineNumber,
-				content: fullLine,
-				description,
-				status,
-				priority,
-				tags,
-				assignments,
-				dates,
+                        const modifiedDate = new Date(file.stat.mtime);
+
+                        const searchText = this.buildSearchText(description, file.path, tags, assignments);
+
+                        return {
+                                id: taskId,
+                                filePath: file.path,
+                                lineNumber,
+                                content: fullLine,
+                                description,
+                                searchText,
+                                status,
+                                priority,
+                                tags,
+                                assignments,
+                                dates,
 				createdDate,
 				modifiedDate
 			};
@@ -253,9 +256,9 @@ export class TaskCacheService {
 		return dates;
 	}
 
-	private extractTaskDescription(content: string): string {
-		// Remove assignments, dates, priority indicators, and tags
-		let description = content;
+        private extractTaskDescription(content: string): string {
+                // Remove assignments, dates, priority indicators, and tags
+                let description = content;
 		
 		// Remove role assignments
 		for (const role of this.visibleRoles) {
@@ -274,8 +277,17 @@ export class TaskCacheService {
 			.replace(/\s*#[\w-]+/g, '')
 			.trim();
 		
-		return description;
-	}
+                return description;
+        }
+
+        private buildSearchText(description: string, filePath: string, tags: string[], assignments: ParsedAssignment[]): string {
+                return [
+                        description,
+                        filePath,
+                        ...tags,
+                        ...assignments.flatMap(a => a.assignees)
+                ].join(' ').toLowerCase();
+        }
 
 	private saveTimeout: NodeJS.Timeout | null = null;
 
@@ -321,21 +333,25 @@ export class TaskCacheService {
 			if (cacheData.version === 1 && cacheData.tasks) {
 				this.cache.clear();
 				
-				for (const taskData of cacheData.tasks) {
-					const task: TaskData = {
-						...taskData,
-						createdDate: new Date(taskData.createdDate),
-						modifiedDate: new Date(taskData.modifiedDate),
-						dates: {
-							created: taskData.dates.created ? new Date(taskData.dates.created) : undefined,
-							due: taskData.dates.due ? new Date(taskData.dates.due) : undefined,
-							completed: taskData.dates.completed ? new Date(taskData.dates.completed) : undefined,
-							scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
-						}
-					};
-					
-					this.cache.set(task.id, task);
-				}
+                                for (const taskData of cacheData.tasks) {
+                                        const task: TaskData = {
+                                                ...taskData,
+                                                createdDate: new Date(taskData.createdDate),
+                                                modifiedDate: new Date(taskData.modifiedDate),
+                                                dates: {
+                                                        created: taskData.dates.created ? new Date(taskData.dates.created) : undefined,
+                                                        due: taskData.dates.due ? new Date(taskData.dates.due) : undefined,
+                                                        completed: taskData.dates.completed ? new Date(taskData.dates.completed) : undefined,
+                                                        scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
+                                                }
+                                        };
+
+                                        if (!task.searchText) {
+                                                task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.assignments);
+                                        }
+
+                                        this.cache.set(task.id, task);
+                                }
 			}
 		} catch (error) {
 			throw new Error('Failed to load cache from file');
