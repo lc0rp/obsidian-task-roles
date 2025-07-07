@@ -506,13 +506,60 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		cardEl.addClass(this.getTaskStatusClass(task.status));
 		cardEl.addClass(this.getTaskPriorityClass(task.priority));
 		
+		// Top row with checkbox and action icons
+		const topRowEl = cardEl.createDiv('task-assignment-card-top-row');
+		
 		// Task checkbox
-		const checkboxEl = cardEl.createEl('input', { type: 'checkbox' });
+		const checkboxEl = topRowEl.createEl('input', { type: 'checkbox' });
 		checkboxEl.checked = task.status === TaskStatus.DONE;
 		checkboxEl.onchange = async () => {
 			const newStatus = checkboxEl.checked ? TaskStatus.DONE : TaskStatus.TODO;
 			await this.taskCacheService.updateTaskStatus(task.id, newStatus);
 			this.render();
+		};
+
+		// Action icons row (moved to top)
+		const actionsEl = topRowEl.createDiv('task-assignment-card-actions');
+
+		// Priority icon
+		const priorityIcon = actionsEl.createSpan('task-card-action-icon');
+		if (task.priority === TaskPriority.MEDIUM) {
+			priorityIcon.setText('⚪');
+		} else {
+			setIcon(priorityIcon, this.getPriorityIconName(task.priority));
+		}
+		const priorityLabel = `Priority: ${task.priority.toUpperCase()}`;
+		priorityIcon.setAttribute('aria-label', priorityLabel);
+		priorityIcon.setAttribute('title', priorityLabel);
+
+		// Link icon
+		const linkIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(linkIcon, 'link');
+		linkIcon.setAttribute('aria-label', task.filePath);
+		linkIcon.setAttribute('title', task.filePath);
+		linkIcon.onclick = (e) => {
+			e.stopPropagation();
+			this.openFileAtTask(task, true);
+		};
+
+		// Edit icon
+		const editIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(editIcon, 'pencil');
+		editIcon.setAttribute('aria-label', 'Edit task');
+		editIcon.setAttribute('title', 'Edit task');
+		editIcon.onclick = async (e) => {
+			e.stopPropagation();
+			await this.openTaskEditModal(task);
+		};
+
+		// Assignment icon
+		const assignIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(assignIcon, 'users');
+		assignIcon.setAttribute('aria-label', 'Assign task roles');
+		assignIcon.setAttribute('title', 'Assign task roles');
+		assignIcon.onclick = async (e) => {
+			e.stopPropagation();
+			await this.openAssignmentModalForTask(task);
 		};
 
 		// Task content
@@ -564,45 +611,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			}
 		}
 
-		// Action icons row
-		const actionsEl = contentEl.createDiv('task-assignment-card-actions');
 
-		// Priority icon
-		const priorityIcon = actionsEl.createSpan('task-card-action-icon');
-		setIcon(priorityIcon, this.getPriorityIconName(task.priority));
-		const priorityLabel = `Priority: ${task.priority.toUpperCase()}`;
-		priorityIcon.setAttribute('aria-label', priorityLabel);
-		priorityIcon.setAttribute('title', priorityLabel);
-
-		// Link icon
-		const linkIcon = actionsEl.createSpan('task-card-action-icon clickable');
-		setIcon(linkIcon, 'link');
-		linkIcon.setAttribute('aria-label', task.filePath);
-		linkIcon.setAttribute('title', task.filePath);
-		linkIcon.onclick = (e) => {
-			e.stopPropagation();
-			this.openFileAtTask(task, true);
-		};
-
-		// Edit icon
-		const editIcon = actionsEl.createSpan('task-card-action-icon clickable');
-		setIcon(editIcon, 'pencil');
-		editIcon.setAttribute('aria-label', 'Edit task');
-		editIcon.setAttribute('title', 'Edit task');
-		editIcon.onclick = async (e) => {
-			e.stopPropagation();
-			await this.openTaskEditModal(task);
-		};
-
-		// Assignment icon
-		const assignIcon = actionsEl.createSpan('task-card-action-icon clickable');
-		setIcon(assignIcon, 'users');
-		assignIcon.setAttribute('aria-label', 'Assign task roles');
-		assignIcon.setAttribute('title', 'Assign task roles');
-		assignIcon.onclick = async (e) => {
-			e.stopPropagation();
-			await this.openAssignmentModalForTask(task);
-		};
 
 		// Click handler to show side panel
 		cardEl.onclick = (e) => {
@@ -781,7 +790,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			case TaskPriority.LOW:
 				return 'arrow-down';
 			default:
-				return 'minus';
+				return 'circle';
 		}
 	}
 
