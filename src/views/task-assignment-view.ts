@@ -540,54 +540,54 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			priorityEl.setText(task.priority.toUpperCase());
 		}
 
-                // Tags
-                if (task.tags.length > 0) {
-                        const tagsEl = metadataEl.createDiv('task-assignment-card-tags');
-                        for (const tag of task.tags) {
-                                const tagEl = tagsEl.createSpan('task-assignment-card-tag');
-                                tagEl.setText(`#${tag}`);
-                        }
-                }
+		// Tags
+		if (task.tags.length > 0) {
+			const tagsEl = metadataEl.createDiv('task-assignment-card-tags');
+			for (const tag of task.tags) {
+				const tagEl = tagsEl.createSpan('task-assignment-card-tag');
+				tagEl.setText(`#${tag}`);
+			}
+		}
 
-                // Action icons row
-                const actionsEl = contentEl.createDiv('task-assignment-card-actions');
+		// Action icons row
+		const actionsEl = contentEl.createDiv('task-assignment-card-actions');
 
-                // Priority icon
-                const priorityIcon = actionsEl.createSpan('task-card-action-icon');
-                setIcon(priorityIcon, this.getPriorityIconName(task.priority));
-                const priorityLabel = `Priority: ${task.priority.toUpperCase()}`;
-                priorityIcon.setAttribute('aria-label', priorityLabel);
-                priorityIcon.setAttribute('title', priorityLabel);
+		// Priority icon
+		const priorityIcon = actionsEl.createSpan('task-card-action-icon');
+		setIcon(priorityIcon, this.getPriorityIconName(task.priority));
+		const priorityLabel = `Priority: ${task.priority.toUpperCase()}`;
+		priorityIcon.setAttribute('aria-label', priorityLabel);
+		priorityIcon.setAttribute('title', priorityLabel);
 
-                // Link icon
-                const linkIcon = actionsEl.createSpan('task-card-action-icon clickable');
-                setIcon(linkIcon, 'link');
-                linkIcon.setAttribute('aria-label', task.filePath);
-                linkIcon.setAttribute('title', task.filePath);
-                linkIcon.onclick = (e) => {
-                        e.stopPropagation();
-                        this.openFileAtTask(task, true);
-                };
+		// Link icon
+		const linkIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(linkIcon, 'link');
+		linkIcon.setAttribute('aria-label', task.filePath);
+		linkIcon.setAttribute('title', task.filePath);
+		linkIcon.onclick = (e) => {
+			e.stopPropagation();
+			this.openFileAtTask(task, true);
+		};
 
-                // Edit icon
-                const editIcon = actionsEl.createSpan('task-card-action-icon clickable');
-                setIcon(editIcon, 'pencil');
-                editIcon.setAttribute('aria-label', 'Edit task');
-                editIcon.setAttribute('title', 'Edit task');
-                editIcon.onclick = async (e) => {
-                        e.stopPropagation();
-                        await this.openTaskEditModal(task);
-                };
+		// Edit icon
+		const editIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(editIcon, 'pencil');
+		editIcon.setAttribute('aria-label', 'Edit task');
+		editIcon.setAttribute('title', 'Edit task');
+		editIcon.onclick = async (e) => {
+			e.stopPropagation();
+			await this.openTaskEditModal(task);
+		};
 
-                // Assignment icon
-                const assignIcon = actionsEl.createSpan('task-card-action-icon clickable');
-                setIcon(assignIcon, 'users');
-                assignIcon.setAttribute('aria-label', 'Assign task roles');
-                assignIcon.setAttribute('title', 'Assign task roles');
-                assignIcon.onclick = async (e) => {
-                        e.stopPropagation();
-                        await this.openAssignmentModalForTask(task);
-                };
+		// Assignment icon
+		const assignIcon = actionsEl.createSpan('task-card-action-icon clickable');
+		setIcon(assignIcon, 'users');
+		assignIcon.setAttribute('aria-label', 'Assign task roles');
+		assignIcon.setAttribute('title', 'Assign task roles');
+		assignIcon.onclick = async (e) => {
+			e.stopPropagation();
+			await this.openAssignmentModalForTask(task);
+		};
 
 		// Click handler to show side panel
 		cardEl.onclick = (e) => {
