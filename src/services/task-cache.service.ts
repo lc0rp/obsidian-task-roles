@@ -258,8 +258,9 @@ export class TaskCacheService {
 		let description = content;
 		
 		// Remove role assignments
+                const allIcons = this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('');
 		for (const role of this.visibleRoles) {
-			const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('')}]*`, 'gu');
+			const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'gu');
 			description = description.replace(regex, '');
 		}
 		

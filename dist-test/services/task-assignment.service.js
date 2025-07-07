@@ -22,8 +22,8 @@ export class TaskAssignmentService {
     }
     parseTaskAssignments(taskText, visibleRoles) {
         const assignments = [];
+        const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
         for (const role of visibleRoles) {
-            const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
             const regex = new RegExp(`${this.escapeRegex(role.icon)}\\s+([^${allIcons}]+?)(?=\\s*[${allIcons}]|$)`, 'g');
             const match = regex.exec(taskText);
             if (match) {
