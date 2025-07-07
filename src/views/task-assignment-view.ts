@@ -1,6 +1,6 @@
-import { WorkspaceLeaf, setIcon, MarkdownView, TFile, Notice } from 'obsidian';
+import { WorkspaceLeaf, setIcon, MarkdownRenderer, MarkdownView, TFile, Notice } from 'obsidian';
 import { TaskAssignmentViewBase } from './task-assignment-view-base';
-import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType, ViewFilters } from '../types';
+import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType, ViewFilters, TASK_DATE_ICONS } from '../types';
 import { TaskCacheService } from '../services/task-cache.service';
 import { ViewConfigurationService } from '../services/view-configuration.service';
 import { SaveViewModal } from '../modals/save-view-modal';
@@ -520,18 +520,33 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		
 		// Task description
 		const descriptionEl = contentEl.createDiv('task-assignment-card-description');
-		descriptionEl.setText(task.description);
+		MarkdownRenderer.renderMarkdown(
+				task.description,
+				descriptionEl,
+				task.filePath,
+				this
+		);
 		
 		// Task metadata
 		const metadataEl = contentEl.createDiv('task-assignment-card-metadata');
 		
-		// Due date
+		// Dates
 		if (task.dates.due) {
-			const dueDateEl = metadataEl.createSpan('task-assignment-card-due-date');
-			dueDateEl.setText(this.formatDate(task.dates.due));
-			if (this.isOverdue(task.dates.due)) {
-				dueDateEl.addClass('overdue');
-			}
+				const dueDateEl = metadataEl.createSpan('task-assignment-card-due-date');
+				dueDateEl.setText(`${TASK_DATE_ICONS.due} ${this.formatDate(task.dates.due)}`);
+				if (this.isOverdue(task.dates.due)) {
+						dueDateEl.addClass('overdue');
+				}
+		}
+
+		if (task.dates.scheduled) {
+				const scheduledEl = metadataEl.createSpan('task-assignment-card-scheduled-date');
+				scheduledEl.setText(`${TASK_DATE_ICONS.scheduled} ${this.formatDate(task.dates.scheduled)}`);
+		}
+
+		if (task.dates.completed) {
+				const completedEl = metadataEl.createSpan('task-assignment-card-completed-date');
+				completedEl.setText(`${TASK_DATE_ICONS.completed} ${this.formatDate(task.dates.completed)}`);
 		}
 
 		// Priority indicator
@@ -627,9 +642,15 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		const contentEl = this.sidePanel.createDiv('task-assignment-side-panel-content');
 		
 		// Task description
-		const descriptionEl = contentEl.createDiv('task-detail-section');
-		descriptionEl.createEl('h3', { text: 'Description' });
-		descriptionEl.createDiv('task-detail-value').setText(this.selectedTask.description);
+        const descriptionEl = contentEl.createDiv('task-detail-section');
+        descriptionEl.createEl('h3', { text: 'Description' });
+        const descriptionValue = descriptionEl.createDiv('task-detail-value');
+        MarkdownRenderer.renderMarkdown(
+			this.selectedTask.description,
+			descriptionValue,
+			this.selectedTask.filePath,
+			this
+		);
 
 		// File location
 		const locationEl = contentEl.createDiv('task-detail-section');
@@ -722,11 +743,11 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		}
 	}
 
-        private showAssigneeSelector(updateCallback?: (() => void) | null): void {
-                import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
-                        new AssigneeSelectorModal(this.app, this.plugin, (selectedAssignee: string) => {
-                                // Determine if it's a person or company based on the symbol
-                                const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
+	private showAssigneeSelector(updateCallback?: (() => void) | null): void {
+		import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
+			new AssigneeSelectorModal(this.app, this.plugin, (selectedAssignee: string) => {
+				// Determine if it's a person or company based on the symbol
+				const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
 				const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);
 				
 				if (isPerson) {
@@ -747,54 +768,54 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				if (updateCallback) {
 					updateCallback();
 				}
-                        }, { mode: 'readonly', keepOpen: true }).open();
-                });
-        }
+			}, { mode: 'readonly', keepOpen: true }).open();
+		});
+	}
 
-        private getPriorityIconName(priority: TaskPriority): string {
-                switch (priority) {
-                        case TaskPriority.URGENT:
-                                return 'alert-octagon';
-                        case TaskPriority.HIGH:
-                                return 'arrow-up';
-                        case TaskPriority.LOW:
-                                return 'arrow-down';
-                        default:
-                                return 'minus';
-                }
-        }
+	private getPriorityIconName(priority: TaskPriority): string {
+		switch (priority) {
+			case TaskPriority.URGENT:
+				return 'alert-octagon';
+			case TaskPriority.HIGH:
+				return 'arrow-up';
+			case TaskPriority.LOW:
+				return 'arrow-down';
+			default:
+				return 'minus';
+		}
+	}
 
-        private async openFileAtTask(task: TaskData, highlight = false): Promise<void> {
-                const file = this.app.vault.getAbstractFileByPath(task.filePath);
-                if (!(file instanceof TFile)) return;
+	private async openFileAtTask(task: TaskData, highlight = false): Promise<void> {
+		const file = this.app.vault.getAbstractFileByPath(task.filePath);
+		if (!(file instanceof TFile)) return;
 
-                await this.app.workspace.getLeaf(false).openFile(file);
-                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (!view) return;
+		await this.app.workspace.getLeaf(false).openFile(file);
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view) return;
 
-                const editor = view.editor;
-                editor.setCursor({ line: task.lineNumber, ch: 0 });
-                if (highlight) {
-                        editor.setSelection({ line: task.lineNumber, ch: 0 }, { line: task.lineNumber, ch: editor.getLine(task.lineNumber).length });
-                        setTimeout(() => editor.setCursor({ line: task.lineNumber, ch: 0 }), 1000);
-                }
-        }
+		const editor = view.editor;
+		editor.setCursor({ line: task.lineNumber, ch: 0 });
+		if (highlight) {
+			editor.setSelection({ line: task.lineNumber, ch: 0 }, { line: task.lineNumber, ch: editor.getLine(task.lineNumber).length });
+			setTimeout(() => editor.setCursor({ line: task.lineNumber, ch: 0 }), 1000);
+		}
+	}
 
-        private async openAssignmentModalForTask(task: TaskData): Promise<void> {
-                await this.openFileAtTask(task);
-                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (view) {
-                        this.plugin.openAssignmentModal(view.editor);
-                }
-        }
+	private async openAssignmentModalForTask(task: TaskData): Promise<void> {
+		await this.openFileAtTask(task);
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view) {
+			this.plugin.openAssignmentModal(view.editor);
+		}
+	}
 
-        private async openTaskEditModal(task: TaskData): Promise<void> {
-                await this.openFileAtTask(task);
-                const tasksPlugin = (this.app as any).plugins?.plugins?.["obsidian-tasks-plugin"];
-                if (tasksPlugin && typeof tasksPlugin.openEditModal === 'function') {
-                        tasksPlugin.openEditModal();
-                } else {
-                        new Notice('Tasks plugin not available');
-                }
-        }
+	private async openTaskEditModal(task: TaskData): Promise<void> {
+		await this.openFileAtTask(task);
+		const tasksPlugin = (this.app as any).plugins?.plugins?.["obsidian-tasks-plugin"];
+		if (tasksPlugin && typeof tasksPlugin.openEditModal === 'function') {
+			tasksPlugin.openEditModal();
+		} else {
+			new Notice('Tasks plugin not available');
+		}
+	}
 } 

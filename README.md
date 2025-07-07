@@ -32,7 +32,8 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 
 ### 📋 Task Center
 
-The Task Center provides a comprehensive task management interface with advanced filtering, multiple view layouts, and real-time task tracking.
+The Task Center provides a comprehensive task management interface with advanced filtering, multiple view layouts, and
+real-time task tracking.
 
 #### **Opening the Task Center**
 
@@ -181,7 +182,8 @@ The plugin recognizes and parses various task metadata formats:
 
 ## Editing Assignments
 
-Select "Assign task roles to People/Companies" on a task that already has roles to edit existing assignments. Only known, unhidden roles will be parsed and displayed.
+Select "Assign task roles to People/Companies" on a task that already has roles to edit existing assignments. Only known,
+unhidden roles will be parsed and displayed.
 
 ## Settings
 
@@ -227,7 +229,7 @@ This plugin is built with TypeScript and follows Obsidian's plugin development g
 
 ### Project Structure
 
-```
+```shell
 
 obsidian-task-assignment/
 ├── docs/                    # Documentation files
