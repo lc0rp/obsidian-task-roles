@@ -519,13 +519,13 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		const contentEl = cardEl.createDiv('task-assignment-card-content');
 		
 		// Task description
-                const descriptionEl = contentEl.createDiv('task-assignment-card-description');
-                MarkdownRenderer.renderMarkdown(
-                        task.description,
-                        descriptionEl,
-                        task.filePath,
-                        this
-                );
+		const descriptionEl = contentEl.createDiv('task-assignment-card-description');
+		MarkdownRenderer.renderMarkdown(
+				task.description,
+				descriptionEl,
+				task.filePath,
+				this
+		);
 		
 		// Task metadata
 		const metadataEl = contentEl.createDiv('task-assignment-card-metadata');
@@ -592,15 +592,15 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		const contentEl = this.sidePanel.createDiv('task-assignment-side-panel-content');
 		
 		// Task description
-                const descriptionEl = contentEl.createDiv('task-detail-section');
-                descriptionEl.createEl('h3', { text: 'Description' });
-                const descriptionValue = descriptionEl.createDiv('task-detail-value');
-                MarkdownRenderer.renderMarkdown(
-                        this.selectedTask.description,
-                        descriptionValue,
-                        this.selectedTask.filePath,
-                        this
-                );
+        const descriptionEl = contentEl.createDiv('task-detail-section');
+        descriptionEl.createEl('h3', { text: 'Description' });
+        const descriptionValue = descriptionEl.createDiv('task-detail-value');
+        MarkdownRenderer.renderMarkdown(
+			this.selectedTask.description,
+			descriptionValue,
+			this.selectedTask.filePath,
+			this
+		);
 
 		// File location
 		const locationEl = contentEl.createDiv('task-detail-section');
