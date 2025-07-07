@@ -13,7 +13,9 @@
 		"lint:md": "markdownlint \"**/*.md\" --ignore node_modules",
 		"lint:md:fix": "markdownlint \"**/*.md\" --ignore node_modules --fix",
 		"lint:fix": "npm run lint:ts:fix && npm run lint:md:fix",
-		"preversion": "npm run lint"
+		"preversion": "npm run lint",
+    "pretest": "tsc src/services/task-assignment.service.ts src/types/index.ts --skipLibCheck --esModuleInterop --module ES2020 --target ES2020 --moduleResolution node --typeRoots tests --outDir dist-test",
+    "test": "NODE_PATH=tests node --test tests/task-assignment.service.test.js"
 	},
 	"keywords": [],
 	"author": "lc0rp",
@@ -29,8 +31,5 @@
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
-	},
-	"dependencies": {
-		"lint": "^0.8.19"
 	}
 }
