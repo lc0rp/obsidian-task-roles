@@ -229,7 +229,7 @@ This plugin is built with TypeScript and follows Obsidian's plugin development g
 
 ### Project Structure
 
-```
+```shell
 
 obsidian-task-assignment/
 ├── docs/                    # Documentation files
