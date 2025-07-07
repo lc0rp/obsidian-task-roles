@@ -591,18 +591,18 @@
 
 /* Scrollbar styling */
 .task-assignment-column-content::-webkit-scrollbar {
-        width: 6px;
+	width: 6px;
 }
 
 .task-assignment-column-content::-webkit-scrollbar-track {
-        background: var(--background-secondary);
+	background: var(--background-secondary);
 }
 
 .task-assignment-column-content::-webkit-scrollbar-thumb {
-        background: var(--background-modifier-border);
-        border-radius: 3px;
+	background: var(--background-modifier-border);
+	border-radius: 3px;
 }
 
 .task-assignment-column-content::-webkit-scrollbar-thumb:hover {
-        background: var(--text-muted);
+	background: var(--text-muted);
 }
