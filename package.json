@@ -5,8 +5,15 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"build": "npm run lint:ts && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"lint": "npm run lint:ts && npm run lint:md",
+		"lint:ts": "eslint src --ext .ts",
+		"lint:ts:fix": "eslint src --ext .ts --fix",
+		"lint:md": "markdownlint \"**/*.md\" --ignore node_modules",
+		"lint:md:fix": "markdownlint \"**/*.md\" --ignore node_modules --fix",
+		"lint:fix": "npm run lint:ts:fix && npm run lint:md:fix",
+		"preversion": "npm run lint"
 	},
 	"keywords": [],
 	"author": "lc0rp",
@@ -17,6 +24,8 @@
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
+		"eslint": "^8.57.1",
+		"markdownlint-cli": "^0.41.0",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"

@@ -1,5 +1,4 @@
 import { 
-	App, 
 	Editor, 
 	MarkdownView, 
 	Plugin,

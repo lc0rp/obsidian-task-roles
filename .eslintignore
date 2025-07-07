@@ -1,3 +1,8 @@
 node_modules/
-
+*.js
+*.mjs
+dist/
+build/
 main.js
+version-bump.mjs
+esbuild.config.mjs

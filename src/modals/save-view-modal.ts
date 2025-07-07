@@ -32,11 +32,10 @@ export class SaveViewModal extends Modal {
 		contentEl.createEl('h2', { text: 'Save View Configuration' });
 
 		let viewName = '';
-		let overwrite = false;
 		const existingViews = this.viewConfigService.getAllViewConfigurations();
 
 		// View name input with datalist for autocomplete
-		const viewNameSetting = new Setting(contentEl)
+		new Setting(contentEl)
 			.setName('Configuration Name')
 			.setDesc('Enter a name for this view configuration. Select from existing names to overwrite.')
 			.addText(text => {

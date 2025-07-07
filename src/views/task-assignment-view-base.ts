@@ -170,8 +170,8 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 		// Check if task content contains explicit priority indicators
 		const content = task.content.toLowerCase();
 		return content.includes('🔴') || content.includes('🟡') || content.includes('🟢') ||
-			   content.includes('[urgent]') || content.includes('[high]') || content.includes('[low]') ||
-			   content.includes('!!!') || content.includes('!!');
+			content.includes('[urgent]') || content.includes('[high]') || content.includes('[low]') ||
+			content.includes('!!!') || content.includes('!!');
 	}
 
 	// Sorting methods
@@ -192,11 +192,12 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 				case 'modified':
 					comparison = a.modifiedDate.getTime() - b.modifiedDate.getTime();
 					break;
-				case 'due':
+				case 'due': {
 					const aDue = a.dates.due?.getTime() || Infinity;
 					const bDue = b.dates.due?.getTime() || Infinity;
 					comparison = aDue - bDue;
 					break;
+				}
 				case 'name':
 					comparison = a.description.localeCompare(b.description);
 					break;

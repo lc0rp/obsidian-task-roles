@@ -10,7 +10,7 @@ export class ViewConfigurationService {
 		layout: ViewLayout,
 		filters: ViewFilters,
 		sortBy: SortOption,
-		overwrite: boolean = false
+		overwrite = false
 	): Promise<{ success: boolean; error?: string }> {
 		// Check if name already exists
 		const existingIndex = this.plugin.settings.savedViews.findIndex(view => view.name === name);

@@ -259,7 +259,7 @@ export class TaskCacheService {
 		
 		// Remove role assignments
 		for (const role of this.visibleRoles) {
-			const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('')}]*`, 'g');
+			const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('')}]*`, 'gu');
 			description = description.replace(regex, '');
 		}
 		
@@ -268,7 +268,7 @@ export class TaskCacheService {
 			.replace(/\s*(due|scheduled|completed):\s*\d{4}-\d{2}-\d{2}/gi, '')
 			.replace(/\s*📅\s*\d{4}-\d{2}-\d{2}/gi, '')
 			.replace(/\s*\[due::\s*\d{4}-\d{2}-\d{2}\]/gi, '')
-			.replace(/\s*[🔴🟡🟢]/g, '')
+			.replace(/\s*[🔴🟡🟢]/gu, '')
 			.replace(/\s*\[(urgent|high|low|in-progress|cancelled)\]/gi, '')
 			.replace(/\s*!{1,3}/g, '')
 			.replace(/\s*#[\w-]+/g, '')
