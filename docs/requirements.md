@@ -1,14 +1,20 @@
 # Obsidian Task Assignment
 
-Obsidian Task Assignment allows you to associate tasks with contacts or companies. It pairs with the Obsidian Tasks plugin, although it is not required.
+Obsidian Task Assignment allows you to associate tasks with contacts or companies. It pairs with the Obsidian Tasks plugin,
+although it is not required.
 
 By default, contacts are created with @<contact_name> and groups or companies are created with the +<company_name>
 
 These are linked to the directory from which the contact originates, using the Mention plugin.
 
-When writing a task, you can trigger the Assign modal, which contains the configured roles and a "+" next to each role, allowing you to add multiple contacts or companies to each role. Clicking the + displays an auto-complete field that you can type in. It has placeholder text stating, "Type @contact or +company to search or create."
+When writing a task, you can trigger the Assign modal, which contains the configured roles and a "+" next to each role,
+allowing you to add multiple contacts or companies to each role. Clicking the + displays an auto-complete field that you
+can type in. It has placeholder text stating, "Type @contact or +company to search or create."
 
-When you type @, it searches the contact directory; when you type +, it searches the company directory. In both cases, suggestions are displayed below the field and can be selected by clicking on them, using the arrow keys to scroll up or down; alternatively, pressing "Enter" will select the first one. The selected contact or company is displayed as a link to that file, using the filename as an alias. E.g. [[Luke|@Luke]]
+When you type @, it searches the contact directory; when you type +, it searches the company directory. In both cases,
+suggestions are displayed below the field and can be selected by clicking on them, using the arrow keys to scroll up or
+down; alternatively, pressing "Enter" will select the first one. The selected contact or company is displayed as a link
+to that file, using the filename as an alias. E.g. [[Luke|@Luke]]
 
 The + sign moves to the end so another selection can be made.
 
@@ -16,19 +22,23 @@ Entries that do not exist still display links, which, when clicked, will cause O
 
 @me or @Me is a special contact that refers to me, and is case-insensitive. The rest of the entries are case sensitive.
 
-Under all the roles, there is an empty row that allows you to add a new role name and icon. Then the role can be assigned like the others.
+Under all the roles, there is an empty row that allows you to add a new role name and icon. Then the role can be assigned
+like the others.
 
 ## How are roles used?
 
-Clicking "Done" in the Assign modal adds the selected contacts or companies to the task by appending them like this: icon space comma-separated contact links. The icon is the role icon. Order: DACI. Empty roles aren't shown.
+Clicking "Done" in the Assign modal adds the selected contacts or companies to the task by appending them like this: icon
+space comma-separated contact links. The icon is the role icon. Order: DACI. Empty roles aren't shown.
 
 ## Editing assignments
 
-Selecting "Assign task roles" on a task that already has roles will display the current data and enable you to edit it. Note that only known, unhidden roles will be parsed.
+Selecting "Assign task roles" on a task that already has roles will display the current data and enable you to edit it.
+Note that only known, unhidden roles will be parsed.
 
 ## Task Center Implementation
 
-The Task Center is a comprehensive task management interface that provides advanced filtering, multiple view layouts, and real-time task tracking.
+The Task Center is a comprehensive task management interface that provides advanced filtering, multiple view layouts,
+and real-time task tracking.
 
 ### Features Implemented
 
@@ -58,7 +68,7 @@ The Task Center is a comprehensive task management interface that provides advan
 - **Content Filters**: Status (multi-select), Priority (including none-set), Tags, Text search
 - **Date Filters**: Date ranges with type selection (Created, Due, Completed, Scheduled)
 - **Combination Filters**: Support for complex filtering combinations
-- **Filter Workflow Control**: 
+- **Filter Workflow Control**:
   - **Auto Apply Mode**: Immediate application of filter changes (default behavior)
   - **Manual Apply Mode**: Batch filter changes with explicit apply/cancel actions
   - **State Management**: Ability to revert filter changes to original state
@@ -118,8 +128,10 @@ The Task Center is a comprehensive task management interface that provides advan
 - select + directory - only updates future data
 - a button to create the @me contact if it doesn't exist
 - manage roles
-  - You cannot edit or delete the default roles, but you can hide them, which prevents them from being displayed in future Assign dialogs.
-  - You can add, edit, and delete custom roles, but this version of the plugin won't update any historical records that utilize custom you edit later
+  - You cannot edit or delete the default roles, but you can hide them, which prevents them from being displayed in future
+    Assign dialogs.
+  - You can add, edit, and delete custom roles, but this version of the plugin won't update any historical records that
+  utilize custom you edit later
 
 ## Default roles: based on DACI concept
 
@@ -132,7 +144,8 @@ The Task Center is a comprehensive task management interface that provides advan
 
 - "Assign task roles" command to pull up dialog (only if the cursor is on a checkbox item, aka task)
 - A keyboard shortcut to trigger the command
-- When typing on a task, you can type the relevant icon, a space <@ or +>, which will trigger an autosuggest search of the contact or company in the preconfigured directories.
+- When typing on a task, you can type the relevant icon, a space <@ or +>, which will trigger an autosuggest search of
+  the contact or company in the preconfigured directories.
 - Inline task icons that appear automatically at the end of task lines
 
 ## Architecture
