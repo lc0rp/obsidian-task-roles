@@ -6,6 +6,7 @@ export interface TaskAssignmentSettings {
 	roles: Role[];
 	hiddenDefaultRoles: string[];
 	savedViews: ViewConfiguration[];
+	autoApplyFilters: boolean;
 }
 
 export interface Role {
@@ -132,5 +133,6 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	companyDirectory: 'Companies',
 	roles: DEFAULT_ROLES,
 	hiddenDefaultRoles: [],
-	savedViews: []
+	savedViews: [],
+	autoApplyFilters: true
 }; 

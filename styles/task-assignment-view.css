@@ -108,7 +108,6 @@
 	padding: 6px 24px 6px 8px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
-	background-color: var(--background-secondary);
 	color: var(--text-normal);
 	cursor: pointer;
 	appearance: none;
@@ -294,9 +293,37 @@
 	cursor: pointer;
 }
 
-.task-assignment-clear-filters-btn {
+.task-assignment-filter-actions {
 	grid-column: 1 / -1;
-	justify-self: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 16px;
+	margin-top: 8px;
+}
+
+.task-assignment-auto-apply-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.task-assignment-auto-apply-checkbox {
+	margin: 0;
+	cursor: pointer;
+}
+
+.task-assignment-auto-apply-label {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-normal);
+	cursor: pointer;
+	user-select: none;
+}
+
+.task-assignment-apply-filters-btn,
+.task-assignment-cancel-filters-btn,
+.task-assignment-clear-filters-btn {
 	padding: 10px 20px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
@@ -304,11 +331,34 @@
 	color: var(--text-normal);
 	cursor: pointer;
 	font-weight: 500;
-	margin-top: 8px;
 }
 
+.task-assignment-apply-filters-btn:hover,
+.task-assignment-cancel-filters-btn:hover,
 .task-assignment-clear-filters-btn:hover {
 	background-color: var(--background-modifier-hover);
+}
+
+.task-assignment-apply-filters-btn:disabled,
+.task-assignment-cancel-filters-btn:disabled {
+	background-color: var(--background-modifier-border);
+	color: var(--text-muted);
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.task-assignment-apply-filters-btn:disabled:hover,
+.task-assignment-cancel-filters-btn:disabled:hover {
+	background-color: var(--background-modifier-border);
+}
+
+.task-assignment-apply-filters-btn {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.task-assignment-apply-filters-btn:hover:not(:disabled) {
+	background-color: var(--interactive-accent-hover);
 }
 
 /* Content Styles */

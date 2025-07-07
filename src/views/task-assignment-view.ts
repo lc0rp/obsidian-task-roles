@@ -1,6 +1,6 @@
 import { WorkspaceLeaf, setIcon } from 'obsidian';
 import { TaskAssignmentViewBase } from './task-assignment-view-base';
-import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType } from '../types';
+import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType, ViewFilters } from '../types';
 import { TaskCacheService } from '../services/task-cache.service';
 import { ViewConfigurationService } from '../services/view-configuration.service';
 import { SaveViewModal } from '../modals/save-view-modal';
@@ -14,6 +14,7 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 	private selectedTask: TaskData | null = null;
 	private viewConfigService: ViewConfigurationService;
 	private currentViewName: string | null = null;
+	private originalFilters: ViewFilters = {};
 
 	constructor(leaf: WorkspaceLeaf, plugin: TaskAssignmentPlugin, taskCacheService: TaskCacheService) {
 		super(leaf, plugin, taskCacheService);
@@ -137,6 +138,11 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			const isVisible = filtersContent.style.display !== 'none';
 			filtersContent.style.display = isVisible ? 'none' : 'block';
 			filterToggle.toggleClass('active', !isVisible);
+			
+			// Store original filters when opening the section
+			if (!isVisible) {
+				this.originalFilters = { ...this.currentFilters };
+			}
 			
 			// Update arrow direction
 			arrowIcon.empty();
@@ -360,13 +366,102 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		};
 		includeNotSetLabel.createSpan().setText('Include tasks without dates');
 
-		// Clear filters button
-		const clearFiltersBtn = filterGrid.createEl('button', { cls: 'task-assignment-clear-filters-btn' });
+		// Filter actions container
+		const filterActionsEl = filterGrid.createDiv('task-assignment-filter-actions');
+		
+		// Clear filters button (first in order)
+		const clearFiltersBtn = filterActionsEl.createEl('button', { cls: 'task-assignment-clear-filters-btn' });
 		clearFiltersBtn.setText('Clear Filters');
 		clearFiltersBtn.onclick = () => {
 			this.currentFilters = {};
 			this.render();
 		};
+		
+		// Cancel button (second in order)
+		const cancelFiltersBtn = filterActionsEl.createEl('button', { cls: 'task-assignment-cancel-filters-btn' });
+		cancelFiltersBtn.setText('Cancel');
+		cancelFiltersBtn.disabled = this.plugin.settings.autoApplyFilters;
+		cancelFiltersBtn.onclick = () => {
+			this.cancelFiltersAndClose();
+		};
+		
+		// Apply Filters button (third in order)
+		const applyFiltersBtn = filterActionsEl.createEl('button', { cls: 'task-assignment-apply-filters-btn' });
+		applyFiltersBtn.setText('Apply Filters');
+		applyFiltersBtn.disabled = this.plugin.settings.autoApplyFilters;
+		applyFiltersBtn.onclick = () => {
+			this.applyFiltersAndClose();
+		};
+		
+		// Auto Apply container (fourth/last in order)
+		const autoApplyContainer = filterActionsEl.createDiv('task-assignment-auto-apply-container');
+		const autoApplyCheckbox = autoApplyContainer.createEl('input', { 
+			type: 'checkbox', 
+			cls: 'task-assignment-auto-apply-checkbox' 
+		});
+		autoApplyCheckbox.checked = this.plugin.settings.autoApplyFilters;
+		
+		const autoApplyLabel = autoApplyContainer.createEl('label', { cls: 'task-assignment-auto-apply-label' });
+		autoApplyLabel.setText('Auto Apply');
+		autoApplyLabel.onclick = () => {
+			autoApplyCheckbox.click();
+		};
+		
+		autoApplyCheckbox.onchange = async () => {
+			this.plugin.settings.autoApplyFilters = autoApplyCheckbox.checked;
+			await this.plugin.saveSettings();
+			applyFiltersBtn.disabled = autoApplyCheckbox.checked;
+			cancelFiltersBtn.disabled = autoApplyCheckbox.checked;
+			
+			// If Auto Apply is enabled, apply filters immediately
+			if (autoApplyCheckbox.checked) {
+				this.applyFiltersAndClose();
+			}
+		};
+	}
+
+	// Override updateFilters to respect Auto Apply setting
+	protected updateFilters(newFilters: Partial<ViewFilters>): void {
+		this.currentFilters = { ...this.currentFilters, ...newFilters };
+		
+		// Only auto-render if Auto Apply is enabled
+		if (this.plugin.settings.autoApplyFilters) {
+			this.applyFiltersAndClose();
+		}
+	}
+
+	private applyFiltersAndClose(): void {
+		// Force re-render with current filters
+		this.render();
+		
+		// Close the filters section
+		this.closeFiltersSection();
+	}
+
+	private cancelFiltersAndClose(): void {
+		// Revert to original filters
+		this.currentFilters = { ...this.originalFilters };
+		
+		// Re-render with original filters
+		this.render();
+		
+		// Close the filters section
+		this.closeFiltersSection();
+	}
+
+	private closeFiltersSection(): void {
+		const filterToggle = this.filtersEl.querySelector('.task-assignment-filter-toggle') as HTMLElement;
+		const filtersContent = this.filtersEl.querySelector('.task-assignment-filters-content') as HTMLElement;
+		const arrowIcon = this.filtersEl.querySelector('.task-assignment-filter-arrow') as HTMLElement;
+		
+		if (filterToggle && filtersContent && arrowIcon) {
+			filtersContent.style.display = 'none';
+			filterToggle.classList.remove('active');
+			
+			// Update arrow direction
+			arrowIcon.empty();
+			setIcon(arrowIcon, 'chevron-down');
+		}
 	}
 
 	private renderContent(): void {
