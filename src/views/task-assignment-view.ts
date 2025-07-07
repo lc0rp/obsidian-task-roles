@@ -525,24 +525,24 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		// Task metadata
 		const metadataEl = contentEl.createDiv('task-assignment-card-metadata');
 		
-                // Dates
-                if (task.dates.due) {
-                        const dueDateEl = metadataEl.createSpan('task-assignment-card-due-date');
-                        dueDateEl.setText(`${TASK_DATE_ICONS.due} ${this.formatDate(task.dates.due)}`);
-                        if (this.isOverdue(task.dates.due)) {
-                                dueDateEl.addClass('overdue');
-                        }
-                }
+		// Dates
+		if (task.dates.due) {
+				const dueDateEl = metadataEl.createSpan('task-assignment-card-due-date');
+				dueDateEl.setText(`${TASK_DATE_ICONS.due} ${this.formatDate(task.dates.due)}`);
+				if (this.isOverdue(task.dates.due)) {
+						dueDateEl.addClass('overdue');
+				}
+		}
 
-                if (task.dates.scheduled) {
-                        const scheduledEl = metadataEl.createSpan('task-assignment-card-scheduled-date');
-                        scheduledEl.setText(`${TASK_DATE_ICONS.scheduled} ${this.formatDate(task.dates.scheduled)}`);
-                }
+		if (task.dates.scheduled) {
+				const scheduledEl = metadataEl.createSpan('task-assignment-card-scheduled-date');
+				scheduledEl.setText(`${TASK_DATE_ICONS.scheduled} ${this.formatDate(task.dates.scheduled)}`);
+		}
 
-                if (task.dates.completed) {
-                        const completedEl = metadataEl.createSpan('task-assignment-card-completed-date');
-                        completedEl.setText(`${TASK_DATE_ICONS.completed} ${this.formatDate(task.dates.completed)}`);
-                }
+		if (task.dates.completed) {
+				const completedEl = metadataEl.createSpan('task-assignment-card-completed-date');
+				completedEl.setText(`${TASK_DATE_ICONS.completed} ${this.formatDate(task.dates.completed)}`);
+		}
 
 		// Priority indicator
 		if (task.priority !== TaskPriority.MEDIUM) {
