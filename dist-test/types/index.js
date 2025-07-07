@@ -26,6 +26,12 @@ export var DateType;
     DateType["COMPLETED"] = "completed";
     DateType["SCHEDULED"] = "scheduled";
 })(DateType || (DateType = {}));
+export const TASK_DATE_ICONS = {
+    due: '📅',
+    scheduled: '⏳',
+    completed: '✅',
+    created: '🗓️'
+};
 export const DEFAULT_ROLES = [
     { id: 'drivers', name: 'Drivers', icon: '🚗', isDefault: true, order: 1 },
     { id: 'approvers', name: 'Approvers', icon: '👍', isDefault: true, order: 2 },
@@ -40,5 +46,6 @@ export const DEFAULT_SETTINGS = {
     roles: DEFAULT_ROLES,
     hiddenDefaultRoles: [],
     savedViews: [],
-    autoApplyFilters: true
+    autoApplyFilters: true,
+    debug: false
 };

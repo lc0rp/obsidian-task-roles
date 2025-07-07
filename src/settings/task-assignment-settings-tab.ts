@@ -75,6 +75,17 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 					await this.plugin.taskAssignmentService.createMeContact();
 				}));
 
+		// Debug logging toggle
+		new Setting(containerEl)
+			.setName('Enable debug logging')
+			.setDesc('Log additional information to the console')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.debug)
+				.onChange(async (value) => {
+					this.plugin.settings.debug = value;
+					await this.plugin.saveSettings();
+				}));
+
 		// Role management
 		containerEl.createEl('h3', { text: 'Role management' });
 
@@ -92,7 +103,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 								this.plugin.settings.hiddenDefaultRoles.push(role.id);
 							}
 						} else {
-							this.plugin.settings.hiddenDefaultRoles = 
+							this.plugin.settings.hiddenDefaultRoles =
 								this.plugin.settings.hiddenDefaultRoles.filter(id => id !== role.id);
 						}
 						await this.plugin.saveSettings();
@@ -164,7 +175,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 
 						this.plugin.settings.roles.push(newRole);
 						await this.plugin.saveSettings();
-						
+
 						nameInput.value = '';
 						iconInput.value = '';
 						this.display();
