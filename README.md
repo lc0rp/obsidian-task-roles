@@ -30,19 +30,89 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 - Hide default roles you don't need
 - Reorder roles by priority
 
-### 📋 Task Assignment View
+### 📋 Task Center
 
-- **Kanban-Style Layout**: Organize tasks by status, role, person, company, or date
-- **Advanced Filtering**: Filter by entity, date range, content, status, priority, and tags
-- **Real-Time Task Cache**: Background task scanning with automatic updates
-- **Interactive Task Cards**: Clickable status toggles and detailed side panels
-- **Saved Views**: Save and recall custom filter and layout configurations
-- **Multiple View Layouts**:
-  - **Status View**: Organize by task completion status
-  - **Role View**: Group by assigned roles (with user/others separation)
-  - **Person/Contact View**: Organize by individual assignees
-  - **Company/Group View**: Group by organizational entities
-  - **Date View**: Organize by date categories (overdue, today, this week, etc.)
+The Task Center provides a comprehensive task management interface with advanced filtering, multiple view layouts, and real-time task tracking.
+
+#### **Opening the Task Center**
+
+1. **Command Palette**: Use "Open Task Center" command
+2. **Ribbon Icon**: Click the users icon in the left ribbon (if enabled)
+3. **Hotkey**: Configure a keyboard shortcut for quick access
+
+#### **View Layouts**
+
+- **Status View**: Organize by task completion status (To Do, In Progress, Done, Cancelled)
+- **Role View**: Group by assigned roles with DACI methodology
+- **Assignees View**: Organize by individual people and companies
+- **Date View**: Organize by date categories (Not Set, Past Due, Today, This Week, Next Week)
+
+#### **Advanced Filtering**
+
+The Task Center supports comprehensive filtering across multiple criteria:
+
+**Entity-Based Filters:**
+
+- **Roles**: Filter by specific roles or tasks with no role assignments
+- **People**: Filter by individual contacts
+- **Companies**: Filter by organizational entities
+- **Combination filters**: Filter by person+role or company+role combinations
+
+**Content-Based Filters:**
+
+- **Status**: Multi-select filter for task statuses (To Do, In Progress, Done, Cancelled)
+- **Priority**: Filter by task priority levels (Urgent, High, Medium, Low) or tasks with no explicit priority
+- **Tags**: Filter by task tags
+- **Text Search**: Full-text search across task descriptions, file paths, tags, and assignees
+
+**Date-Based Filters:**
+
+- **Date Range**: From-to date selection with "include not set" option
+- **Date Types**: Filter by Created, Due, Completed, or Scheduled dates
+
+#### **Interactive Task Cards**
+
+Task cards display:
+
+- Task description with clickable status checkbox
+- Due date with overdue highlighting
+- Priority indicators
+- Tag display
+- Click to open detailed side panel
+
+#### **Task Details Side Panel**
+
+Clicking a task card opens a detailed side panel showing:
+
+- Full task description
+- File location and line number
+- Current status and priority
+- All assigned roles and assignees
+- Complete date information (created, due, scheduled, completed, modified)
+- Tags
+
+#### **View Configuration Management**
+
+- **Save Configurations**: Save current filter and layout settings with custom names
+- **Load Configurations**: Quickly apply saved view configurations
+- **Configuration Autocomplete**: Type existing configuration names to overwrite
+- **Configuration Display**: Shows currently loaded configuration name in header
+
+#### **Real-Time Task Cache**
+
+The Task Center uses an intelligent background task cache that:
+
+- Automatically scans all markdown files for tasks
+- Updates in real-time when files are modified, created, or deleted
+- Parses comprehensive task metadata including:
+  - Assignments and roles
+  - Dates (due, scheduled, completed, created, modified)
+  - Priority levels (🔴 Urgent, 🟡 High, 🟢 Low, or text indicators)
+  - Status (including custom indicators like 🚧 for in-progress, ❌ for cancelled)
+  - Tags
+  - File metadata
+- Stores cache data in `.obsidian/task-assignment-cache.json`
+- Manual refresh available via refresh button or command
 
 ## Usage
 
@@ -60,38 +130,42 @@ When you assign people to a task, it gets formatted like this:
 
 Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]]`
 
+### Task Metadata Support
+
+The plugin recognizes and parses various task metadata formats:
+
+**Priority Indicators:**
+
+- 🔴 or `[urgent]` or `!!!` → Urgent priority
+- 🟡 or `[high]` or `!!` → High priority
+- 🟢 or `[low]` → Low priority
+- No indicator → Medium priority (default)
+
+**Status Indicators:**
+
+- `[x]` or `[X]` → Done
+- 🚧 or `[in-progress]` → In Progress
+- ❌ or `[cancelled]` → Cancelled
+- `[ ]` → To Do (default)
+
+**Date Formats:**
+
+- `due: 2024-01-15`
+- `scheduled: 2024-01-15`
+- `completed: 2024-01-15`
+- `📅 2024-01-15`
+- `[due:: 2024-01-15]`
+
+**Tags:**
+
+- Standard Obsidian tags: `#project #urgent`
+
 ## Ways to Assign
 
 1. **Click the person icon**: Appears automatically at the end of task lines
 2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
 3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
-
-## Using the Task Center
-
-### Opening the Task Center
-
-1. **Command Palette**: Use "Open Task Center" command
-2. **Ribbon Icon**: Click the users icon in the left ribbon (if enabled)
-3. **Hotkey**: Configure a keyboard shortcut for quick access
-
-### View Features
-
-- **Layout Switching**: Use the dropdown to switch between Status, Role, Person, Company, or Date views
-- **Filtering**: Click the "Filters" button to access advanced filtering options
-- **Task Interaction**: Click task cards to view details in the side panel
-- **Status Updates**: Toggle task completion directly from the cards
-- **Cache Refresh**: Use the refresh button to manually update the task cache
-- **Save View Config.**: Save your current filter and layout configuration for later use
-
-### Task Cache
-
-The Task Center uses a background task cache that:
-
-- Automatically scans all markdown files for tasks
-- Updates in real-time when files are modified
-- Parses task metadata including assignments, dates, priorities, and tags
-- Stores cache data in `.obsidian/task-assignment-cache.json`
 
 ## Editing Assignments
 
@@ -142,6 +216,7 @@ This plugin is built with TypeScript and follows Obsidian's plugin development g
 ### Project Structure
 
 ```
+
 obsidian-task-assignment/
 ├── docs/                    # Documentation files
 ├── src/                     # TypeScript source code
@@ -154,9 +229,9 @@ obsidian-task-assignment/
 │   ├── settings/           # Plugin settings and configuration
 │   ├── ui/                 # UI utilities (reserved for future use)
 │   ├── utils/              # General utilities (reserved for future use)
-│   └── views/              # Custom views (reserved for future use)
+│   └── views/              # Task Center view implementation
 ├── styles/                 # CSS stylesheets
-│   └── styles.css          # Plugin styles
+│   └── task-assignment-view.css # Task Center styles
 ├── tests/                  # Test files (future)
 ├── media/                  # Media assets (icons, images)
 ├── manifest.json           # Plugin manifest
@@ -169,12 +244,33 @@ obsidian-task-assignment/
 The plugin follows a modular architecture with clear separation of concerns:
 
 - **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
-- **Types** (`types/`) - TypeScript interfaces and constants
-- **Services** (`services/`) - Business logic and data processing
-- **Components** (`components/`) - Reusable UI widgets
-- **Editor** (`editor/`) - CodeMirror extensions and suggestions
-- **Modals** (`modals/`) - Dialog windows and user interactions
+- **Types** (`types/`) - TypeScript interfaces and constants for task data models
+- **Services** (`services/`) - Business logic including task caching, assignment processing, and view configuration
+- **Components** (`components/`) - Reusable UI widgets including the task assignment icon
+- **Editor** (`editor/`) - CodeMirror extensions and auto-suggestions
+- **Modals** (`modals/`) - Dialog windows for assignment, role editing, and view saving
+- **Views** (`views/`) - Task Center implementation with filtering and layout management
 - **Settings** (`settings/`) - Configuration and preferences
+
+### Key Components
+
+**Core Services:**
+
+- **TaskCacheService** - Real-time task scanning, parsing, and caching
+- **TaskAssignmentService** - Assignment parsing, formatting, and file operations
+- **ViewConfigurationService** - Saved view management
+
+**UI Components:**
+
+- **TaskAssignmentView** - Main Task Center interface
+- **TaskAssignmentWidget** - Inline assignment icon for tasks
+- **AssignmentModal** - Role assignment dialog
+- **SaveViewModal** - View configuration saving interface
+
+**Editor Integration:**
+
+- **TaskAssignmentExtension** - CodeMirror extension for task decoration
+- **AssignmentSuggest** - Auto-completion for inline assignments
 
 This modular design makes the codebase more maintainable, testable, and extensible for future features.
 

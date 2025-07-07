@@ -26,6 +26,83 @@ Clicking "Done" in the Assign modal adds the selected contacts or companies to t
 
 Selecting "Assign task roles" on a task that already has roles will display the current data and enable you to edit it. Note that only known, unhidden roles will be parsed.
 
+## Task Center Implementation
+
+The Task Center is a comprehensive task management interface that provides advanced filtering, multiple view layouts, and real-time task tracking.
+
+### Features Implemented
+
+#### **Task Cache System**
+
+- **Real-time scanning**: Automatically scans all markdown files for tasks
+- **Live updates**: Updates cache when files are modified, created, deleted, or renamed
+- **Comprehensive parsing**: Extracts all task metadata including:
+  - Task assignments and roles
+  - Priority levels (🔴🟡🟢 icons, [urgent]/[high]/[low] text, ! indicators)
+  - Status indicators (including custom 🚧 in-progress, ❌ cancelled)
+  - Dates (due, scheduled, completed, created, modified)
+  - Tags (#tag format)
+  - File location and line numbers
+- **Persistent storage**: Saves cache to `.obsidian/task-assignment-cache.json`
+
+#### **View Layouts**
+
+- **Status View**: Organizes tasks by completion status (To Do, In Progress, Done, Cancelled)
+- **Role View**: Groups tasks by assigned roles using DACI methodology
+- **Assignees View**: Organizes by individual people and companies
+- **Date View**: Groups by date categories (Not Set, Past Due, Today, This Week, Next Week)
+
+#### **Advanced Filtering System**
+
+- **Entity Filters**: Role, People, Companies with "none-set" options
+- **Content Filters**: Status (multi-select), Priority (including none-set), Tags, Text search
+- **Date Filters**: Date ranges with type selection (Created, Due, Completed, Scheduled)
+- **Combination Filters**: Support for complex filtering combinations
+
+#### **Interactive Task Cards**
+
+- Clickable status checkboxes for immediate task completion
+- Visual priority indicators and overdue highlighting
+- Tag display
+- Click-to-expand detailed side panel
+
+#### **Task Details Side Panel**
+
+- Full task description and file location
+- Complete assignment information with roles
+- All date fields (created, due, scheduled, completed, modified)
+- Priority and status information
+- Tags display
+
+#### **View Configuration Management**
+
+- **Save Configurations**: Save current filter and layout settings with custom names
+- **Load Configurations**: Dropdown to quickly apply saved configurations
+- **Configuration Persistence**: Stored in plugin settings
+- **Overwrite Protection**: Warns before overwriting existing configurations
+
+#### **User Interface**
+
+- **Responsive Layout**: Kanban-style columns with task cards
+- **Filter Toggle**: Collapsible filter panel
+- **Header Controls**: Layout selector, save/load configurations, cache refresh
+- **Real-time Updates**: Immediate UI updates when cache changes
+
+### Commands and Access
+
+#### **Available Commands**
+
+- **"Open Task Center"**: Opens the main task view
+- **"Refresh Task Cache"**: Manually rebuilds the task cache
+- **"Assign task roles"**: Opens assignment modal (context-sensitive)
+
+#### **Access Methods**
+
+- Command palette access
+- Ribbon icon (users icon)
+- Configurable keyboard shortcuts
+- Inline task icons for assignment
+
 ## Settings
 
 - change @ sign - only updates future data
@@ -49,6 +126,7 @@ Selecting "Assign task roles" on a task that already has roles will display the 
 - "Assign task roles" command to pull up dialog (only if the cursor is on a checkbox item, aka task)
 - A keyboard shortcut to trigger the command
 - When typing on a task, you can type the relevant icon, a space <@ or +>, which will trigger an autosuggest search of the contact or company in the preconfigured directories.
+- Inline task icons that appear automatically at the end of task lines
 
 ## Architecture
 
@@ -57,19 +135,41 @@ The plugin follows a modular architecture with clear separation of concerns:
 ### Core Structure
 
 - **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
-- **Types** (`types/`) - TypeScript interfaces and constants
-- **Services** (`services/`) - Business logic and data processing
-- **Components** (`components/`) - Reusable UI widgets
+- **Types** (`types/`) - TypeScript interfaces and constants including comprehensive task data models
+- **Services** (`services/`) - Business logic including task caching, assignment processing, and view configuration
+- **Components** (`components/`) - Reusable UI widgets including the task assignment widget
 - **Editor** (`editor/`) - CodeMirror extensions and suggestions
-- **Modals** (`modals/`) - Dialog windows and user interactions
+- **Modals** (`modals/`) - Dialog windows for assignments, role editing, and view configuration
+- **Views** (`views/`) - Task Center implementation with base and concrete view classes
 - **Settings** (`settings/`) - Configuration and preferences
 
 ### Key Components
 
-- **TaskAssignmentService** - Handles parsing, formatting, and file operations
-- **TaskAssignmentWidget** - Inline assignment icon for tasks
-- **AssignmentModal** - Main role assignment dialog
-- **AssignmentSuggest** - Editor autocompletion for inline assignments
-- **TaskAssignmentExtension** - CodeMirror extension for task decoration
+#### **Core Services**
+
+- **TaskCacheService** - Real-time task scanning, parsing, caching, and file monitoring
+- **TaskAssignmentService** - Assignment parsing, formatting, and file operations
+- **ViewConfigurationService** - Saved view management and persistence
+
+#### **View System**
+
+- **TaskAssignmentViewBase** - Abstract base class with common filtering and layout logic
+- **TaskAssignmentView** - Concrete implementation with UI rendering and interaction handling
+
+#### **Task Data Model**
+
+- **TaskData Interface** - Comprehensive task representation including:
+  - File metadata (path, line number, creation/modification dates)
+  - Content parsing (description, full content)
+  - Status and priority information
+  - Assignment data with parsed roles
+  - Date fields (due, scheduled, completed, etc.)
+  - Tags and search metadata
+
+#### **Editor Integration**
+
+- **TaskAssignmentExtension** - CodeMirror extension for task decoration with person icons
+- **TaskAssignmentWidget** - Clickable widget for inline task assignment
+- **AssignmentSuggest** - Auto-completion for inline assignment typing
 
 This modular design makes the codebase more maintainable, testable, and extensible for future features.
