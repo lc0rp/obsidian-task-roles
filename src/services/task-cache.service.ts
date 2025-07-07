@@ -57,16 +57,18 @@ export class TaskCacheService {
 		this.isUpdating = true;
 		new Notice('Refreshing task cache...');
 		
-		try {
-			this.cache.clear();
-			
-			const markdownFiles = this.app.vault.getMarkdownFiles();
-			for (const file of markdownFiles) {
-				await this.updateTasksFromFile(file);
-			}
-			
-			await this.saveCacheToFile();
-			new Notice('Task cache refreshed successfully');
+                try {
+                        this.cache.clear();
+
+                        const markdownFiles = this.app.vault.getMarkdownFiles();
+                        await Promise.all(markdownFiles.map(file =>
+                                this.updateTasksFromFile(file).catch(error => {
+                                        console.error(`Error updating tasks from file ${file.path}:`, error);
+                                })
+                        ));
+
+                        await this.saveCacheToFile();
+                        new Notice('Task cache refreshed successfully');
 		} catch (error) {
 			console.error('Error refreshing cache:', error);
 			new Notice('Error refreshing task cache');
