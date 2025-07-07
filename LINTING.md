@@ -34,4 +34,4 @@ This project uses ESLint for TypeScript code quality and markdownlint for docume
 ## Current Status
 
 TypeScript linting is enforced in the build process with only 2 warnings remaining (non-blocking).
-Markdown linting is available for documentation quality but doesn't block builds. 
+Markdown linting is available for documentation quality but doesn't block builds.
