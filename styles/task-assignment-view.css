@@ -489,11 +489,33 @@
 }
 
 .task-assignment-card-tag {
-	font-size: 11px;
-	color: var(--text-accent);
-	background-color: var(--background-secondary);
-	padding: 2px 4px;
-	border-radius: 3px;
+        font-size: 11px;
+        color: var(--text-accent);
+        background-color: var(--background-secondary);
+        padding: 2px 4px;
+        border-radius: 3px;
+}
+
+/* Action icons row */
+.task-assignment-card-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+        align-items: center;
+}
+
+.task-card-action-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+}
+
+.task-card-action-icon.clickable {
+        cursor: pointer;
+}
+
+.task-card-action-icon.clickable:hover {
+        color: var(--text-normal);
 }
 
 /* Task Status Classes */

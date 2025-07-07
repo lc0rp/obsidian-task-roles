@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, setIcon } from 'obsidian';
+import { WorkspaceLeaf, setIcon, MarkdownView, TFile, Notice } from 'obsidian';
 import { TaskAssignmentViewBase } from './task-assignment-view-base';
 import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType, ViewFilters } from '../types';
 import { TaskCacheService } from '../services/task-cache.service';
@@ -540,14 +540,54 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 			priorityEl.setText(task.priority.toUpperCase());
 		}
 
-		// Tags
-		if (task.tags.length > 0) {
-			const tagsEl = metadataEl.createDiv('task-assignment-card-tags');
-			for (const tag of task.tags) {
-				const tagEl = tagsEl.createSpan('task-assignment-card-tag');
-				tagEl.setText(`#${tag}`);
-			}
-		}
+                // Tags
+                if (task.tags.length > 0) {
+                        const tagsEl = metadataEl.createDiv('task-assignment-card-tags');
+                        for (const tag of task.tags) {
+                                const tagEl = tagsEl.createSpan('task-assignment-card-tag');
+                                tagEl.setText(`#${tag}`);
+                        }
+                }
+
+                // Action icons row
+                const actionsEl = contentEl.createDiv('task-assignment-card-actions');
+
+                // Priority icon
+                const priorityIcon = actionsEl.createSpan('task-card-action-icon');
+                setIcon(priorityIcon, this.getPriorityIconName(task.priority));
+                const priorityLabel = `Priority: ${task.priority.toUpperCase()}`;
+                priorityIcon.setAttribute('aria-label', priorityLabel);
+                priorityIcon.setAttribute('title', priorityLabel);
+
+                // Link icon
+                const linkIcon = actionsEl.createSpan('task-card-action-icon clickable');
+                setIcon(linkIcon, 'link');
+                linkIcon.setAttribute('aria-label', task.filePath);
+                linkIcon.setAttribute('title', task.filePath);
+                linkIcon.onclick = (e) => {
+                        e.stopPropagation();
+                        this.openFileAtTask(task, true);
+                };
+
+                // Edit icon
+                const editIcon = actionsEl.createSpan('task-card-action-icon clickable');
+                setIcon(editIcon, 'pencil');
+                editIcon.setAttribute('aria-label', 'Edit task');
+                editIcon.setAttribute('title', 'Edit task');
+                editIcon.onclick = async (e) => {
+                        e.stopPropagation();
+                        await this.openTaskEditModal(task);
+                };
+
+                // Assignment icon
+                const assignIcon = actionsEl.createSpan('task-card-action-icon clickable');
+                setIcon(assignIcon, 'users');
+                assignIcon.setAttribute('aria-label', 'Assign task roles');
+                assignIcon.setAttribute('title', 'Assign task roles');
+                assignIcon.onclick = async (e) => {
+                        e.stopPropagation();
+                        await this.openAssignmentModalForTask(task);
+                };
 
 		// Click handler to show side panel
 		cardEl.onclick = (e) => {
@@ -682,11 +722,11 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		}
 	}
 
-	private showAssigneeSelector(updateCallback?: (() => void) | null): void {
-		import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
-			new AssigneeSelectorModal(this.app, this.plugin, (selectedAssignee: string) => {
-				// Determine if it's a person or company based on the symbol
-				const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
+        private showAssigneeSelector(updateCallback?: (() => void) | null): void {
+                import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
+                        new AssigneeSelectorModal(this.app, this.plugin, (selectedAssignee: string) => {
+                                // Determine if it's a person or company based on the symbol
+                                const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
 				const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);
 				
 				if (isPerson) {
@@ -707,7 +747,54 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 				if (updateCallback) {
 					updateCallback();
 				}
-			}, { mode: 'readonly', keepOpen: true }).open();
-		});
-	}
+                        }, { mode: 'readonly', keepOpen: true }).open();
+                });
+        }
+
+        private getPriorityIconName(priority: TaskPriority): string {
+                switch (priority) {
+                        case TaskPriority.URGENT:
+                                return 'alert-octagon';
+                        case TaskPriority.HIGH:
+                                return 'arrow-up';
+                        case TaskPriority.LOW:
+                                return 'arrow-down';
+                        default:
+                                return 'minus';
+                }
+        }
+
+        private async openFileAtTask(task: TaskData, highlight = false): Promise<void> {
+                const file = this.app.vault.getAbstractFileByPath(task.filePath);
+                if (!(file instanceof TFile)) return;
+
+                await this.app.workspace.getLeaf(false).openFile(file);
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (!view) return;
+
+                const editor = view.editor;
+                editor.setCursor({ line: task.lineNumber, ch: 0 });
+                if (highlight) {
+                        editor.setSelection({ line: task.lineNumber, ch: 0 }, { line: task.lineNumber, ch: editor.getLine(task.lineNumber).length });
+                        setTimeout(() => editor.setCursor({ line: task.lineNumber, ch: 0 }), 1000);
+                }
+        }
+
+        private async openAssignmentModalForTask(task: TaskData): Promise<void> {
+                await this.openFileAtTask(task);
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (view) {
+                        this.plugin.openAssignmentModal(view.editor);
+                }
+        }
+
+        private async openTaskEditModal(task: TaskData): Promise<void> {
+                await this.openFileAtTask(task);
+                const tasksPlugin = (this.app as any).plugins?.plugins?.["obsidian-tasks-plugin"];
+                if (tasksPlugin && typeof tasksPlugin.openEditModal === 'function') {
+                        tasksPlugin.openEditModal();
+                } else {
+                        new Notice('Tasks plugin not available');
+                }
+        }
 } 
