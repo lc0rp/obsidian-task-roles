@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, setIcon } from 'obsidian';
+import { WorkspaceLeaf, setIcon, MarkdownRenderer } from 'obsidian';
 import { TaskAssignmentViewBase } from './task-assignment-view-base';
 import { TaskData, ViewLayout, TaskStatus, TaskPriority, DateType, ViewFilters } from '../types';
 import { TaskCacheService } from '../services/task-cache.service';
@@ -520,7 +520,12 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		
 		// Task description
 		const descriptionEl = contentEl.createDiv('task-assignment-card-description');
-		descriptionEl.setText(task.description);
+		MarkdownRenderer.renderMarkdown(
+				task.description,
+				descriptionEl,
+				task.filePath,
+				this
+		);
 		
 		// Task metadata
 		const metadataEl = contentEl.createDiv('task-assignment-card-metadata');
@@ -587,9 +592,15 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		const contentEl = this.sidePanel.createDiv('task-assignment-side-panel-content');
 		
 		// Task description
-		const descriptionEl = contentEl.createDiv('task-detail-section');
-		descriptionEl.createEl('h3', { text: 'Description' });
-		descriptionEl.createDiv('task-detail-value').setText(this.selectedTask.description);
+        const descriptionEl = contentEl.createDiv('task-detail-section');
+        descriptionEl.createEl('h3', { text: 'Description' });
+        const descriptionValue = descriptionEl.createDiv('task-detail-value');
+        MarkdownRenderer.renderMarkdown(
+			this.selectedTask.description,
+			descriptionValue,
+			this.selectedTask.filePath,
+			this
+		);
 
 		// File location
 		const locationEl = contentEl.createDiv('task-detail-section');
