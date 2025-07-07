@@ -45,7 +45,7 @@ export class TaskAssignmentWidget extends WidgetType {
 				}
 
 				const cursor = editor.getCursor();
-				
+
 				// Set cursor to the line where the icon was clicked
 				editor.setCursor({ line: this.lineNumber, ch: cursor.ch });
 
@@ -62,4 +62,4 @@ export class TaskAssignmentWidget extends WidgetType {
 
 		return iconContainer;
 	}
-} 
+}
