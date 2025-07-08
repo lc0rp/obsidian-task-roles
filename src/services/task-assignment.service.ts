@@ -8,7 +8,9 @@ export class TaskAssignmentService {
 
 	constructor(private app: App, private settings: TaskAssignmentSettings) {
 		// Build initial cache and listen for file system changes
-		void this.refreshAssigneeCache();
+		this.refreshAssigneeCache().catch(error =>
+			console.error('Error refreshing assignee cache:', error)
+		);
 		this.setupCacheWatchers();
 	}
 
@@ -16,9 +18,13 @@ export class TaskAssignmentService {
 		const refresh = (file: TFile) => {
 			if (file.extension !== 'md') return;
 			const path = file.path;
-			if (path.startsWith(`${this.settings.contactDirectory}/`) ||
-				path.startsWith(`${this.settings.companyDirectory}/`)) {
-				void this.refreshAssigneeCache();
+			if (
+				path.startsWith(`${this.settings.contactDirectory}/`) ||
+				path.startsWith(`${this.settings.companyDirectory}/`)
+			) {
+				this.refreshAssigneeCache().catch(error =>
+					console.error('Error refreshing assignee cache:', error)
+				);
 			}
 		};
 
@@ -55,12 +61,12 @@ export class TaskAssignmentService {
 			return;
 		}
 
-		this.contactCache = await this.readDirectory(this.settings.contactDirectory);
-		this.companyCache = await this.readDirectory(this.settings.companyDirectory);
+		this.contactCache = this.readDirectory(this.settings.contactDirectory);
+		this.companyCache = this.readDirectory(this.settings.companyDirectory);
 		this.cacheInitialized = true;
 	}
 
-	private async readDirectory(directory: string): Promise<string[]> {
+	private readDirectory(directory: string): string[] {
 		const folder = this.app.vault.getAbstractFileByPath(directory);
 		if (!folder || !(folder instanceof TFolder)) {
 			return [];
