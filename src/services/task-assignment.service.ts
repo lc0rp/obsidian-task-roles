@@ -6,21 +6,27 @@ export class TaskAssignmentService {
 	private companyCache: string[] = [];
 	private cacheInitialized = false;
 
-	constructor(private app: App, private settings: TaskAssignmentSettings) {
-		// Build initial cache and listen for file system changes
-		void this.refreshAssigneeCache();
-		this.setupCacheWatchers();
-	}
+        constructor(private app: App, private settings: TaskAssignmentSettings) {
+                // Build initial cache and listen for file system changes
+                this.refreshAssigneeCache().catch(error =>
+                        console.error('Error refreshing assignee cache:', error)
+                );
+                this.setupCacheWatchers();
+        }
 
 	private setupCacheWatchers(): void {
-		const refresh = (file: TFile) => {
-			if (file.extension !== 'md') return;
-			const path = file.path;
-			if (path.startsWith(`${this.settings.contactDirectory}/`) ||
-				path.startsWith(`${this.settings.companyDirectory}/`)) {
-				void this.refreshAssigneeCache();
-			}
-		};
+                const refresh = (file: TFile) => {
+                        if (file.extension !== 'md') return;
+                        const path = file.path;
+                        if (
+                                path.startsWith(`${this.settings.contactDirectory}/`) ||
+                                path.startsWith(`${this.settings.companyDirectory}/`)
+                        ) {
+                                this.refreshAssigneeCache().catch(error =>
+                                        console.error('Error refreshing assignee cache:', error)
+                                );
+                        }
+                };
 
 		if (typeof (this.app.vault as any).on === 'function') {
 			this.app.vault.on('create', refresh);
@@ -55,16 +61,16 @@ export class TaskAssignmentService {
 			return;
 		}
 
-		this.contactCache = await this.readDirectory(this.settings.contactDirectory);
-		this.companyCache = await this.readDirectory(this.settings.companyDirectory);
-		this.cacheInitialized = true;
-	}
+                this.contactCache = this.readDirectory(this.settings.contactDirectory);
+                this.companyCache = this.readDirectory(this.settings.companyDirectory);
+                this.cacheInitialized = true;
+        }
 
-	private async readDirectory(directory: string): Promise<string[]> {
-		const folder = this.app.vault.getAbstractFileByPath(directory);
-		if (!folder || !(folder instanceof TFolder)) {
-			return [];
-		}
+        private readDirectory(directory: string): string[] {
+                const folder = this.app.vault.getAbstractFileByPath(directory);
+                if (!folder || !(folder instanceof TFolder)) {
+                        return [];
+                }
 
 		const files: string[] = [];
 		for (const file of folder.children) {
@@ -73,8 +79,8 @@ export class TaskAssignmentService {
 			}
 		}
 
-		return files.sort();
-	}
+                return files.sort();
+        }
 
 	parseTaskAssignments(taskText: string, visibleRoles: Role[]): ParsedAssignment[] {
 		const assignments: ParsedAssignment[] = [];

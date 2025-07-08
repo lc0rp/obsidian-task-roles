@@ -8,7 +8,7 @@ export class TaskAssignmentService {
         this.companyCache = [];
         this.cacheInitialized = false;
         // Build initial cache and listen for file system changes
-        void this.refreshAssigneeCache();
+        this.refreshAssigneeCache().catch(error => console.error('Error refreshing assignee cache:', error));
         this.setupCacheWatchers();
     }
     setupCacheWatchers() {
@@ -18,7 +18,7 @@ export class TaskAssignmentService {
             const path = file.path;
             if (path.startsWith(`${this.settings.contactDirectory}/`) ||
                 path.startsWith(`${this.settings.companyDirectory}/`)) {
-                void this.refreshAssigneeCache();
+                this.refreshAssigneeCache().catch(error => console.error('Error refreshing assignee cache:', error));
             }
         };
         if (typeof this.app.vault.on === 'function') {
@@ -48,11 +48,11 @@ export class TaskAssignmentService {
             this.cacheInitialized = true;
             return;
         }
-        this.contactCache = await this.readDirectory(this.settings.contactDirectory);
-        this.companyCache = await this.readDirectory(this.settings.companyDirectory);
+        this.contactCache = this.readDirectory(this.settings.contactDirectory);
+        this.companyCache = this.readDirectory(this.settings.companyDirectory);
         this.cacheInitialized = true;
     }
-    async readDirectory(directory) {
+    readDirectory(directory) {
         const folder = this.app.vault.getAbstractFileByPath(directory);
         if (!folder || !(folder instanceof TFolder)) {
             return [];
@@ -99,10 +99,10 @@ export class TaskAssignmentService {
         const sortedAssignments = assignments
             .filter(a => a.assignees.length > 0)
             .sort((a, b) => {
-                const roleA = visibleRoles.find(r => r.id === a.roleId);
-                const roleB = visibleRoles.find(r => r.id === b.roleId);
-                return (roleA?.order || 999) - (roleB?.order || 999);
-            });
+            const roleA = visibleRoles.find(r => r.id === a.roleId);
+            const roleB = visibleRoles.find(r => r.id === b.roleId);
+            return (roleA?.order || 999) - (roleB?.order || 999);
+        });
         for (const assignment of sortedAssignments) {
             const role = visibleRoles.find(r => r.id === assignment.roleId);
             if (role) {
