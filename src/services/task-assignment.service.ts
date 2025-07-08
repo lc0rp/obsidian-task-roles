@@ -2,11 +2,11 @@ import { App, TFile, TFolder, Notice } from 'obsidian';
 import { TaskAssignmentSettings, Role, Assignment, ParsedAssignment } from '../types';
 
 export class TaskAssignmentService {
-	constructor(private app: App, private settings: TaskAssignmentSettings) {}
+	constructor(private app: App, private settings: TaskAssignmentSettings) { }
 
 	async getContactsAndCompanies(symbol: string): Promise<string[]> {
-		const directory = symbol === this.settings.contactSymbol 
-			? this.settings.contactDirectory 
+		const directory = symbol === this.settings.contactSymbol
+			? this.settings.contactDirectory
 			: this.settings.companyDirectory;
 
 		const folder = this.app.vault.getAbstractFileByPath(directory);
@@ -26,12 +26,12 @@ export class TaskAssignmentService {
 
 	parseTaskAssignments(taskText: string, visibleRoles: Role[]): ParsedAssignment[] {
 		const assignments: ParsedAssignment[] = [];
-		
-                const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
+
+		const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
 		for (const role of visibleRoles) {
 			const regex = new RegExp(`${this.escapeRegex(role.icon)}\\s+([^${allIcons}]+?)(?=\\s*[${allIcons}]|$)`, 'g');
 			const match = regex.exec(taskText);
-			
+
 			if (match) {
 				const assigneeText = match[1].trim();
 				const assignees = this.parseAssignees(assigneeText);
@@ -40,7 +40,7 @@ export class TaskAssignmentService {
 				}
 			}
 		}
-		
+
 		return assignments;
 	}
 
@@ -48,17 +48,17 @@ export class TaskAssignmentService {
 		const linkRegex = /\[\[([^\]]+)\|([^\]]+)\]\]/g;
 		const assignees: string[] = [];
 		let match;
-		
+
 		while ((match = linkRegex.exec(text)) !== null) {
 			assignees.push(match[2]); // Use the alias part (e.g., @John)
 		}
-		
+
 		return assignees;
 	}
 
 	formatAssignments(assignments: Assignment[], visibleRoles: Role[]): string {
 		const parts: string[] = [];
-		
+
 		// Sort by role order
 		const sortedAssignments = assignments
 			.filter(a => a.assignees.length > 0)
@@ -77,11 +77,11 @@ export class TaskAssignmentService {
 					const cleanName = assignee.substring(1); // Remove @ or +
 					return `[[${directory}/${cleanName}|${assignee}]]`;
 				}).join(', ');
-				
+
 				parts.push(`${role.icon} ${formattedAssignees}`);
 			}
 		}
-		
+
 		return parts.join(' ');
 	}
 
@@ -91,7 +91,7 @@ export class TaskAssignmentService {
 
 	async createMeContact(): Promise<void> {
 		const contactPath = `${this.settings.contactDirectory}/Me.md`;
-		
+
 		if (await this.app.vault.adapter.exists(contactPath)) {
 			new Notice('Contact @me already exists');
 			return;
@@ -110,7 +110,7 @@ export class TaskAssignmentService {
 	async createContactOrCompany(assignee: string): Promise<void> {
 		const isContact = assignee.startsWith(this.settings.contactSymbol);
 		const isCompany = assignee.startsWith(this.settings.companySymbol);
-		
+
 		if (!isContact && !isCompany) {
 			return;
 		}
@@ -118,7 +118,7 @@ export class TaskAssignmentService {
 		const name = assignee.substring(1); // Remove @ or +
 		const directory = isContact ? this.settings.contactDirectory : this.settings.companyDirectory;
 		const filePath = `${directory}/${name}.md`;
-		
+
 		// Check if file already exists
 		if (await this.app.vault.adapter.exists(filePath)) {
 			return; // File already exists, no need to create
@@ -132,7 +132,7 @@ export class TaskAssignmentService {
 		// Create the file with basic content
 		const fileType = isContact ? 'contact' : 'company';
 		const content = `# ${name}\n\nThis is a ${fileType} file.`;
-		
+
 		try {
 			await this.app.vault.create(filePath, content);
 			new Notice(`Created ${fileType}: ${assignee}`, 2000);
