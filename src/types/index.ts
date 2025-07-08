@@ -7,6 +7,7 @@ export interface TaskAssignmentSettings {
 	hiddenDefaultRoles: string[];
 	savedViews: ViewConfiguration[];
 	autoApplyFilters: boolean;
+	debug: boolean;
 }
 
 export interface Role {
@@ -34,6 +35,7 @@ export interface TaskData {
 	lineNumber: number;
 	content: string;
 	description: string;
+	searchText: string;
 	status: TaskStatus;
 	priority: TaskPriority;
 	tags: string[];
@@ -141,5 +143,6 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	roles: DEFAULT_ROLES,
 	hiddenDefaultRoles: [],
 	savedViews: [],
-	autoApplyFilters: true
-}; 
+	autoApplyFilters: true,
+	debug: false
+};

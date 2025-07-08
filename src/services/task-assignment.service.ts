@@ -2,13 +2,65 @@ import { App, TFile, TFolder, Notice } from 'obsidian';
 import { TaskAssignmentSettings, Role, Assignment, ParsedAssignment } from '../types';
 
 export class TaskAssignmentService {
-	constructor(private app: App, private settings: TaskAssignmentSettings) { }
+	private contactCache: string[] = [];
+	private companyCache: string[] = [];
+	private cacheInitialized = false;
+
+	constructor(private app: App, private settings: TaskAssignmentSettings) {
+		// Build initial cache and listen for file system changes
+		void this.refreshAssigneeCache();
+		this.setupCacheWatchers();
+	}
+
+	private setupCacheWatchers(): void {
+		const refresh = (file: TFile) => {
+			if (file.extension !== 'md') return;
+			const path = file.path;
+			if (path.startsWith(`${this.settings.contactDirectory}/`) ||
+				path.startsWith(`${this.settings.companyDirectory}/`)) {
+				void this.refreshAssigneeCache();
+			}
+		};
+
+		if (typeof (this.app.vault as any).on === 'function') {
+			this.app.vault.on('create', refresh);
+			this.app.vault.on('delete', refresh);
+			this.app.vault.on('rename', refresh);
+		}
+	}
 
 	async getContactsAndCompanies(symbol: string): Promise<string[]> {
-		const directory = symbol === this.settings.contactSymbol
-			? this.settings.contactDirectory
-			: this.settings.companyDirectory;
+		if (!this.cacheInitialized) {
+			await this.refreshAssigneeCache();
+		}
 
+		return symbol === this.settings.contactSymbol
+			? [...this.contactCache]
+			: [...this.companyCache];
+	}
+
+	getCachedContacts(): string[] {
+		return [...this.contactCache];
+	}
+
+	getCachedCompanies(): string[] {
+		return [...this.companyCache];
+	}
+
+	async refreshAssigneeCache(): Promise<void> {
+		if (typeof (this.app.vault as any).getAbstractFileByPath !== 'function') {
+			this.contactCache = [];
+			this.companyCache = [];
+			this.cacheInitialized = true;
+			return;
+		}
+
+		this.contactCache = await this.readDirectory(this.settings.contactDirectory);
+		this.companyCache = await this.readDirectory(this.settings.companyDirectory);
+		this.cacheInitialized = true;
+	}
+
+	private async readDirectory(directory: string): Promise<string[]> {
 		const folder = this.app.vault.getAbstractFileByPath(directory);
 		if (!folder || !(folder instanceof TFolder)) {
 			return [];
@@ -105,6 +157,7 @@ export class TaskAssignmentService {
 
 		await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
 		new Notice('Created @me contact');
+		await this.refreshAssigneeCache();
 	}
 
 	async createContactOrCompany(assignee: string): Promise<void> {
@@ -136,9 +189,10 @@ export class TaskAssignmentService {
 		try {
 			await this.app.vault.create(filePath, content);
 			new Notice(`Created ${fileType}: ${assignee}`, 2000);
+			await this.refreshAssigneeCache();
 		} catch (error) {
 			console.error(`Error creating ${fileType} file:`, error);
 			new Notice(`Failed to create ${fileType}: ${assignee}`, 3000);
 		}
 	}
-} 
+}

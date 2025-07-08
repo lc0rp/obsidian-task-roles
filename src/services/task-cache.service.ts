@@ -1,5 +1,5 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role } from '../types';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedAssignment } from '../types';
 import { TaskAssignmentService } from './task-assignment.service';
 
 export class TaskCacheService {
@@ -10,7 +10,8 @@ export class TaskCacheService {
 	constructor(
 		private app: App,
 		private taskAssignmentService: TaskAssignmentService,
-		private visibleRoles: Role[]
+		private visibleRoles: Role[],
+		private debug: boolean
 	) {
 		this.setupEventListeners();
 	}
@@ -46,7 +47,9 @@ export class TaskCacheService {
 		try {
 			await this.loadCacheFromFile();
 		} catch (error) {
-			console.log('No existing cache found, building new cache...');
+			if (this.debug) {
+				console.log('No existing cache found, building new cache...');
+			}
 			await this.refreshCache();
 		}
 	}
@@ -61,9 +64,11 @@ export class TaskCacheService {
 			this.cache.clear();
 
 			const markdownFiles = this.app.vault.getMarkdownFiles();
-			for (const file of markdownFiles) {
-				await this.updateTasksFromFile(file);
-			}
+			await Promise.all(markdownFiles.map(file =>
+				this.updateTasksFromFile(file).catch(error => {
+					console.error(`Error updating tasks from file ${file.path}:`, error);
+				})
+			));
 
 			await this.saveCacheToFile();
 			new Notice('Task cache refreshed successfully');
@@ -168,12 +173,15 @@ export class TaskCacheService {
 			const createdDate = new Date(file.stat.ctime);
 			const modifiedDate = new Date(file.stat.mtime);
 
+			const searchText = this.buildSearchText(description, file.path, tags, assignments);
+
 			return {
 				id: taskId,
 				filePath: file.path,
 				lineNumber,
 				content: fullLine,
 				description,
+				searchText,
 				status,
 				priority,
 				tags,
@@ -278,6 +286,15 @@ export class TaskCacheService {
 		return description;
 	}
 
+	private buildSearchText(description: string, filePath: string, tags: string[], assignments: ParsedAssignment[]): string {
+		return [
+			description,
+			filePath,
+			...tags,
+			...assignments.flatMap(a => a.assignees)
+		].join(' ').toLowerCase();
+	}
+
 	private saveTimeout: NodeJS.Timeout | null = null;
 
 	private debouncedSave(): void {
@@ -334,6 +351,10 @@ export class TaskCacheService {
 							scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
 						}
 					};
+
+					if (!task.searchText) {
+						task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.assignments);
+					}
 
 					this.cache.set(task.id, task);
 				}

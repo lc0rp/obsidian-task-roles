@@ -1,6 +1,7 @@
 # Source Code
 
-This directory contains the main TypeScript source files for the Obsidian Task Assignment plugin, organized into modular subdirectories following best practices.
+This directory contains the main TypeScript source files for the Obsidian Task Assignment plugin, organized into modular
+subdirectories following best practices.
 
 ## Directory Structure
 
