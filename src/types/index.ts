@@ -144,5 +144,8 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	hiddenDefaultRoles: [],
 	savedViews: [],
 	autoApplyFilters: true,
-	debug: false
+        debug: false
 };
+
+export const ASSIGNMENT_COMMENT_START = '<!--TA-->';
+export const ASSIGNMENT_COMMENT_END = '<!--/TA-->';

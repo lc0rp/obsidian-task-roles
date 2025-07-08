@@ -225,19 +225,12 @@ export class AssignmentModal extends Modal {
 	applyAssignments() {
 		const currentLine = this.editor.getLine(this.editor.getCursor().line);
 		
-		// Remove existing assignments
-		let cleanLine = currentLine;
-		const allVisibleRoles = this.plugin.getVisibleRoles();
-		const allIcons = allVisibleRoles.map(r => this.plugin.taskAssignmentService.escapeRegex(r.icon)).join('');
-		for (const role of allVisibleRoles) {
-			const regex = new RegExp(`\\s*${this.plugin.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'g');
-			cleanLine = cleanLine.replace(regex, '');
-		}
-		
-		// Add new assignments
-		const assignmentText = this.plugin.taskAssignmentService.formatAssignments(this.assignments, this.plugin.getVisibleRoles());
-		const newLine = assignmentText ? `${cleanLine.trim()} ${assignmentText}` : cleanLine.trim();
-		
-		this.editor.setLine(this.editor.getCursor().line, newLine);
-	}
-} 
+                const newLine = this.plugin.taskAssignmentService.applyAssignmentsToLine(
+                        currentLine,
+                        this.assignments,
+                        this.plugin.getVisibleRoles()
+                );
+
+                this.editor.setLine(this.editor.getCursor().line, newLine);
+        }
+}
