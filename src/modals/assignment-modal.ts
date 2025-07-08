@@ -18,11 +18,11 @@ export class AssignmentModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		
+
 		// Parse existing assignments
 		const currentLine = this.editor.getLine(this.editor.getCursor().line);
 		this.existingAssignments = this.plugin.taskAssignmentService.parseTaskAssignments(currentLine, this.plugin.getVisibleRoles());
-		
+
 		// Initialize assignments from existing data
 		this.assignments = this.existingAssignments.map(pa => ({
 			roleId: pa.role.id,
@@ -50,19 +50,19 @@ export class AssignmentModal extends Modal {
 
 		for (const role of visibleRoles) {
 			const roleDiv = rolesContainer.createDiv('role-row');
-			
+
 			const roleHeader = roleDiv.createDiv('role-header');
 			roleHeader.createSpan('role-icon').setText(role.icon);
-			
+
 			const roleNameContainer = roleHeader.createDiv('role-name-container');
 			roleNameContainer.createSpan('role-name').setText(role.name);
-			
+
 			// Add description for default roles
 			if (role.isDefault && roleDescriptions[role.id]) {
 				const description = roleNameContainer.createSpan('role-description');
 				description.setText(roleDescriptions[role.id]);
 			}
-			
+
 			const addButton = roleHeader.createEl('button', { text: '+', cls: 'add-assignee-btn' });
 			addButton.setAttribute('aria-label', 'Select people or groups');
 			addButton.setAttribute('title', 'Select people or groups');
@@ -108,15 +108,15 @@ export class AssignmentModal extends Modal {
 		for (const assignee of assignees) {
 			const assigneeEl = assigneeContainer.createSpan('assignee-tag');
 			assigneeEl.setText(assignee);
-			
+
 			const removeBtn = assigneeEl.createSpan('remove-assignee');
 			removeBtn.setText('×');
-			
+
 			// Make the entire assignee tag clickable for removal
 			assigneeEl.onclick = (e) => {
 				e.stopPropagation(); // Prevent triggering role section click
 				this.removeAssignee(roleId, assignee);
-				this.renderAssignees(container, roleId, 
+				this.renderAssignees(container, roleId,
 					this.assignments.find(a => a.roleId === roleId)?.assignees || []);
 			};
 
@@ -134,7 +134,7 @@ export class AssignmentModal extends Modal {
 			removeBtn.onclick = (e) => {
 				e.stopPropagation();
 				this.removeAssignee(roleId, assignee);
-				this.renderAssignees(container, roleId, 
+				this.renderAssignees(container, roleId,
 					this.assignments.find(a => a.roleId === roleId)?.assignees || []);
 			};
 		}
@@ -144,7 +144,7 @@ export class AssignmentModal extends Modal {
 		new AssigneeSelectorModal(this.app, this.plugin, async (assignee: string) => {
 			// Create the contact/company file if it doesn't exist
 			await this.plugin.taskAssignmentService.createContactOrCompany(assignee);
-			
+
 			this.addAssignee(roleId, assignee);
 			const assignment = this.assignments.find(a => a.roleId === roleId);
 			this.renderAssignees(container, roleId, assignment?.assignees || []);
@@ -157,7 +157,7 @@ export class AssignmentModal extends Modal {
 			assignment = { roleId, assignees: [] };
 			this.assignments.push(assignment);
 		}
-		
+
 		if (!assignment.assignees.includes(assignee)) {
 			assignment.assignees.push(assignee);
 		}
@@ -172,16 +172,16 @@ export class AssignmentModal extends Modal {
 
 	renderNewRole() {
 		const newRoleDiv = this.contentEl.createDiv('new-role-row');
-		
+
 		const nameInput = newRoleDiv.createEl('input', { type: 'text', placeholder: 'Role name' });
 		const iconInput = newRoleDiv.createEl('input', { type: 'text', placeholder: '🎯' });
 		iconInput.style.width = '40px';
-		
+
 		const addBtn = newRoleDiv.createEl('button', { text: 'Add Role' });
 		addBtn.onclick = async () => {
 			const name = nameInput.value.trim();
 			const icon = iconInput.value.trim();
-			
+
 			if (name && icon) {
 				const newRole: Role = {
 					id: name.toLowerCase().replace(/\s+/g, '-'),
@@ -190,10 +190,10 @@ export class AssignmentModal extends Modal {
 					isDefault: false,
 					order: this.plugin.settings.roles.length + 1
 				};
-				
+
 				this.plugin.settings.roles.push(newRole);
 				await this.plugin.saveSettings();
-				
+
 				this.onOpen(); // Refresh the modal
 			}
 		};
@@ -201,13 +201,13 @@ export class AssignmentModal extends Modal {
 
 	renderButtons() {
 		const buttonDiv = this.contentEl.createDiv('button-container');
-		
+
 		const doneBtn = buttonDiv.createEl('button', { text: 'Done', cls: 'mod-cta' });
 		doneBtn.onclick = () => {
 			this.applyAssignments();
 			this.close();
 		};
-		
+
 		const cancelBtn = buttonDiv.createEl('button', { text: 'Cancel' });
 		cancelBtn.onclick = () => this.close();
 
@@ -224,13 +224,13 @@ export class AssignmentModal extends Modal {
 
 	applyAssignments() {
 		const currentLine = this.editor.getLine(this.editor.getCursor().line);
-		
-                const newLine = this.plugin.taskAssignmentService.applyAssignmentsToLine(
-                        currentLine,
-                        this.assignments,
-                        this.plugin.getVisibleRoles()
-                );
 
-                this.editor.setLine(this.editor.getCursor().line, newLine);
-        }
+		const newLine = this.plugin.taskAssignmentService.applyAssignmentsToLine(
+			currentLine,
+			this.assignments,
+			this.plugin.getVisibleRoles()
+		);
+
+		this.editor.setLine(this.editor.getCursor().line, newLine);
+	}
 }

@@ -99,10 +99,10 @@ export class TaskAssignmentService {
         const sortedAssignments = assignments
             .filter(a => a.assignees.length > 0)
             .sort((a, b) => {
-            const roleA = visibleRoles.find(r => r.id === a.roleId);
-            const roleB = visibleRoles.find(r => r.id === b.roleId);
-            return (roleA?.order || 999) - (roleB?.order || 999);
-        });
+                const roleA = visibleRoles.find(r => r.id === a.roleId);
+                const roleB = visibleRoles.find(r => r.id === b.roleId);
+                return (roleA?.order || 999) - (roleB?.order || 999);
+            });
         for (const assignment of sortedAssignments) {
             const role = visibleRoles.find(r => r.id === assignment.roleId);
             if (role) {
