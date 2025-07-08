@@ -1,13 +1,58 @@
 import { TFile, TFolder, Notice } from 'obsidian';
+import { ASSIGNMENT_COMMENT_START, ASSIGNMENT_COMMENT_END } from '../types/index.js';
 export class TaskAssignmentService {
     constructor(app, settings) {
         this.app = app;
         this.settings = settings;
+        this.contactCache = [];
+        this.companyCache = [];
+        this.cacheInitialized = false;
+        // Build initial cache and listen for file system changes
+        void this.refreshAssigneeCache();
+        this.setupCacheWatchers();
+    }
+    setupCacheWatchers() {
+        const refresh = (file) => {
+            if (file.extension !== 'md')
+                return;
+            const path = file.path;
+            if (path.startsWith(`${this.settings.contactDirectory}/`) ||
+                path.startsWith(`${this.settings.companyDirectory}/`)) {
+                void this.refreshAssigneeCache();
+            }
+        };
+        if (typeof this.app.vault.on === 'function') {
+            this.app.vault.on('create', refresh);
+            this.app.vault.on('delete', refresh);
+            this.app.vault.on('rename', refresh);
+        }
     }
     async getContactsAndCompanies(symbol) {
-        const directory = symbol === this.settings.contactSymbol
-            ? this.settings.contactDirectory
-            : this.settings.companyDirectory;
+        if (!this.cacheInitialized) {
+            await this.refreshAssigneeCache();
+        }
+        return symbol === this.settings.contactSymbol
+            ? [...this.contactCache]
+            : [...this.companyCache];
+    }
+    getCachedContacts() {
+        return [...this.contactCache];
+    }
+    getCachedCompanies() {
+        return [...this.companyCache];
+    }
+    async refreshAssigneeCache() {
+        if (typeof this.app.vault.getAbstractFileByPath !== 'function') {
+            this.contactCache = [];
+            this.companyCache = [];
+            this.cacheInitialized = true;
+            return;
+        }
+        this.contactCache = await this.readDirectory(this.settings.contactDirectory);
+        this.companyCache = await this.readDirectory(this.settings.companyDirectory);
+        this.cacheInitialized = true;
+    }
+    async readDirectory(directory) {
         const folder = this.app.vault.getAbstractFileByPath(directory);
         if (!folder || !(folder instanceof TFolder)) {
             return [];
@@ -22,10 +67,13 @@ export class TaskAssignmentService {
     }
     parseTaskAssignments(taskText, visibleRoles) {
         const assignments = [];
+        const sanitized = taskText
+            .replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
+            .replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
         const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
         for (const role of visibleRoles) {
             const regex = new RegExp(`${this.escapeRegex(role.icon)}\\s+([^${allIcons}]+?)(?=\\s*[${allIcons}]|$)`, 'g');
-            const match = regex.exec(taskText);
+            const match = regex.exec(sanitized);
             if (match) {
                 const assigneeText = match[1].trim();
                 const assignees = this.parseAssignees(assigneeText);
@@ -72,6 +120,52 @@ export class TaskAssignmentService {
     escapeRegex(text) {
         return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
+    findMetadataIndex(line) {
+        const patterns = [
+            /[🔴🟡🟢]/u,
+            /\[(?:urgent|high|low|in-progress|cancelled)\]/i,
+            /!{1,3}/,
+            /(?:recur|every)/i,
+            /(due|scheduled|completed):\s*\d{4}-\d{2}-\d{2}/i,
+            /📅\s*\d{4}-\d{2}-\d{2}/,
+            /\[due::\s*\d{4}-\d{2}-\d{2}\]/i,
+            /#[\w-]+/
+        ];
+        let index = -1;
+        for (const pattern of patterns) {
+            const m = line.match(pattern);
+            if (m) {
+                const i = m.index ?? -1;
+                if (i !== -1 && (index === -1 || i < index)) {
+                    index = i;
+                }
+            }
+        }
+        return index;
+    }
+    applyAssignmentsToLine(line, assignments, visibleRoles) {
+        const assignmentText = this.formatAssignments(assignments, visibleRoles);
+        const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
+        let cleanLine = line
+            .replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
+            .replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
+        for (const role of visibleRoles) {
+            const regex = new RegExp(`\\s*${this.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'g');
+            cleanLine = cleanLine.replace(regex, '');
+        }
+        cleanLine = cleanLine.replace(/\s{2,}/g, ' ').trim();
+        if (!assignmentText) {
+            return cleanLine;
+        }
+        const wrapped = `${ASSIGNMENT_COMMENT_START} ${assignmentText} ${ASSIGNMENT_COMMENT_END}`;
+        const idx = this.findMetadataIndex(cleanLine);
+        if (idx === -1) {
+            return `${cleanLine} ${wrapped}`.trim();
+        }
+        const before = cleanLine.substring(0, idx).trimEnd();
+        const after = cleanLine.substring(idx).trimStart();
+        return `${before} ${wrapped} ${after}`.replace(/\s{2,}/g, ' ').trim();
+    }
     async createMeContact() {
         const contactPath = `${this.settings.contactDirectory}/Me.md`;
         if (await this.app.vault.adapter.exists(contactPath)) {
@@ -85,6 +179,7 @@ export class TaskAssignmentService {
         }
         await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
         new Notice('Created @me contact');
+        await this.refreshAssigneeCache();
     }
     async createContactOrCompany(assignee) {
         const isContact = assignee.startsWith(this.settings.contactSymbol);
@@ -109,6 +204,7 @@ export class TaskAssignmentService {
         try {
             await this.app.vault.create(filePath, content);
             new Notice(`Created ${fileType}: ${assignee}`, 2000);
+            await this.refreshAssigneeCache();
         }
         catch (error) {
             console.error(`Error creating ${fileType} file:`, error);

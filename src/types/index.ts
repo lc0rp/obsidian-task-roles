@@ -146,3 +146,6 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	autoApplyFilters: true,
 	debug: false
 };
+
+export const ASSIGNMENT_COMMENT_START = '<!--TA-->';
+export const ASSIGNMENT_COMMENT_END = '<!--/TA-->';

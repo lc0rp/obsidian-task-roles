@@ -1,7 +1,7 @@
 # Obsidian Task Assignment
 
-Obsidian Task Assignment allows you to associate tasks with contacts or companies. It pairs with the Obsidian Tasks plugin,
-although it is not required.
+Obsidian Task Assignment allows you to associate tasks with contacts or companies. It is intended for use with the tasks
+plugin.
 
 By default, contacts are created with @<contact_name> and groups or companies are created with the +<company_name>
 

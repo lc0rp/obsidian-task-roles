@@ -1,5 +1,5 @@
 import { App, TFile, TFolder, Notice } from 'obsidian';
-import { TaskAssignmentSettings, Role, Assignment, ParsedAssignment } from '../types';
+import { TaskAssignmentSettings, Role, Assignment, ParsedAssignment, ASSIGNMENT_COMMENT_START, ASSIGNMENT_COMMENT_END } from '../types/index.js';
 
 export class TaskAssignmentService {
 	private contactCache: string[] = [];
@@ -79,10 +79,14 @@ export class TaskAssignmentService {
 	parseTaskAssignments(taskText: string, visibleRoles: Role[]): ParsedAssignment[] {
 		const assignments: ParsedAssignment[] = [];
 
+		const sanitized = taskText
+			.replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
+			.replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
+
 		const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
 		for (const role of visibleRoles) {
 			const regex = new RegExp(`${this.escapeRegex(role.icon)}\\s+([^${allIcons}]+?)(?=\\s*[${allIcons}]|$)`, 'g');
-			const match = regex.exec(taskText);
+			const match = regex.exec(sanitized);
 
 			if (match) {
 				const assigneeText = match[1].trim();
@@ -139,6 +143,60 @@ export class TaskAssignmentService {
 
 	escapeRegex(text: string): string {
 		return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	}
+
+	private findMetadataIndex(line: string): number {
+		const patterns = [
+			/[🔴🟡🟢]/u,
+			/\[(?:urgent|high|low|in-progress|cancelled)\]/i,
+			/!{1,3}/,
+			/(?:recur|every)/i,
+			/(due|scheduled|completed):\s*\d{4}-\d{2}-\d{2}/i,
+			/📅\s*\d{4}-\d{2}-\d{2}/,
+			/\[due::\s*\d{4}-\d{2}-\d{2}\]/i,
+			/#[\w-]+/
+		];
+
+		let index = -1;
+		for (const pattern of patterns) {
+			const m = line.match(pattern);
+			if (m) {
+				const i = m.index ?? -1;
+				if (i !== -1 && (index === -1 || i < index)) {
+					index = i;
+				}
+			}
+		}
+		return index;
+	}
+
+	applyAssignmentsToLine(line: string, assignments: Assignment[], visibleRoles: Role[]): string {
+		const assignmentText = this.formatAssignments(assignments, visibleRoles);
+
+		const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
+		let cleanLine = line
+			.replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
+			.replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
+
+		for (const role of visibleRoles) {
+			const regex = new RegExp(`\\s*${this.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'g');
+			cleanLine = cleanLine.replace(regex, '');
+		}
+
+		cleanLine = cleanLine.replace(/\s{2,}/g, ' ').trim();
+
+		if (!assignmentText) {
+			return cleanLine;
+		}
+
+		const wrapped = `${ASSIGNMENT_COMMENT_START} ${assignmentText} ${ASSIGNMENT_COMMENT_END}`;
+		const idx = this.findMetadataIndex(cleanLine);
+		if (idx === -1) {
+			return `${cleanLine} ${wrapped}`.trim();
+		}
+		const before = cleanLine.substring(0, idx).trimEnd();
+		const after = cleanLine.substring(idx).trimStart();
+		return `${before} ${wrapped} ${after}`.replace(/\s{2,}/g, ' ').trim();
 	}
 
 	async createMeContact(): Promise<void> {

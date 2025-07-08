@@ -18,6 +18,17 @@ test('parseTaskAssignments returns single role', () => {
   ]);
 });
 
+test('applyAssignmentsToLine inserts assignments before metadata', () => {
+  const service = createService();
+  const line = '- [ ] Test task 🔴 📅 2024-01-01';
+  const assignments = [{ roleId: 'drivers', assignees: ['@John'] }];
+  const result = service.applyAssignmentsToLine(line, assignments, DEFAULT_ROLES);
+  assert.equal(
+    result,
+    '- [ ] Test task <!--TA--> 🚗 [[Contacts/John|@John]] <!--/TA--> 🔴 📅 2024-01-01'
+  );
+});
+
 test('parseTaskAssignments handles multiple roles', () => {
   const service = createService();
   const input = '🚗 [[Contacts/John|@John]] 👍 [[Contacts/Jane|@Jane]]';
@@ -46,4 +57,16 @@ test('escapeRegex escapes special characters', () => {
   const escaped = service.escapeRegex('.*+?^${}()|[]\\');
   const expected = '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\';
   assert.equal(escaped, expected);
+});
+
+
+test('applyAssignmentsToLine inserts assignments before metadata', () => {
+  const service = createService();
+  const line = '- [ ] Test task 🔴 📅 2024-01-01';
+  const assignments = [{ roleId: 'drivers', assignees: ['@John'] }];
+  const result = service.applyAssignmentsToLine(line, assignments, DEFAULT_ROLES);
+  assert.equal(
+    result,
+    '- [ ] Test task <!--TA--> 🚗 [[Contacts/John|@John]] <!--/TA--> 🔴 📅 2024-01-01'
+  );
 });
