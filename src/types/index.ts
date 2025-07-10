@@ -7,6 +7,7 @@ export interface TaskAssignmentSettings {
 	hiddenDefaultRoles: string[];
 	savedViews: ViewConfiguration[];
 	autoApplyFilters: boolean;
+	useCompactFilters: boolean;
 	debug: boolean;
 }
 
@@ -144,6 +145,7 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	hiddenDefaultRoles: [],
 	savedViews: [],
 	autoApplyFilters: true,
+	useCompactFilters: false,
 	debug: false
 };
 

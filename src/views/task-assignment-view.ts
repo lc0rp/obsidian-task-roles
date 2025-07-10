@@ -118,6 +118,13 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 	}
 
 	private renderFilters(): void {
+		// Use compact filters if the setting is enabled
+		if (this.plugin.settings.useCompactFilters) {
+			this.renderCompactFilters();
+			return;
+		}
+
+		// Otherwise use the original expandable filters
 		this.filtersEl = this.viewContainerEl.createDiv('task-assignment-filters');
 		
 		// Filter toggle
@@ -148,6 +155,648 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		};
 
 		this.renderFilterControls(filtersContent);
+	}
+
+	private renderCompactFilters(): void {
+		this.filtersEl = this.viewContainerEl.createDiv('task-assignment-compact-filters');
+		
+		// Store original filters for cancel functionality
+		this.originalFilters = { ...this.currentFilters };
+		
+		// Store reference to assignees display update function
+		let updateAssigneesDisplay: (() => void) | null = null;
+		
+		// Store references to all dropdowns for closing them when clicking outside
+		const allDropdowns: HTMLElement[] = [];
+
+		// Function to add white dropdown arrow to multiselect displays
+		const addWhiteArrow = (element: HTMLElement) => {
+			const whiteArrowSvg = `data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E`;
+			element.style.backgroundImage = `url("${whiteArrowSvg}")`;
+		};
+
+		// Create horizontal filter row
+		const filtersRow = this.filtersEl.createDiv('task-assignment-compact-filters-row');
+
+		// Search input
+		const searchGroup = filtersRow.createDiv('compact-filter-group');
+		searchGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const searchIcon = searchGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(searchIcon, 'file-search-2');
+		const searchInput = searchGroup.createEl('input', { 
+			type: 'text', 
+			placeholder: 'Search tasks...',
+			cls: 'compact-filter-input'
+		});
+		searchInput.value = this.currentFilters.textSearch || '';
+		searchInput.oninput = () => {
+			this.updateFilters({ textSearch: searchInput.value });
+		};
+
+		// Assignees filter
+		const assigneesGroup = filtersRow.createDiv('compact-filter-group');
+		assigneesGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const assigneesIcon = assigneesGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(assigneesIcon, 'users');
+		const assigneesInput = assigneesGroup.createEl('input', { 
+			type: 'text', 
+			placeholder: 'Select assignees',
+			cls: 'compact-filter-input compact-filter-assignees'
+		});
+		assigneesInput.readOnly = true;
+		
+		// Display selected assignees
+		updateAssigneesDisplay = () => {
+			const selectedAssignees = [
+				...(this.currentFilters.people || []),
+				...(this.currentFilters.companies || [])
+			];
+			assigneesInput.value = selectedAssignees.length > 0 
+				? selectedAssignees.join(', ') 
+				: '';
+		};
+		
+		updateAssigneesDisplay();
+		
+		assigneesInput.onclick = () => {
+			this.showAssigneeSelector(updateAssigneesDisplay);
+		};
+
+		// Roles filter
+		const rolesGroup = filtersRow.createDiv('compact-filter-group');
+		rolesGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const rolesIcon = rolesGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(rolesIcon, 'axe');
+		
+		const rolesDropdownContainer = rolesGroup.createDiv('compact-multiselect-container');
+		const rolesDisplay = rolesDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
+		addWhiteArrow(rolesDisplay);
+		const rolesDropdown = rolesDropdownContainer.createDiv('compact-multiselect-dropdown');
+		rolesDropdown.style.display = 'none';
+		allDropdowns.push(rolesDropdown);
+		
+		const visibleRoles = this.plugin.getVisibleRoles();
+		const totalRoles = visibleRoles.length + 1; // +1 for "None" option
+		
+		// Update roles display text
+		const updateRolesDisplay = () => {
+			const selectedRoles = this.currentFilters.roles || [];
+			if (selectedRoles.length === 0) {
+				rolesDisplay.setText('All Roles');
+			} else if (selectedRoles.length === totalRoles) {
+				rolesDisplay.setText('All Roles');
+			} else {
+				rolesDisplay.setText(`${selectedRoles.length} of ${totalRoles} Roles`);
+			}
+		};
+		
+		// Store original roles for cancel functionality
+		let originalRoles = [...(this.currentFilters.roles || [])];
+		let tempRoles = [...originalRoles];
+		
+		// Toggle dropdown
+		rolesDisplay.onclick = (e) => {
+			e.stopPropagation();
+			const isVisible = rolesDropdown.style.display !== 'none';
+			if (!isVisible) {
+				// Store current state when opening
+				originalRoles = [...(this.currentFilters.roles || [])];
+				tempRoles = [...originalRoles];
+			}
+			rolesDropdown.style.display = isVisible ? 'none' : 'block';
+		};
+		
+		const rolesOptionsContainer = rolesDropdown.createDiv('compact-multiselect-options');
+		
+		// Add "All Roles" option first
+		const allRolesLabel = rolesOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+		const allRolesCheckbox = allRolesLabel.createEl('input', { type: 'checkbox' });
+		allRolesCheckbox.checked = tempRoles.length === totalRoles;
+		allRolesLabel.createSpan().setText('All Roles');
+		
+		// Add "None" option for roles
+		const noneRoleLabel = rolesOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+		const noneRoleCheckbox = noneRoleLabel.createEl('input', { type: 'checkbox' });
+		noneRoleCheckbox.checked = tempRoles.includes('none-set');
+		noneRoleLabel.createSpan().setText('None');
+		
+		// Add visible roles
+		const roleCheckboxes: { checkbox: HTMLInputElement; id: string }[] = [
+			{ checkbox: noneRoleCheckbox, id: 'none-set' }
+		];
+		
+		for (const role of visibleRoles) {
+			const roleLabel = rolesOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+			const roleCheckbox = roleLabel.createEl('input', { type: 'checkbox' });
+			roleCheckbox.checked = tempRoles.includes(role.id);
+			roleLabel.createSpan().setText(`${role.icon} ${role.name}`);
+			roleCheckboxes.push({ checkbox: roleCheckbox, id: role.id });
+		}
+		
+		// Update all checkboxes state
+		const updateRoleCheckboxes = () => {
+			allRolesCheckbox.checked = tempRoles.length === totalRoles;
+			roleCheckboxes.forEach(({ checkbox, id }) => {
+				checkbox.checked = tempRoles.includes(id);
+			});
+		};
+		
+		// All Roles checkbox handler
+		allRolesCheckbox.onchange = (e) => {
+			e.stopPropagation();
+			if (allRolesCheckbox.checked) {
+				tempRoles = ['none-set', ...visibleRoles.map(r => r.id)];
+			} else {
+				tempRoles = [];
+			}
+			updateRoleCheckboxes();
+		};
+		
+		// Individual role checkbox handlers
+		roleCheckboxes.forEach(({ checkbox, id }) => {
+			checkbox.onchange = (e) => {
+				e.stopPropagation();
+				if (checkbox.checked) {
+					if (!tempRoles.includes(id)) {
+						tempRoles.push(id);
+					}
+				} else {
+					tempRoles = tempRoles.filter(r => r !== id);
+				}
+				updateRoleCheckboxes();
+			};
+		});
+		
+		// Action buttons
+		const rolesActions = rolesDropdown.createDiv('compact-multiselect-actions');
+		
+		const resetRolesBtn = rolesActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		resetRolesBtn.setText('Reset');
+		resetRolesBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempRoles = [];
+			updateRoleCheckboxes();
+		};
+		
+		const cancelRolesBtn = rolesActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		cancelRolesBtn.setText('Cancel');
+		cancelRolesBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempRoles = [...originalRoles];
+			rolesDropdown.style.display = 'none';
+		};
+		
+		const okRolesBtn = rolesActions.createEl('button', { cls: 'compact-multiselect-btn compact-multiselect-ok' });
+		okRolesBtn.setText('OK');
+		okRolesBtn.onclick = (e) => {
+			e.stopPropagation();
+			this.updateFilters({ roles: tempRoles });
+			updateRolesDisplay();
+			// Don't close dropdown - allow multiple selections
+		};
+		
+		updateRolesDisplay();
+
+		// Status filter
+		const statusGroup = filtersRow.createDiv('compact-filter-group');
+		statusGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const statusIcon = statusGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(statusIcon, 'check-circle');
+		
+		const statusDropdownContainer = statusGroup.createDiv('compact-multiselect-container');
+		const statusDisplay = statusDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
+		addWhiteArrow(statusDisplay);
+		const statusDropdown = statusDropdownContainer.createDiv('compact-multiselect-dropdown');
+		statusDropdown.style.display = 'none';
+		allDropdowns.push(statusDropdown);
+		
+		const statuses = [
+			{ value: TaskStatus.TODO, label: 'To Do' },
+			{ value: TaskStatus.IN_PROGRESS, label: 'In Progress' },
+			{ value: TaskStatus.DONE, label: 'Done' },
+			{ value: TaskStatus.CANCELLED, label: 'Cancelled' }
+		];
+		
+		// Store original statuses for cancel functionality
+		let originalStatuses: TaskStatus[] = [...(this.currentFilters.statuses || [])];
+		let tempStatuses: TaskStatus[] = [...originalStatuses];
+		
+		// Update status display text
+		const updateStatusDisplay = () => {
+			const selectedStatuses = this.currentFilters.statuses || [];
+			if (selectedStatuses.length === 0) {
+				statusDisplay.setText('All Statuses');
+			} else if (selectedStatuses.length === statuses.length) {
+				statusDisplay.setText('All Statuses');
+			} else {
+				statusDisplay.setText(`${selectedStatuses.length} of ${statuses.length} Statuses`);
+			}
+		};
+		
+		// Toggle dropdown
+		statusDisplay.onclick = (e) => {
+			e.stopPropagation();
+			const isVisible = statusDropdown.style.display !== 'none';
+			if (!isVisible) {
+				// Store current state when opening
+				originalStatuses = [...(this.currentFilters.statuses || [])];
+				tempStatuses = [...originalStatuses];
+			}
+			statusDropdown.style.display = isVisible ? 'none' : 'block';
+		};
+		
+		const statusOptionsContainer = statusDropdown.createDiv('compact-multiselect-options');
+		
+		// Add "All Statuses" option first
+		const allStatusLabel = statusOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+		const allStatusCheckbox = allStatusLabel.createEl('input', { type: 'checkbox' });
+		allStatusCheckbox.checked = tempStatuses.length === statuses.length;
+		allStatusLabel.createSpan().setText('All Statuses');
+		
+		// Add status options
+		const statusCheckboxes: { checkbox: HTMLInputElement; value: TaskStatus }[] = [];
+		
+		for (const status of statuses) {
+			const statusLabel = statusOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+			const statusCheckbox = statusLabel.createEl('input', { type: 'checkbox' });
+			statusCheckbox.checked = tempStatuses.includes(status.value);
+			statusLabel.createSpan().setText(status.label);
+			statusCheckboxes.push({ checkbox: statusCheckbox, value: status.value });
+		}
+		
+		// Update all checkboxes state
+		const updateStatusCheckboxes = () => {
+			allStatusCheckbox.checked = tempStatuses.length === statuses.length;
+			statusCheckboxes.forEach(({ checkbox, value }) => {
+				checkbox.checked = tempStatuses.includes(value);
+			});
+		};
+		
+		// All Status checkbox handler
+		allStatusCheckbox.onchange = (e) => {
+			e.stopPropagation();
+			if (allStatusCheckbox.checked) {
+				tempStatuses = [...statuses.map(s => s.value)];
+			} else {
+				tempStatuses = [];
+			}
+			updateStatusCheckboxes();
+		};
+		
+		// Individual status checkbox handlers
+		statusCheckboxes.forEach(({ checkbox, value }) => {
+			checkbox.onchange = (e) => {
+				e.stopPropagation();
+				if (checkbox.checked) {
+					if (!tempStatuses.includes(value)) {
+						tempStatuses.push(value);
+					}
+				} else {
+					tempStatuses = tempStatuses.filter(s => s !== value);
+				}
+				updateStatusCheckboxes();
+			};
+		});
+		
+		// Action buttons
+		const statusActions = statusDropdown.createDiv('compact-multiselect-actions');
+		
+		const resetStatusBtn = statusActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		resetStatusBtn.setText('Reset');
+		resetStatusBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempStatuses = [];
+			updateStatusCheckboxes();
+		};
+		
+		const cancelStatusBtn = statusActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		cancelStatusBtn.setText('Cancel');
+		cancelStatusBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempStatuses = [...originalStatuses];
+			statusDropdown.style.display = 'none';
+		};
+		
+		const okStatusBtn = statusActions.createEl('button', { cls: 'compact-multiselect-btn compact-multiselect-ok' });
+		okStatusBtn.setText('OK');
+		okStatusBtn.onclick = (e) => {
+			e.stopPropagation();
+			this.updateFilters({ statuses: tempStatuses });
+			updateStatusDisplay();
+			// Don't close dropdown - allow multiple selections
+		};
+		
+		updateStatusDisplay();
+
+		// Priority filter
+		const priorityGroup = filtersRow.createDiv('compact-filter-group');
+		priorityGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const priorityIcon = priorityGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(priorityIcon, 'flag');
+		
+		const priorityDropdownContainer = priorityGroup.createDiv('compact-multiselect-container');
+		const priorityDisplay = priorityDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
+		addWhiteArrow(priorityDisplay);
+		const priorityDropdown = priorityDropdownContainer.createDiv('compact-multiselect-dropdown');
+		priorityDropdown.style.display = 'none';
+		allDropdowns.push(priorityDropdown);
+		
+		const priorities = [
+			{ value: TaskPriority.URGENT, label: 'Urgent' },
+			{ value: TaskPriority.HIGH, label: 'High' },
+			{ value: TaskPriority.MEDIUM, label: 'Medium' },
+			{ value: TaskPriority.LOW, label: 'Low' }
+		];
+		const totalPriorities = priorities.length + 1; // +1 for "None" option
+		
+		// Store original priorities for cancel functionality
+		let originalPriorities: (TaskPriority | 'none-set')[] = [...(this.currentFilters.priorities || [])];
+		let tempPriorities: (TaskPriority | 'none-set')[] = [...originalPriorities];
+		
+		// Update priority display text
+		const updatePriorityDisplay = () => {
+			const selectedPriorities = this.currentFilters.priorities || [];
+			if (selectedPriorities.length === 0) {
+				priorityDisplay.setText('All Priorities');
+			} else if (selectedPriorities.length === totalPriorities) {
+				priorityDisplay.setText('All Priorities');
+			} else {
+				priorityDisplay.setText(`${selectedPriorities.length} of ${totalPriorities} Priorities`);
+			}
+		};
+		
+		// Toggle dropdown
+		priorityDisplay.onclick = (e) => {
+			e.stopPropagation();
+			const isVisible = priorityDropdown.style.display !== 'none';
+			if (!isVisible) {
+				// Store current state when opening
+				originalPriorities = [...(this.currentFilters.priorities || [])];
+				tempPriorities = [...originalPriorities];
+			}
+			priorityDropdown.style.display = isVisible ? 'none' : 'block';
+		};
+		
+		const priorityOptionsContainer = priorityDropdown.createDiv('compact-multiselect-options');
+		
+		// Add "All Priorities" option first
+		const allPrioritiesLabel = priorityOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+		const allPrioritiesCheckbox = allPrioritiesLabel.createEl('input', { type: 'checkbox' });
+		allPrioritiesCheckbox.checked = tempPriorities.length === totalPriorities;
+		allPrioritiesLabel.createSpan().setText('All Priorities');
+		
+		// Add "None" option for priority
+		const nonePriorityLabel = priorityOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+		const nonePriorityCheckbox = nonePriorityLabel.createEl('input', { type: 'checkbox' });
+		nonePriorityCheckbox.checked = tempPriorities.includes('none-set');
+		nonePriorityLabel.createSpan().setText('None');
+		
+		// Add priority options
+		const priorityCheckboxes: { checkbox: HTMLInputElement; value: TaskPriority | 'none-set' }[] = [
+			{ checkbox: nonePriorityCheckbox, value: 'none-set' }
+		];
+		
+		for (const priority of priorities) {
+			const priorityLabel = priorityOptionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
+			const priorityCheckbox = priorityLabel.createEl('input', { type: 'checkbox' });
+			priorityCheckbox.checked = tempPriorities.includes(priority.value);
+			priorityLabel.createSpan().setText(priority.label);
+			priorityCheckboxes.push({ checkbox: priorityCheckbox, value: priority.value });
+		}
+		
+		// Update all checkboxes state
+		const updatePriorityCheckboxes = () => {
+			allPrioritiesCheckbox.checked = tempPriorities.length === totalPriorities;
+			priorityCheckboxes.forEach(({ checkbox, value }) => {
+				checkbox.checked = tempPriorities.includes(value);
+			});
+		};
+		
+		// All Priorities checkbox handler
+		allPrioritiesCheckbox.onchange = (e) => {
+			e.stopPropagation();
+			if (allPrioritiesCheckbox.checked) {
+				tempPriorities = ['none-set' as const, ...priorities.map(p => p.value)];
+			} else {
+				tempPriorities = [];
+			}
+			updatePriorityCheckboxes();
+		};
+		
+		// Individual priority checkbox handlers
+		priorityCheckboxes.forEach(({ checkbox, value }) => {
+			checkbox.onchange = (e) => {
+				e.stopPropagation();
+				if (checkbox.checked) {
+					if (!tempPriorities.includes(value)) {
+						tempPriorities.push(value);
+					}
+				} else {
+					tempPriorities = tempPriorities.filter(p => p !== value);
+				}
+				updatePriorityCheckboxes();
+			};
+		});
+		
+		// Action buttons
+		const priorityActions = priorityDropdown.createDiv('compact-multiselect-actions');
+		
+		const resetPriorityBtn = priorityActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		resetPriorityBtn.setText('Reset');
+		resetPriorityBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempPriorities = [];
+			updatePriorityCheckboxes();
+		};
+		
+		const cancelPriorityBtn = priorityActions.createEl('button', { cls: 'compact-multiselect-btn' });
+		cancelPriorityBtn.setText('Cancel');
+		cancelPriorityBtn.onclick = (e) => {
+			e.stopPropagation();
+			tempPriorities = [...originalPriorities];
+			priorityDropdown.style.display = 'none';
+		};
+		
+		const okPriorityBtn = priorityActions.createEl('button', { cls: 'compact-multiselect-btn compact-multiselect-ok' });
+		okPriorityBtn.setText('OK');
+		okPriorityBtn.onclick = (e) => {
+			e.stopPropagation();
+			this.updateFilters({ priorities: tempPriorities });
+			updatePriorityDisplay();
+			// Don't close dropdown - allow multiple selections
+		};
+		
+		updatePriorityDisplay();
+
+		// Date filter group
+		const dateGroup = filtersRow.createDiv('compact-filter-group');
+		dateGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
+		const dateIcon = dateGroup.createEl('span', { cls: 'compact-filter-icon' });
+		setIcon(dateIcon, 'calendar');
+		
+		const dateContainer = dateGroup.createDiv('compact-date-container');
+		
+		// Date type select
+		const dateTypeSelect = dateContainer.createEl('select', { cls: 'compact-filter-select compact-date-type' });
+		addWhiteArrow(dateTypeSelect);
+		const dateTypes = [
+			{ value: DateType.DUE, label: 'Due' },
+			{ value: DateType.CREATED, label: 'Created' },
+			{ value: DateType.COMPLETED, label: 'Completed' },
+			{ value: DateType.SCHEDULED, label: 'Scheduled' }
+		];
+		
+		for (const dateType of dateTypes) {
+			const option = dateTypeSelect.createEl('option', { value: dateType.value });
+			option.setText(dateType.label);
+			if (dateType.value === this.currentFilters.dateType) {
+				option.selected = true;
+			}
+		}
+		
+		dateTypeSelect.onchange = () => {
+			this.updateFilters({ dateType: dateTypeSelect.value as DateType });
+		};
+
+		// Date range inputs
+		const fromInput = dateContainer.createEl('input', { 
+			type: 'date', 
+			cls: 'compact-filter-date',
+			title: 'From date'
+		});
+		fromInput.value = this.currentFilters.dateRange?.from?.toISOString().split('T')[0] || '';
+		fromInput.onchange = () => {
+			const from = fromInput.value ? new Date(fromInput.value) : undefined;
+			this.updateFilters({ 
+				dateRange: { 
+					...this.currentFilters.dateRange, 
+					from 
+				} 
+			});
+		};
+
+		const toInput = dateContainer.createEl('input', { 
+			type: 'date', 
+			cls: 'compact-filter-date',
+			title: 'To date'
+		});
+		toInput.value = this.currentFilters.dateRange?.to?.toISOString().split('T')[0] || '';
+		toInput.onchange = () => {
+			const to = toInput.value ? new Date(toInput.value) : undefined;
+			this.updateFilters({ 
+				dateRange: { 
+					...this.currentFilters.dateRange, 
+					to 
+				} 
+			});
+		};
+
+		// Include not set checkbox
+		const includeNotSetLabel = dateContainer.createEl('label', { cls: 'compact-date-checkbox' });
+		const includeNotSetCheckbox = includeNotSetLabel.createEl('input', { type: 'checkbox' });
+		includeNotSetCheckbox.checked = this.currentFilters.dateRange?.includeNotSet || false;
+		includeNotSetCheckbox.onchange = () => {
+			this.updateFilters({ 
+				dateRange: { 
+					...this.currentFilters.dateRange, 
+					includeNotSet: includeNotSetCheckbox.checked 
+				} 
+			});
+		};
+		const noDatesIcon = includeNotSetLabel.createEl('span');
+		setIcon(noDatesIcon, 'calendar-x');
+		// Show tooltip on hover
+		includeNotSetLabel.title = 'Include tasks without dates';
+
+		// Filter actions
+		const actionsGroup = filtersRow.createDiv('compact-filter-actions');
+		
+		// Clear filters button
+		const clearFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-clear' });
+		const clearFiltersIcon = clearFiltersBtn.createEl('span');
+		setIcon(clearFiltersIcon, 'rotate-ccw');
+		clearFiltersBtn.title = 'Clear filters';
+		clearFiltersBtn.onclick = () => {
+			this.currentFilters = {};
+			this.render();
+		};
+		
+		// Cancel button
+		const cancelFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-cancel' });
+		const cancelFiltersIcon = cancelFiltersBtn.createEl('span');
+		setIcon(cancelFiltersIcon, 'x-circle');
+		cancelFiltersBtn.title = 'Cancel';
+		cancelFiltersBtn.style.display = this.plugin.settings.autoApplyFilters ? 'none' : 'block';
+		cancelFiltersBtn.onclick = () => {
+			this.cancelFiltersAndClose();
+		};
+
+		// Apply Filters button
+		const applyFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-apply' });
+		const applyFiltersIcon = applyFiltersBtn.createEl('span');
+		setIcon(applyFiltersIcon, 'play-circle');
+		applyFiltersBtn.title = 'Apply';
+		applyFiltersBtn.style.display = this.plugin.settings.autoApplyFilters ? 'none' : 'block';
+		applyFiltersBtn.onclick = () => {
+			this.applyFiltersAndClose();
+		};
+		
+		// Auto Apply toggle
+		const autoApplyLabel = actionsGroup.createEl('label', { cls: 'compact-filter-btn compact-auto-apply' });
+		const autoApplyCheckbox = autoApplyLabel.createEl('input', { type: 'checkbox' });
+		autoApplyCheckbox.checked = this.plugin.settings.autoApplyFilters;
+		autoApplyCheckbox.onchange = async () => {
+			this.plugin.settings.autoApplyFilters = autoApplyCheckbox.checked;
+			await this.plugin.saveSettings();
+			
+			// Show/hide buttons based on Auto Apply setting
+			const shouldHide = autoApplyCheckbox.checked;
+			applyFiltersBtn.style.display = shouldHide ? 'none' : 'block';
+			cancelFiltersBtn.style.display = shouldHide ? 'none' : 'block';
+			
+			// If Auto Apply is enabled, apply filters immediately
+			if (autoApplyCheckbox.checked) {
+				this.applyFiltersAndClose();
+			}
+		};
+		const autoApplyIcon = autoApplyLabel.createEl('span');
+		setIcon(autoApplyIcon, 'fast-forward');
+		autoApplyLabel.title = 'Auto apply';
+		
+		// Close dropdowns when clicking outside
+		const closeAllDropdowns = () => {
+			allDropdowns.forEach(dropdown => {
+				dropdown.style.display = 'none';
+			});
+		};
+		
+		// Add global click handler to close dropdowns when clicking outside
+		const handleOutsideClick = (event: MouseEvent) => {
+			const target = event.target as HTMLElement;
+			
+			// Check if click is inside any dropdown container
+			let isInsideDropdown = false;
+			for (const dropdown of allDropdowns) {
+				const container = dropdown.closest('.compact-multiselect-container');
+				if (container && container.contains(target)) {
+					isInsideDropdown = true;
+					break;
+				}
+			}
+			
+			// If click is outside all dropdowns, close them
+			if (!isInsideDropdown) {
+				closeAllDropdowns();
+			}
+		};
+		
+		// Add global click handler
+		document.addEventListener('click', handleOutsideClick);
+		
+		// Store cleanup function for when view is destroyed
+		this.register(() => {
+			document.removeEventListener('click', handleOutsideClick);
+		});
 	}
 
 	private renderFilterControls(container: HTMLElement): void {
