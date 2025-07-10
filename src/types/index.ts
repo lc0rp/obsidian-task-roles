@@ -8,6 +8,7 @@ export interface TaskAssignmentSettings {
 	savedViews: ViewConfiguration[];
 	autoApplyFilters: boolean;
 	useCompactFilters: boolean;
+	useTaskQueries: boolean;
 	debug: boolean;
 }
 
@@ -146,6 +147,7 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	savedViews: [],
 	autoApplyFilters: true,
 	useCompactFilters: false,
+	useTaskQueries: false,
 	debug: false
 };
 

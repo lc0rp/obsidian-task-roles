@@ -47,6 +47,8 @@ export const DEFAULT_SETTINGS = {
     hiddenDefaultRoles: [],
     savedViews: [],
     autoApplyFilters: true,
+    useCompactFilters: false,
+    useTaskQueries: false,
     debug: false
 };
 export const ASSIGNMENT_COMMENT_START = '<!--TA-->';

@@ -29,6 +29,16 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 		this.renderContent();
 	}
 
+	protected async renderAsync(): Promise<void> {
+		this.viewContainerEl = this.contentEl;
+		this.viewContainerEl.empty();
+		this.viewContainerEl.addClass('task-assignment-view');
+
+		this.renderHeader();
+		this.renderFilters();
+		await this.renderContentAsync();
+	}	
+
 	private renderHeader(): void {
 		const headerEl = this.viewContainerEl.createDiv('task-assignment-header');
 		
@@ -1114,19 +1124,133 @@ export class TaskAssignmentView extends TaskAssignmentViewBase {
 	private renderContent(): void {
 		this.viewContentEl = this.viewContainerEl.createDiv('task-assignment-content');
 		
-		// Get filtered and organized tasks
-		const allTasks = this.taskCacheService.getAllTasks();
-		const filteredTasks = this.applyFilters(allTasks);
-		const columns = this.organizeTasksByLayout(filteredTasks);
+		// Check if task queries are enabled
+		if (!this.plugin.settings.useTaskQueries) {
+			// Get filtered and organized tasks
+			const allTasks = this.taskCacheService.getAllTasks();
+			const filteredTasks = this.applyFilters(allTasks);
+			const columns = this.organizeTasksByLayout(filteredTasks);
 
-		// Render columns
-		const columnsContainer = this.viewContentEl.createDiv('task-assignment-columns');
+			// Render columns
+			const columnsContainer = this.viewContentEl.createDiv('task-assignment-columns');
+			
+			for (const column of columns) {
+				this.renderColumn(columnsContainer, column);
+			}
+		}
+	}
+
+	private async renderContentAsync(): Promise<void> {
+		this.viewContentEl = this.viewContainerEl.createDiv('task-assignment-content');
 		
-		for (const column of columns) {
-			this.renderColumn(columnsContainer, column);
+		// Check if task queries are enabled
+		if (this.plugin.settings.useTaskQueries) {
+			await this.renderContentFromTaskQueries();
+		}
+	}
+
+	private async renderContentFromTaskQueries(): Promise<void> {
+		// Convert current filters to task queries
+		const taskQuery = this.buildTaskQueryFromFilters();
+		
+		// Create the task query syntax as markdown
+		const taskQueryMarkdown = taskQuery 
+			? `# Generated Task Query:\n\n\`\`\`tasks\n${taskQuery}\n\`\`\`\n\n*This is the task query syntax that would be used to filter tasks. In the future, this could be executed by a task query engine.*`
+			: `# Generated Task Query:\n\n\`\`\`tasks\n# No filters applied\n\`\`\`\n\n*This is the task query syntax that would be used to filter tasks. In the future, this could be executed by a task query engine.*`;
+		
+		// Create container for the rendered markdown
+		const queryContainer = this.viewContentEl.createDiv('task-query-container');
+		
+		// Render the task query using MarkdownRenderer
+		await MarkdownRenderer.renderMarkdown(
+			taskQueryMarkdown,
+			queryContainer,
+			"virtual/tasks-preview.md",
+			this  // the view is a MarkdownComponent, so it's safe to pass here
+		);
+	}
+
+	private buildTaskQueryFromFilters(): string {
+		const queryParts: string[] = [];
+
+		// Convert role filters to query syntax
+		if (this.currentFilters.roles && this.currentFilters.roles.length > 0) {
+			const roleQueries = this.currentFilters.roles.map(roleId => {
+				if (roleId === 'none-set') {
+					return 'no-role';
+				}
+				const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
+				return role ? `role:${role.name}` : `role:${roleId}`;
+			});
+			queryParts.push(`(${roleQueries.join(' OR ')})`);
 		}
 
+		// Convert people filters to query syntax
+		if (this.currentFilters.people && this.currentFilters.people.length > 0) {
+			const peopleQueries = this.currentFilters.people.map(person => `assignee:${person}`);
+			queryParts.push(`(${peopleQueries.join(' OR ')})`);
+		}
+
+		// Convert company filters to query syntax
+		if (this.currentFilters.companies && this.currentFilters.companies.length > 0) {
+			const companyQueries = this.currentFilters.companies.map(company => `assignee:${company}`);
+			queryParts.push(`(${companyQueries.join(' OR ')})`);
+		}
+
+		// Convert status filters to query syntax
+		if (this.currentFilters.statuses && this.currentFilters.statuses.length > 0) {
+			const statusQueries = this.currentFilters.statuses.map(status => `status:${status}`);
+			queryParts.push(`(${statusQueries.join(' OR ')})`);
+		}
+
+		// Convert priority filters to query syntax
+		if (this.currentFilters.priorities && this.currentFilters.priorities.length > 0) {
+			const priorityQueries = this.currentFilters.priorities.map(priority => {
+				if (priority === 'none-set') {
+					return 'priority:medium AND no-explicit-priority';
+				}
+				return `priority:${priority}`;
+			});
+			queryParts.push(`(${priorityQueries.join(' OR ')})`);
+		}
+
+		// Convert tag filters to query syntax
+		if (this.currentFilters.tags && this.currentFilters.tags.length > 0) {
+			const tagQueries = this.currentFilters.tags.map(tag => `#${tag}`);
+			queryParts.push(`(${tagQueries.join(' OR ')})`);
+		}
+
+		// Convert date range filters to query syntax
+		if (this.currentFilters.dateRange && this.currentFilters.dateType) {
+			const { from, to, includeNotSet } = this.currentFilters.dateRange;
+			const dateType = this.currentFilters.dateType;
+			
+			const dateParts: string[] = [];
+			
+			if (from) {
+				dateParts.push(`${dateType}:>=${from.toISOString().split('T')[0]}`);
+			}
+			if (to) {
+				dateParts.push(`${dateType}:<=${to.toISOString().split('T')[0]}`);
+			}
+			if (includeNotSet) {
+				dateParts.push(`no-${dateType}`);
+			}
+			
+			if (dateParts.length > 0) {
+				queryParts.push(`(${dateParts.join(' OR ')})`);
+			}
+		}
+
+		// Convert text search to query syntax
+		if (this.currentFilters.textSearch && this.currentFilters.textSearch.trim()) {
+			queryParts.push(`"${this.currentFilters.textSearch.trim()}"`);
+		}
+
+		return queryParts.join(' AND ');
 	}
+
+
 
 	private renderColumn(container: HTMLElement, column: any): void {
 		const columnEl = container.createDiv('task-assignment-column');

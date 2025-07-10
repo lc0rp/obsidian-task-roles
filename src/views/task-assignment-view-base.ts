@@ -29,7 +29,11 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
-		this.render();
+		if (this.plugin.settings.useTaskQueries) {
+			await this.renderAsync();
+		} else {
+			this.render();
+		}
 	}
 
 	async onClose(): Promise<void> {
@@ -37,6 +41,7 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 	}
 
 	protected abstract render(): void;
+	protected abstract renderAsync(): Promise<void>;
 
 	// Filtering methods
 	protected applyFilters(tasks: TaskData[]): TaskData[] {
@@ -398,14 +403,29 @@ export abstract class TaskAssignmentViewBase extends ItemView {
 		this.render();
 	}
 
+	protected async updateFiltersAsync(newFilters: Partial<ViewFilters>): Promise<void> {
+		this.currentFilters = { ...this.currentFilters, ...newFilters };
+		return this.renderAsync();
+	}
+
 	protected updateLayout(newLayout: ViewLayout): void {
 		this.currentLayout = newLayout;
 		this.render();
 	}
 
+	protected async updateLayoutAsync(newLayout: ViewLayout): Promise<void> {
+		this.currentLayout = newLayout;
+		return this.renderAsync();
+	}
+
 	protected updateSort(newSort: SortOption): void {
 		this.currentSort = newSort;
 		this.render();
+	}
+
+	protected async updateSortAsync(newSort: SortOption): Promise<void> {
+		this.currentSort = newSort;
+		return this.renderAsync();
 	}
 
 	// Utility methods
