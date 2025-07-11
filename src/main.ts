@@ -16,6 +16,8 @@ import { AssignmentModal } from './modals/assignment-modal';
 import { TaskAssignmentSettingTab } from './settings/task-assignment-settings-tab';
 import { TaskAssignmentView } from './views/task-assignment-view';
 
+import { syntaxTree } from '@codemirror/language';
+
 export default class TaskAssignmentPlugin extends Plugin {
 	settings: TaskAssignmentSettings;
 	taskAssignmentService: TaskAssignmentService;
@@ -77,27 +79,6 @@ export default class TaskAssignmentPlugin extends Plugin {
 
 		// Register role suggestion for \ shortcuts
 		this.registerEditorSuggest(new RoleSuggest(this.app, this));
-
-		// Integrate with the Tasks plugin autosuggest menu if available
-		const tasks = this.app.plugins.enabledPlugins.has('obsidian-tasks-plugin')
-			? (this.app.plugins.plugins['obsidian-tasks-plugin'] as any).apiV1
-			: undefined;
-
-		if (tasks?.registerAutoSuggestExtension) {
-			for (const role of this.getVisibleRoles()) {
-				tasks.registerAutoSuggestExtension({
-					keyword: role.id,
-					icon: role.icon,
-					onApply: ({ editor, range }: { editor: Editor; range: { from: EditorPosition; to: EditorPosition } }) => {
-						const inTask = this.isInTaskCodeBlock(editor, range.from.line);
-						const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
-						editor.replaceRange(replacement, range.from, range.to);
-						const cursor = { line: range.from.line, ch: range.from.ch + replacement.length - (inTask ? 0 : 1) };
-						editor.setCursor(cursor);
-					}
-				});
-			}
-		}
 
 		// Register the CodeMirror extension for task icons
 		this.registerEditorExtension(taskAssignmentExtension(this));
@@ -185,21 +166,52 @@ export default class TaskAssignmentPlugin extends Plugin {
 	}
 
 	isInTaskCodeBlock(editor: Editor, line: number): boolean {
+		/** ---------- 1. CM6 fast‑path ---------- */
+		const view = (editor as any).cm; // EditorView in CM6
+		if (view && view.state && view.state.selection) {
+			try {
+				const state = view.state;
+				const pos   = state.selection.main.head;
+				let node    = syntaxTree(state).resolve(pos, -1);
+
+				// Walk up the tree until we find a fenced code block
+				while (node) {
+					if (node.name === 'FencedCode') {
+						const infoNode = node.getChild('FencedCodeInfo');
+						const info = infoNode
+							? state.sliceDoc(infoNode.from, infoNode.to).trim().toLowerCase()
+							: '';
+
+						return info === 'tasks' || info === 'dataview';
+					}
+					node = node.parent;
+				}
+			} catch {
+				/* Fall through to CM5/legacy scan */	
+			}
+		}
+
+		/** ---------- 2. Legacy CM5 / plain scan ---------- */
 		let inside = false;
-		let lang = '';
+		let lang   = '';
+
 		for (let i = 0; i <= line; i++) {
-			const text = editor.getLine(i).trim();
-			const match = text.match(/^```(\w*)/);
+			const text  = editor.getLine(i).trim();
+			const match = text.match(/^```([\w-]*)/); // opening/closing fence
+
 			if (match) {
-				if (inside) {
-					inside = false;
-					lang = '';
-				} else {
+				const currentLang = (match[1] || '').toLowerCase();
+
+				if (!inside) {
 					inside = true;
-					lang = (match[1] || '').toLowerCase();
+					lang   = currentLang;
+				} else {
+					inside = false;
+					lang   = '';
 				}
 			}
 		}
-		return inside && (lang === 'tasks' || lang === 'taskview');
+
+		return inside && (lang === 'tasks' || lang === 'dataview');
 	}
 }
