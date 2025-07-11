@@ -97,6 +97,17 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// Compatibility mode toggle
+		new Setting(containerEl)
+			.setName('Compatibility mode')
+			.setDesc('Use custom backslash trigger instead of built-in editor suggest for role shortcuts')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.compatMode)
+				.onChange(async (value) => {
+					this.plugin.settings.compatMode = value;
+					await this.plugin.saveSettings();
+				}));
+
 		// Task queries toggle
 		new Setting(containerEl)
 			.setName('Use task queries for content')
