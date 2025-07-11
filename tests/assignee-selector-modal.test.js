@@ -16,7 +16,7 @@ function createPlugin() {
 
 test('onOpen refreshes suggestions by dispatching input event', async () => {
   const plugin = createPlugin();
-  const modal = new AssigneeSelectorModal(plugin.app, plugin, () => {});
+  const modal = new AssigneeSelectorModal(plugin.app, plugin, () => { });
   await modal.onOpen();
   assert.ok(modal.inputEl.dispatched.includes('input'));
 });
