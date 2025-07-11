@@ -22,7 +22,18 @@ export class RoleSuggest extends EditorSuggest<Role> {
     onTrigger(cursor: EditorPosition, editor: Editor): EditorSuggestTriggerInfo | null {
         const line = editor.getLine(cursor.line);
         const before = line.substring(0, cursor.ch);
-        const match = before.match(/\\([a-zA-Z]*)$/);
+
+        const shortcuts = this.plugin.getVisibleRoles()
+            .map(r => r.shortcut)
+            .filter((s): s is string => !!s)
+            .map(s => this.plugin.taskAssignmentService.escapeRegex(s))
+            .join('');
+
+        const pattern = shortcuts
+            ? new RegExp(`\\\\(?:([${shortcuts}]?)|)$`)
+            : /\\$/;
+
+        const match = before.match(pattern);
         if (!match) {
             return null;
         }
