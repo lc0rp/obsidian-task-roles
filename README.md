@@ -24,7 +24,7 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 - **Contributors** 👥: Who will contribute to the task
 - **Informed** 📢: Who needs to be kept informed
 - **Quick shortcuts**: Type `\d`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
-  Inside `tasks` or `taskview` code blocks, the shortcut inserts `🚗 = ` style markup.
+  Inside `tasks` or `taskview` code blocks, the shortcut inserts `🚗 =` style markup.
 
 ### ⚙️ Customizable Roles
 

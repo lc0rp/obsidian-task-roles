@@ -172,12 +172,12 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 				text.setPlaceholder('Enter role name');
 			});
 
-                new Setting(containerEl)
-                        .setName('Role icon')
-                        .addText(text => {
-                                iconInput = text.inputEl;
-                                text.setPlaceholder('🎯');
-                        });
+		new Setting(containerEl)
+			.setName('Role icon')
+			.addText(text => {
+				iconInput = text.inputEl;
+				text.setPlaceholder('🎯');
+			});
 
 		new Setting(containerEl)
 			.setName('Shortcut letter')

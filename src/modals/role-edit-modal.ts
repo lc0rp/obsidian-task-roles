@@ -31,12 +31,12 @@ export class RoleEditModal extends Modal {
 				text.setValue(this.role.name);
 			});
 
-                new Setting(contentEl)
-                        .setName('Role icon')
-                        .addText(text => {
-                                iconInput = text.inputEl;
-                                text.setValue(this.role.icon);
-                        });
+		new Setting(contentEl)
+			.setName('Role icon')
+			.addText(text => {
+				iconInput = text.inputEl;
+				text.setValue(this.role.icon);
+			});
 
 		new Setting(contentEl)
 			.setName('Shortcut letter')
