@@ -49,7 +49,8 @@ export const DEFAULT_SETTINGS = {
     autoApplyFilters: true,
     useCompactFilters: false,
     useTaskQueries: false,
-    debug: false
+    debug: false,
+    compatMode: false
 };
 export const ASSIGNMENT_COMMENT_START = '<!--TA-->';
 export const ASSIGNMENT_COMMENT_END = '<!--/TA-->';

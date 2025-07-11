@@ -1,52 +1,37 @@
-import {
-    App,
-    Editor,
-    EditorPosition,
-    EditorSuggest,
-    EditorSuggestContext,
-    EditorSuggestTriggerInfo
-} from 'obsidian';
-import type TaskAssignmentPlugin from '../main';
-import { Role } from '../types';
-
+import { EditorSuggest } from 'obsidian';
 /**
  * Suggests roles when typing a backslash followed by the role shortcut.
  * Inserts a dataview inline field like `[🚗:: ]` with the cursor positioned
  * before the closing bracket.
  */
-export class RoleSuggest extends EditorSuggest<Role> {
-    constructor(public app: App, private plugin: TaskAssignmentPlugin) {
+export class RoleSuggest extends EditorSuggest {
+    constructor(app, plugin) {
         super(app);
+        this.app = app;
+        this.plugin = plugin;
     }
-
-    onTrigger(cursor: EditorPosition, editor: Editor): EditorSuggestTriggerInfo | null {
+    onTrigger(cursor, editor) {
         const line = editor.getLine(cursor.line);
         const before = line.substring(0, cursor.ch);
-
         // Check if we're in a task code block or on a task line
         const isInTaskBlock = this.isInTaskBlock(editor, cursor.line);
         const isTaskLine = /^\s*- \[[ x]\]/.test(line);
-
         // Only trigger if we're in a task code block or on a task line
         if (!isInTaskBlock && !isTaskLine) {
             return null;
         }
-
         const shortcuts = this.plugin.getVisibleRoles()
             .map(r => r.shortcut)
-            .filter((s): s is string => !!s)
+            .filter((s) => !!s)
             .map(s => this.plugin.taskAssignmentService.escapeRegex(s))
             .join('');
-
         const pattern = shortcuts
             ? new RegExp(`\\\\(?:([${shortcuts}]?)|)$`)
             : /\\$/;
-
         const match = before.match(pattern);
         if (!match) {
             return null;
         }
-
         const query = match[1];
         const start = cursor.ch - query.length - 1; // include backslash
         return {
@@ -55,26 +40,22 @@ export class RoleSuggest extends EditorSuggest<Role> {
             query
         };
     }
-
-    getSuggestions(context: EditorSuggestContext): Role[] {
+    getSuggestions(context) {
         const query = context.query.toLowerCase();
         const roles = this.plugin.getVisibleRoles();
         return roles.filter(r => (r.shortcut ?? '').toLowerCase().startsWith(query));
     }
-
-    renderSuggestion(role: Role, el: HTMLElement): void {
+    renderSuggestion(role, el) {
         el.createSpan({ text: `${role.icon} ${role.name}` });
     }
-
-    private isInTaskBlock(editor: Editor, line: number): boolean {
+    isInTaskBlock(editor, line) {
         return this.plugin.isInTaskCodeBlock(editor, line);
     }
-
-    selectSuggestion(role: Role): void {
-        const { editor, start } = this.context!;
+    selectSuggestion(role) {
+        const { editor, start } = this.context;
         const inTask = this.isInTaskBlock(editor, start.line);
         const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
-        editor.replaceRange(replacement, start, this.context!.end);
+        editor.replaceRange(replacement, start, this.context.end);
         const cursorPos = {
             line: start.line,
             ch: start.ch + replacement.length

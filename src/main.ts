@@ -187,7 +187,9 @@ export default class TaskAssignmentPlugin extends Plugin {
 
                         return info === 'tasks' || info === 'dataview';
                     }
-                    node = node.parent;
+                    const parent = node.parent;
+                    if (!parent) break;
+                    node = parent;
                 }
             } catch {
                 /* Fall through to CM5/legacy scan */
