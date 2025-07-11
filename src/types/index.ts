@@ -13,11 +13,13 @@ export interface TaskAssignmentSettings {
 }
 
 export interface Role {
-	id: string;
-	name: string;
-	icon: string;
-	isDefault: boolean;
-	order: number;
+        id: string;
+        name: string;
+        icon: string;
+        /** Single letter shortcut used for quick assignment */
+        shortcut?: string;
+        isDefault: boolean;
+        order: number;
 }
 
 export interface Assignment {
@@ -131,10 +133,10 @@ export interface ViewColumn {
 }
 
 export const DEFAULT_ROLES: Role[] = [
-	{ id: 'drivers', name: 'Drivers', icon: '🚗', isDefault: true, order: 1 },
-	{ id: 'approvers', name: 'Approvers', icon: '👍', isDefault: true, order: 2 },
-	{ id: 'contributors', name: 'Contributors', icon: '👥', isDefault: true, order: 3 },
-	{ id: 'informed', name: 'Informed', icon: '📢', isDefault: true, order: 4 }
+        { id: 'drivers', name: 'Drivers', icon: '🚗', shortcut: 'd', isDefault: true, order: 1 },
+        { id: 'approvers', name: 'Approvers', icon: '👍', shortcut: 'a', isDefault: true, order: 2 },
+        { id: 'contributors', name: 'Contributors', icon: '👥', shortcut: 'c', isDefault: true, order: 3 },
+        { id: 'informed', name: 'Informed', icon: '📢', shortcut: 'i', isDefault: true, order: 4 }
 ];
 
 export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
