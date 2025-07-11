@@ -80,23 +80,23 @@ export default class TaskAssignmentPlugin extends Plugin {
 
 		// Integrate with the Tasks plugin autosuggest menu if available
 		const tasks = this.app.plugins.enabledPlugins.has('obsidian-tasks-plugin')
-				? (this.app.plugins.plugins['obsidian-tasks-plugin'] as any).apiV1
-				: undefined;
+			? (this.app.plugins.plugins['obsidian-tasks-plugin'] as any).apiV1
+			: undefined;
 
 		if (tasks?.registerAutoSuggestExtension) {
-				for (const role of this.getVisibleRoles()) {
-						tasks.registerAutoSuggestExtension({
-								keyword: role.id,
-								icon: role.icon,
-								onApply: ({ editor, range }: { editor: Editor; range: { from: EditorPosition; to: EditorPosition } }) => {
-										const inTask = this.isInTaskCodeBlock(editor, range.from.line);
-										const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
-										editor.replaceRange(replacement, range.from, range.to);
-										const cursor = { line: range.from.line, ch: range.from.ch + replacement.length - (inTask ? 0 : 1) };
-										editor.setCursor(cursor);
-								}
-						});
-				}
+			for (const role of this.getVisibleRoles()) {
+				tasks.registerAutoSuggestExtension({
+					keyword: role.id,
+					icon: role.icon,
+					onApply: ({ editor, range }: { editor: Editor; range: { from: EditorPosition; to: EditorPosition } }) => {
+						const inTask = this.isInTaskCodeBlock(editor, range.from.line);
+						const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
+						editor.replaceRange(replacement, range.from, range.to);
+						const cursor = { line: range.from.line, ch: range.from.ch + replacement.length - (inTask ? 0 : 1) };
+						editor.setCursor(cursor);
+					}
+				});
+			}
 		}
 
 		// Register the CodeMirror extension for task icons
@@ -178,28 +178,28 @@ export default class TaskAssignmentPlugin extends Plugin {
 		new AssignmentModal(this.app, this, editor).open();
 	}
 
-        getVisibleRoles(): Role[] {
-                return this.settings.roles.filter(role =>
-                        !role.isDefault || !this.settings.hiddenDefaultRoles.includes(role.id)
-                );
-        }
+	getVisibleRoles(): Role[] {
+		return this.settings.roles.filter(role =>
+			!role.isDefault || !this.settings.hiddenDefaultRoles.includes(role.id)
+		);
+	}
 
-        isInTaskCodeBlock(editor: Editor, line: number): boolean {
-                let inside = false;
-                let lang = '';
-                for (let i = 0; i <= line; i++) {
-                        const text = editor.getLine(i).trim();
-                        const match = text.match(/^```(\w*)/);
-                        if (match) {
-                                if (inside) {
-                                        inside = false;
-                                        lang = '';
-                                } else {
-                                        inside = true;
-                                        lang = (match[1] || '').toLowerCase();
-                                }
-                        }
-                }
-                return inside && (lang === 'tasks' || lang === 'taskview');
-        }
+	isInTaskCodeBlock(editor: Editor, line: number): boolean {
+		let inside = false;
+		let lang = '';
+		for (let i = 0; i <= line; i++) {
+			const text = editor.getLine(i).trim();
+			const match = text.match(/^```(\w*)/);
+			if (match) {
+				if (inside) {
+					inside = false;
+					lang = '';
+				} else {
+					inside = true;
+					lang = (match[1] || '').toLowerCase();
+				}
+			}
+		}
+		return inside && (lang === 'tasks' || lang === 'taskview');
+	}
 }
