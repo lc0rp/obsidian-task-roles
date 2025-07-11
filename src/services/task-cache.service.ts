@@ -265,12 +265,26 @@ export class TaskCacheService {
         // Remove assignments, dates, priority indicators, and tags
         let description = content;
 
-        // Remove role assignments
+        // Remove role assignments - both old and new formats
         const allIcons = this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('');
+
+        // Remove old format assignments (icon + wiki-links)
         for (const role of this.visibleRoles) {
             const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'gu');
             description = description.replace(regex, '');
         }
+
+        // Remove new format assignments (dataview inline)
+        for (const role of this.visibleRoles) {
+            const escapedIcon = this.taskAssignmentService.escapeRegex(role.icon);
+            const regex = new RegExp(`\\s*\\[${escapedIcon}::[^\\]]*\\]`, 'gu');
+            description = description.replace(regex, '');
+        }
+
+        // Remove HTML comments from old format
+        description = description
+            .replace(/<!--TA-->/g, '')
+            .replace(/<!--\/TA-->/g, '');
 
         // Remove dates, priority, and tags
         description = description

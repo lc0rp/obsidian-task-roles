@@ -140,10 +140,12 @@ The Task Center uses an intelligent background task cache that:
 
 ### Assignment Format
 
-When you assign people to a task, it gets formatted like this:
-`[icon] [comma-separated contact links]`
+When you assign people to a task, it gets formatted using dataview inline format:
+`[icon:: comma-separated assignees]`
 
-Example: `🚗 [[John Doe|@John]], [[Jane Smith|@Jane]] 👍 [[Manager|@Manager]]`
+Example: `[🚗:: @John, @Jane] [👍:: @Manager]`
+
+The plugin also supports reading the legacy format for backward compatibility.
 
 ### Task Metadata Support
 
