@@ -992,3 +992,45 @@
 .task-assignment-column-content::-webkit-scrollbar-thumb:hover {
 	background: var(--text-muted);
 }
+
+/* Backslash Trigger Compatibility Mode Styles */
+.backslash-trigger-popup {
+	position: fixed;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: var(--shadow-s);
+	z-index: 1000;
+	max-height: 200px;
+	overflow-y: auto;
+	min-width: 200px;
+}
+
+.backslash-trigger-option {
+	padding: 8px 12px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.backslash-trigger-option:last-child {
+	border-bottom: none;
+}
+
+.backslash-trigger-option:hover,
+.backslash-trigger-option.selected {
+	background-color: var(--background-modifier-hover);
+}
+
+.backslash-trigger-option span:first-child {
+	font-size: 16px;
+	min-width: 20px;
+	text-align: center;
+}
+
+.backslash-trigger-option span:last-child {
+	font-weight: 500;
+	color: var(--text-normal);
+}

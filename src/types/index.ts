@@ -1,142 +1,143 @@
 export interface TaskAssignmentSettings {
-	contactSymbol: string;
-	companySymbol: string;
-	contactDirectory: string;
-	companyDirectory: string;
-	roles: Role[];
-	hiddenDefaultRoles: string[];
-	savedViews: ViewConfiguration[];
-	autoApplyFilters: boolean;
-	useCompactFilters: boolean;
-	useTaskQueries: boolean;
-	debug: boolean;
+    contactSymbol: string;
+    companySymbol: string;
+    contactDirectory: string;
+    companyDirectory: string;
+    roles: Role[];
+    hiddenDefaultRoles: string[];
+    savedViews: ViewConfiguration[];
+    autoApplyFilters: boolean;
+    useCompactFilters: boolean;
+    useTaskQueries: boolean;
+    debug: boolean;
+    compatMode: boolean;
 }
 
 export interface Role {
-	id: string;
-	name: string;
-	icon: string;
-	/** Single letter shortcut used for quick assignment */
-	shortcut?: string;
-	isDefault: boolean;
-	order: number;
+    id: string;
+    name: string;
+    icon: string;
+    /** Single letter shortcut used for quick assignment */
+    shortcut?: string;
+    isDefault: boolean;
+    order: number;
 }
 
 export interface Assignment {
-	roleId: string;
-	assignees: string[];
+    roleId: string;
+    assignees: string[];
 }
 
 export interface ParsedAssignment {
-	role: Role;
-	assignees: string[];
+    role: Role;
+    assignees: string[];
 }
 
 // Task data structures for caching and views
 export interface TaskData {
-	id: string;
-	filePath: string;
-	lineNumber: number;
-	content: string;
-	description: string;
-	searchText: string;
-	status: TaskStatus;
-	priority: TaskPriority;
-	tags: string[];
-	assignments: ParsedAssignment[];
-	dates: TaskDates;
-	createdDate: Date;
-	modifiedDate: Date;
+    id: string;
+    filePath: string;
+    lineNumber: number;
+    content: string;
+    description: string;
+    searchText: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+    tags: string[];
+    assignments: ParsedAssignment[];
+    dates: TaskDates;
+    createdDate: Date;
+    modifiedDate: Date;
 }
 
 export interface TaskDates {
-	created?: Date;
-	due?: Date;
-	completed?: Date;
-	scheduled?: Date;
+    created?: Date;
+    due?: Date;
+    completed?: Date;
+    scheduled?: Date;
 }
 
 export enum TaskStatus {
-	TODO = 'todo',
-	IN_PROGRESS = 'in-progress',
-	DONE = 'done',
-	CANCELLED = 'cancelled'
+    TODO = 'todo',
+    IN_PROGRESS = 'in-progress',
+    DONE = 'done',
+    CANCELLED = 'cancelled'
 }
 
 export enum TaskPriority {
-	LOW = 'low',
-	MEDIUM = 'medium',
-	HIGH = 'high',
-	URGENT = 'urgent'
+    LOW = 'low',
+    MEDIUM = 'medium',
+    HIGH = 'high',
+    URGENT = 'urgent'
 }
 
 // View configuration types
 export interface ViewConfiguration {
-	id: string;
-	name: string;
-	layout: ViewLayout;
-	filters: ViewFilters;
-	sortBy: SortOption;
-	createdDate: Date;
+    id: string;
+    name: string;
+    layout: ViewLayout;
+    filters: ViewFilters;
+    sortBy: SortOption;
+    createdDate: Date;
 }
 
 export enum ViewLayout {
-	STATUS = 'status',
-	ROLE = 'role',
-	ASSIGNEES = 'assignees',
-	DATE = 'date'
+    STATUS = 'status',
+    ROLE = 'role',
+    ASSIGNEES = 'assignees',
+    DATE = 'date'
 }
 
 export interface ViewFilters {
-	roles?: string[];
-	people?: string[];
-	companies?: string[];
-	statuses?: TaskStatus[];
-	priorities?: (TaskPriority | 'none-set')[];
-	tags?: string[];
-	dateRange?: DateRange;
-	dateType?: DateType;
-	textSearch?: string;
+    roles?: string[];
+    people?: string[];
+    companies?: string[];
+    statuses?: TaskStatus[];
+    priorities?: (TaskPriority | 'none-set')[];
+    tags?: string[];
+    dateRange?: DateRange;
+    dateType?: DateType;
+    textSearch?: string;
 }
 
 export interface DateRange {
-	from?: Date;
-	to?: Date;
-	includeNotSet?: boolean;
+    from?: Date;
+    to?: Date;
+    includeNotSet?: boolean;
 }
 
 export enum DateType {
-	CREATED = 'created',
-	DUE = 'due',
-	COMPLETED = 'completed',
-	SCHEDULED = 'scheduled'
+    CREATED = 'created',
+    DUE = 'due',
+    COMPLETED = 'completed',
+    SCHEDULED = 'scheduled'
 }
 
 export const TASK_DATE_ICONS: Record<keyof TaskDates, string> = {
-	due: '📅',
-	scheduled: '⏳',
-	completed: '✅',
-	created: '🗓️'
+    due: '📅',
+    scheduled: '⏳',
+    completed: '✅',
+    created: '🗓️'
 };
 
 export interface SortOption {
-	field: 'urgency' | 'description' | 'created' | 'modified' | 'due' | 'name' | 'recency';
-	direction: 'asc' | 'desc';
+    field: 'urgency' | 'description' | 'created' | 'modified' | 'due' | 'name' | 'recency';
+    direction: 'asc' | 'desc';
 }
 
 // View state for organizing tasks
 export interface ViewColumn {
-	id: string;
-	title: string;
-	tasks: TaskData[];
-	isUserColumn?: boolean; // For role view - indicates if this is the user's column
+    id: string;
+    title: string;
+    tasks: TaskData[];
+    isUserColumn?: boolean; // For role view - indicates if this is the user's column
 }
 
 export const DEFAULT_ROLES: Role[] = [
-	{ id: 'drivers', name: 'Drivers', icon: '🚗', shortcut: 'd', isDefault: true, order: 1 },
-	{ id: 'approvers', name: 'Approvers', icon: '👍', shortcut: 'a', isDefault: true, order: 2 },
-	{ id: 'contributors', name: 'Contributors', icon: '👥', shortcut: 'c', isDefault: true, order: 3 },
-	{ id: 'informed', name: 'Informed', icon: '📢', shortcut: 'i', isDefault: true, order: 4 }
+    { id: 'drivers', name: 'Drivers', icon: '🚗', shortcut: 'd', isDefault: true, order: 1 },
+    { id: 'approvers', name: 'Approvers', icon: '👍', shortcut: 'a', isDefault: true, order: 2 },
+    { id: 'contributors', name: 'Contributors', icon: '👥', shortcut: 'c', isDefault: true, order: 3 },
+    { id: 'informed', name: 'Informed', icon: '📢', shortcut: 'i', isDefault: true, order: 4 }
 ];
 
 export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
@@ -150,7 +151,8 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
 	autoApplyFilters: true,
 	useCompactFilters: false,
 	useTaskQueries: false,
-	debug: false
+	debug: false,
+	compatMode: false
 };
 
 export const ASSIGNMENT_COMMENT_START = '<!--TA-->';
