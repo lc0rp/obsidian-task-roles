@@ -35,11 +35,13 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 		}
 	}
 
-	async onOpen() {
-		super.onOpen();
-		this.contacts = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
-		this.companies = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.companySymbol);
-	}
+        async onOpen() {
+                super.onOpen();
+                this.contacts = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
+                this.companies = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.companySymbol);
+                // Refresh suggestions after async data is loaded
+                this.inputEl.dispatchEvent(new Event('input'));
+        }
 
 	getItems(): string[] {
 		this.currentQuery = this.inputEl.value;
