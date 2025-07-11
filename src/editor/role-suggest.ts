@@ -63,4 +63,3 @@ export class RoleSuggest extends EditorSuggest<Role> {
         editor.setCursor(cursorPos);
     }
 }
-

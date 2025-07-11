@@ -161,9 +161,9 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 
 		// Add new role
 		containerEl.createEl('h4', { text: 'Add new role' });
-                let nameInput: HTMLInputElement;
-                let iconInput: HTMLInputElement;
-                let shortcutInput: HTMLInputElement;
+		let nameInput: HTMLInputElement;
+		let iconInput: HTMLInputElement;
+		let shortcutInput: HTMLInputElement;
 
 		new Setting(containerEl)
 			.setName('Role name')
@@ -179,13 +179,13 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
                                 text.setPlaceholder('🎯');
                         });
 
-                new Setting(containerEl)
-                        .setName('Shortcut letter')
-                        .setDesc('Single character used with \\ to insert this role')
-                        .addText(text => {
-                                shortcutInput = text.inputEl;
-                                text.setPlaceholder('d');
-                        });
+		new Setting(containerEl)
+			.setName('Shortcut letter')
+			.setDesc('Single character used with \\ to insert this role')
+			.addText(text => {
+				shortcutInput = text.inputEl;
+				text.setPlaceholder('d');
+			});
 
 		new Setting(containerEl)
 			.addButton(button => button
@@ -193,26 +193,26 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 				.setCta()
 				.onClick(async () => {
 					const name = nameInput.value.trim();
-                                        const icon = iconInput.value.trim();
-                                        const shortcut = shortcutInput.value.trim();
+					const icon = iconInput.value.trim();
+					const shortcut = shortcutInput.value.trim();
 
 					if (name && icon) {
-                                                const newRole: Role = {
-                                                        id: name.toLowerCase().replace(/\s+/g, '-'),
-                                                        name,
-                                                        icon,
-                                                        shortcut: shortcut || undefined,
-                                                        isDefault: false,
-                                                        order: this.plugin.settings.roles.length + 1
-                                                };
+						const newRole: Role = {
+							id: name.toLowerCase().replace(/\s+/g, '-'),
+							name,
+							icon,
+							shortcut: shortcut || undefined,
+							isDefault: false,
+							order: this.plugin.settings.roles.length + 1
+						};
 
 						this.plugin.settings.roles.push(newRole);
 						await this.plugin.saveSettings();
 
 						nameInput.value = '';
-                                                iconInput.value = '';
-                                                shortcutInput.value = '';
-                                                this.display();
+						iconInput.value = '';
+						shortcutInput.value = '';
+						this.display();
 					}
 				}));
 
