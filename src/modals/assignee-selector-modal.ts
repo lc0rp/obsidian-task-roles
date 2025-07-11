@@ -39,6 +39,8 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
 		super.onOpen();
 		this.contacts = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
 		this.companies = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.companySymbol);
+		// Refresh suggestions after async data is loaded
+		this.inputEl.dispatchEvent(new Event('input'));
 	}
 
 	getItems(): string[] {
