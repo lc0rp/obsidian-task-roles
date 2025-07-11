@@ -163,6 +163,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 		containerEl.createEl('h4', { text: 'Add new role' });
 		let nameInput: HTMLInputElement;
 		let iconInput: HTMLInputElement;
+		let shortcutInput: HTMLInputElement;
 
 		new Setting(containerEl)
 			.setName('Role name')
@@ -179,18 +180,28 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName('Shortcut letter')
+			.setDesc('Single character used with \\ to insert this role')
+			.addText(text => {
+				shortcutInput = text.inputEl;
+				text.setPlaceholder('d');
+			});
+
+		new Setting(containerEl)
 			.addButton(button => button
 				.setButtonText('Add role')
 				.setCta()
 				.onClick(async () => {
 					const name = nameInput.value.trim();
 					const icon = iconInput.value.trim();
+					const shortcut = shortcutInput.value.trim();
 
 					if (name && icon) {
 						const newRole: Role = {
 							id: name.toLowerCase().replace(/\s+/g, '-'),
 							name,
 							icon,
+							shortcut: shortcut || undefined,
 							isDefault: false,
 							order: this.plugin.settings.roles.length + 1
 						};
@@ -200,6 +211,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
 
 						nameInput.value = '';
 						iconInput.value = '';
+						shortcutInput.value = '';
 						this.display();
 					}
 				}));

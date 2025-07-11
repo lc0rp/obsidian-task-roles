@@ -1,5 +1,6 @@
 import {
 	Editor,
+	EditorPosition,
 	MarkdownView,
 	Plugin,
 	WorkspaceLeaf
@@ -10,6 +11,7 @@ import { TaskAssignmentService } from './services/task-assignment.service';
 import { TaskCacheService } from './services/task-cache.service';
 import { taskAssignmentExtension } from './editor/task-assignment-extension';
 import { AssignmentSuggest } from './editor/assignment-suggest';
+import { RoleSuggest } from './editor/role-suggest';
 import { AssignmentModal } from './modals/assignment-modal';
 import { TaskAssignmentSettingTab } from './settings/task-assignment-settings-tab';
 import { TaskAssignmentView } from './views/task-assignment-view';
@@ -73,6 +75,30 @@ export default class TaskAssignmentPlugin extends Plugin {
 		// Register editor suggest for inline assignment
 		this.registerEditorSuggest(new AssignmentSuggest(this.app, this));
 
+		// Register role suggestion for \ shortcuts
+		this.registerEditorSuggest(new RoleSuggest(this.app, this));
+
+		// Integrate with the Tasks plugin autosuggest menu if available
+		const tasks = this.app.plugins.enabledPlugins.has('obsidian-tasks-plugin')
+			? (this.app.plugins.plugins['obsidian-tasks-plugin'] as any).apiV1
+			: undefined;
+
+		if (tasks?.registerAutoSuggestExtension) {
+			for (const role of this.getVisibleRoles()) {
+				tasks.registerAutoSuggestExtension({
+					keyword: role.id,
+					icon: role.icon,
+					onApply: ({ editor, range }: { editor: Editor; range: { from: EditorPosition; to: EditorPosition } }) => {
+						const inTask = this.isInTaskCodeBlock(editor, range.from.line);
+						const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
+						editor.replaceRange(replacement, range.from, range.to);
+						const cursor = { line: range.from.line, ch: range.from.ch + replacement.length - (inTask ? 0 : 1) };
+						editor.setCursor(cursor);
+					}
+				});
+			}
+		}
+
 		// Register the CodeMirror extension for task icons
 		this.registerEditorExtension(taskAssignmentExtension(this));
 
@@ -109,7 +135,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-		// Ensure default roles exist and have correct icons
+		// Ensure default roles exist and have correct icons and shortcuts
 		const { DEFAULT_ROLES } = await import('./types');
 		for (const defaultRole of DEFAULT_ROLES) {
 			const existingRole = this.settings.roles.find(r => r.id === defaultRole.id);
@@ -118,6 +144,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 				// Update existing default role with correct icon and other properties
 				existingRole.icon = defaultRole.icon;
 				existingRole.name = defaultRole.name;
+				existingRole.shortcut = defaultRole.shortcut;
 				existingRole.isDefault = defaultRole.isDefault;
 				existingRole.order = defaultRole.order;
 			} else if (!this.settings.hiddenDefaultRoles.includes(defaultRole.id)) {
@@ -156,4 +183,23 @@ export default class TaskAssignmentPlugin extends Plugin {
 			!role.isDefault || !this.settings.hiddenDefaultRoles.includes(role.id)
 		);
 	}
-} 
+
+	isInTaskCodeBlock(editor: Editor, line: number): boolean {
+		let inside = false;
+		let lang = '';
+		for (let i = 0; i <= line; i++) {
+			const text = editor.getLine(i).trim();
+			const match = text.match(/^```(\w*)/);
+			if (match) {
+				if (inside) {
+					inside = false;
+					lang = '';
+				} else {
+					inside = true;
+					lang = (match[1] || '').toLowerCase();
+				}
+			}
+		}
+		return inside && (lang === 'tasks' || lang === 'taskview');
+	}
+}

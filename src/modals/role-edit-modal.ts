@@ -22,6 +22,7 @@ export class RoleEditModal extends Modal {
 
 		let nameInput: HTMLInputElement;
 		let iconInput: HTMLInputElement;
+		let shortcutInput: HTMLInputElement;
 
 		new Setting(contentEl)
 			.setName('Role name')
@@ -37,16 +38,26 @@ export class RoleEditModal extends Modal {
 				text.setValue(this.role.icon);
 			});
 
+		new Setting(contentEl)
+			.setName('Shortcut letter')
+			.setDesc('Single character used with \\ to insert this role')
+			.addText(text => {
+				shortcutInput = text.inputEl;
+				text.setValue(this.role.shortcut || '');
+			});
+
 		const buttonDiv = contentEl.createDiv('button-container');
-		
+
 		const saveBtn = buttonDiv.createEl('button', { text: 'Save', cls: 'mod-cta' });
 		saveBtn.onclick = async () => {
 			const name = nameInput.value.trim();
 			const icon = iconInput.value.trim();
+			const shortcut = shortcutInput.value.trim();
 
 			if (name && icon) {
 				this.role.name = name;
 				this.role.icon = icon;
+				this.role.shortcut = shortcut || undefined;
 				await this.plugin.saveSettings();
 				this.onSave();
 				this.close();
