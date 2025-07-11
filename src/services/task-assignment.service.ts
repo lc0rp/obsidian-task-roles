@@ -104,14 +104,35 @@ export class TaskAssignmentService {
         // Parse dataview inline format: [🚗:: @John, @Jane]
         for (const role of visibleRoles) {
             const escapedIcon = this.escapeRegex(role.icon);
-            const regex = new RegExp(`\\[${escapedIcon}::\\s*([^\\]]+)\\]`, 'g');
-            let match;
+            const startPattern = `\\[${escapedIcon}::\\s*`;
+            const startRegex = new RegExp(startPattern, 'g');
+            let startMatch;
 
-            while ((match = regex.exec(taskText)) !== null) {
-                const assigneeText = match[1].trim();
-                const assignees = this.parseAssignees(assigneeText, true); // true for dataview format
-                if (assignees.length > 0) {
-                    assignments.push({ role, assignees });
+            while ((startMatch = startRegex.exec(taskText)) !== null) {
+                const startIndex = startMatch.index + startMatch[0].length;
+
+                // Find the matching closing bracket by counting brackets
+                let bracketCount = 1; // We're inside the opening bracket
+                let endIndex = startIndex;
+
+                for (let i = startIndex; i < taskText.length; i++) {
+                    if (taskText[i] === '[') {
+                        bracketCount++;
+                    } else if (taskText[i] === ']') {
+                        bracketCount--;
+                        if (bracketCount === 0) {
+                            endIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (bracketCount === 0) {
+                    const assigneeText = taskText.substring(startIndex, endIndex).trim();
+                    const assignees = this.parseAssignees(assigneeText, true); // true for dataview format
+                    if (assignees.length > 0) {
+                        assignments.push({ role, assignees });
+                    }
                 }
             }
         }
@@ -147,12 +168,26 @@ export class TaskAssignmentService {
         const assignees: string[] = [];
 
         if (isDataviewFormat) {
-            // For dataview format, assignees are plain text separated by commas
-            // Example: "@John, @Jane, +Company"
-            const parts = text.split(',').map(part => part.trim());
-            for (const part of parts) {
-                if (part.startsWith(this.settings.contactSymbol) || part.startsWith(this.settings.companySymbol)) {
-                    assignees.push(part);
+            // For dataview format, assignees can be either plain text or wiki-link format
+            // Example: "@John, @Jane, +Company" or "[[Contacts/John|@John]], [[Companies/Acme|+Acme]]"
+
+            // First try to parse as wiki-links
+            const linkRegex = /\[\[([^\]]+)\|([^\]]+)\]\]/g;
+            let match;
+            let hasLinks = false;
+
+            while ((match = linkRegex.exec(text)) !== null) {
+                assignees.push(match[2]); // Use the alias part (e.g., @John)
+                hasLinks = true;
+            }
+
+            // If no wiki-links found, parse as plain text (backward compatibility)
+            if (!hasLinks) {
+                const parts = text.split(',').map(part => part.trim());
+                for (const part of parts) {
+                    if (part.startsWith(this.settings.contactSymbol) || part.startsWith(this.settings.companySymbol)) {
+                        assignees.push(part);
+                    }
                 }
             }
         } else {
@@ -184,8 +219,13 @@ export class TaskAssignmentService {
         for (const assignment of sortedAssignments) {
             const role = visibleRoles.find(r => r.id === assignment.roleId);
             if (role) {
-                // Format as dataview inline: [🚗:: @John, @Jane]
-                const assigneeList = assignment.assignees.join(', ');
+                // Format as dataview inline with links: [🚗:: [[/path/to/contact|@contact]], [[/path/to/company|+company]]]
+                const assigneeList = assignment.assignees.map(assignee => {
+                    const isContact = assignee.startsWith(this.settings.contactSymbol);
+                    const directory = isContact ? this.settings.contactDirectory : this.settings.companyDirectory;
+                    const cleanName = assignee.substring(1); // Remove @ or +
+                    return `[[${directory}/${cleanName}|${assignee}]]`;
+                }).join(', ');
                 parts.push(`[${role.icon}:: ${assigneeList}]`);
             }
         }

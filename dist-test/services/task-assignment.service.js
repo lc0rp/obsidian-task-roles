@@ -67,6 +67,54 @@ export class TaskAssignmentService {
     }
     parseTaskAssignments(taskText, visibleRoles) {
         const assignments = [];
+        // First, try to parse new dataview inline format [🚗:: @John]
+        const dataviewAssignments = this.parseDataviewAssignments(taskText, visibleRoles);
+        assignments.push(...dataviewAssignments);
+        // If no dataview assignments found, try old format (with HTML comments)
+        if (assignments.length === 0) {
+            const legacyAssignments = this.parseLegacyAssignments(taskText, visibleRoles);
+            assignments.push(...legacyAssignments);
+        }
+        return assignments;
+    }
+    parseDataviewAssignments(taskText, visibleRoles) {
+        const assignments = [];
+        // Parse dataview inline format: [🚗:: @John, @Jane]
+        for (const role of visibleRoles) {
+            const escapedIcon = this.escapeRegex(role.icon);
+            const startPattern = `\\[${escapedIcon}::\\s*`;
+            const startRegex = new RegExp(startPattern, 'g');
+            let startMatch;
+            while ((startMatch = startRegex.exec(taskText)) !== null) {
+                const startIndex = startMatch.index + startMatch[0].length;
+                // Find the matching closing bracket by counting brackets
+                let bracketCount = 1; // We're inside the opening bracket
+                let endIndex = startIndex;
+                for (let i = startIndex; i < taskText.length; i++) {
+                    if (taskText[i] === '[') {
+                        bracketCount++;
+                    }
+                    else if (taskText[i] === ']') {
+                        bracketCount--;
+                        if (bracketCount === 0) {
+                            endIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (bracketCount === 0) {
+                    const assigneeText = taskText.substring(startIndex, endIndex).trim();
+                    const assignees = this.parseAssignees(assigneeText, true); // true for dataview format
+                    if (assignees.length > 0) {
+                        assignments.push({ role, assignees });
+                    }
+                }
+            }
+        }
+        return assignments;
+    }
+    parseLegacyAssignments(taskText, visibleRoles) {
+        const assignments = [];
         const sanitized = taskText
             .replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
             .replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
@@ -76,7 +124,7 @@ export class TaskAssignmentService {
             const match = regex.exec(sanitized);
             if (match) {
                 const assigneeText = match[1].trim();
-                const assignees = this.parseAssignees(assigneeText);
+                const assignees = this.parseAssignees(assigneeText, false); // false for legacy format
                 if (assignees.length > 0) {
                     assignments.push({ role, assignees });
                 }
@@ -84,12 +132,37 @@ export class TaskAssignmentService {
         }
         return assignments;
     }
-    parseAssignees(text) {
-        const linkRegex = /\[\[([^\]]+)\|([^\]]+)\]\]/g;
+    parseAssignees(text, isDataviewFormat = false) {
         const assignees = [];
-        let match;
-        while ((match = linkRegex.exec(text)) !== null) {
-            assignees.push(match[2]); // Use the alias part (e.g., @John)
+        if (isDataviewFormat) {
+            // For dataview format, assignees can be either plain text or wiki-link format
+            // Example: "@John, @Jane, +Company" or "[[Contacts/John|@John]], [[Companies/Acme|+Acme]]"
+            // First try to parse as wiki-links
+            const linkRegex = /\[\[([^\]]+)\|([^\]]+)\]\]/g;
+            let match;
+            let hasLinks = false;
+            while ((match = linkRegex.exec(text)) !== null) {
+                assignees.push(match[2]); // Use the alias part (e.g., @John)
+                hasLinks = true;
+            }
+            // If no wiki-links found, parse as plain text (backward compatibility)
+            if (!hasLinks) {
+                const parts = text.split(',').map(part => part.trim());
+                for (const part of parts) {
+                    if (part.startsWith(this.settings.contactSymbol) || part.startsWith(this.settings.companySymbol)) {
+                        assignees.push(part);
+                    }
+                }
+            }
+        }
+        else {
+            // For legacy format, assignees are in wiki-link format
+            // Example: "[[Contacts/John|@John]], [[Companies/Acme|+Acme]]"
+            const linkRegex = /\[\[([^\]]+)\|([^\]]+)\]\]/g;
+            let match;
+            while ((match = linkRegex.exec(text)) !== null) {
+                assignees.push(match[2]); // Use the alias part (e.g., @John)
+            }
         }
         return assignees;
     }
@@ -106,13 +179,14 @@ export class TaskAssignmentService {
         for (const assignment of sortedAssignments) {
             const role = visibleRoles.find(r => r.id === assignment.roleId);
             if (role) {
-                const formattedAssignees = assignment.assignees.map(assignee => {
+                // Format as dataview inline with links: [🚗:: [[/path/to/contact|@contact]], [[/path/to/company|+company]]]
+                const assigneeList = assignment.assignees.map(assignee => {
                     const isContact = assignee.startsWith(this.settings.contactSymbol);
                     const directory = isContact ? this.settings.contactDirectory : this.settings.companyDirectory;
                     const cleanName = assignee.substring(1); // Remove @ or +
                     return `[[${directory}/${cleanName}|${assignee}]]`;
                 }).join(', ');
-                parts.push(`${role.icon} ${formattedAssignees}`);
+                parts.push(`[${role.icon}:: ${assigneeList}]`);
             }
         }
         return parts.join(' ');
@@ -129,6 +203,7 @@ export class TaskAssignmentService {
             /(due|scheduled|completed):\s*\d{4}-\d{2}-\d{2}/i,
             /📅\s*\d{4}-\d{2}-\d{2}/,
             /\[due::\s*\d{4}-\d{2}-\d{2}\]/i,
+            /\[[\w\s\u{1F000}-\u{1F9FF}]+::[^\]]*\]/u,
             /#[\w-]+/
         ];
         let index = -1;
@@ -145,26 +220,39 @@ export class TaskAssignmentService {
     }
     applyAssignmentsToLine(line, assignments, visibleRoles) {
         const assignmentText = this.formatAssignments(assignments, visibleRoles);
-        const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
-        let cleanLine = line
+        // Clean line by removing both old and new format assignments
+        let cleanLine = this.removeAllAssignments(line, visibleRoles);
+        if (!assignmentText) {
+            return cleanLine;
+        }
+        // Insert assignments before metadata
+        const idx = this.findMetadataIndex(cleanLine);
+        if (idx === -1) {
+            return `${cleanLine} ${assignmentText}`.trim();
+        }
+        const before = cleanLine.substring(0, idx).trimEnd();
+        const after = cleanLine.substring(idx).trimStart();
+        return `${before} ${assignmentText} ${after}`.replace(/\s{2,}/g, ' ').trim();
+    }
+    removeAllAssignments(line, visibleRoles) {
+        let cleanLine = line;
+        // Remove old format (HTML comments)
+        cleanLine = cleanLine
             .replace(new RegExp(ASSIGNMENT_COMMENT_START, 'g'), '')
             .replace(new RegExp(ASSIGNMENT_COMMENT_END, 'g'), '');
+        // Remove old format assignments (icon + wiki-links)
+        const allIcons = visibleRoles.map(r => this.escapeRegex(r.icon)).join('');
         for (const role of visibleRoles) {
             const regex = new RegExp(`\\s*${this.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'g');
             cleanLine = cleanLine.replace(regex, '');
         }
-        cleanLine = cleanLine.replace(/\s{2,}/g, ' ').trim();
-        if (!assignmentText) {
-            return cleanLine;
+        // Remove new format assignments (dataview inline)
+        for (const role of visibleRoles) {
+            const escapedIcon = this.escapeRegex(role.icon);
+            const regex = new RegExp(`\\s*\\[${escapedIcon}::[^\\]]*\\]`, 'g');
+            cleanLine = cleanLine.replace(regex, '');
         }
-        const wrapped = `${ASSIGNMENT_COMMENT_START} ${assignmentText} ${ASSIGNMENT_COMMENT_END}`;
-        const idx = this.findMetadataIndex(cleanLine);
-        if (idx === -1) {
-            return `${cleanLine} ${wrapped}`.trim();
-        }
-        const before = cleanLine.substring(0, idx).trimEnd();
-        const after = cleanLine.substring(idx).trimStart();
-        return `${before} ${wrapped} ${after}`.replace(/\s{2,}/g, ' ').trim();
+        return cleanLine.replace(/\s{2,}/g, ' ').trim();
     }
     async createMeContact() {
         const contactPath = `${this.settings.contactDirectory}/Me.md`;
