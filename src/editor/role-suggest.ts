@@ -8,6 +8,7 @@ import {
 } from 'obsidian';
 import type TaskAssignmentPlugin from '../main';
 import { Role } from '../types';
+import { TaskUtils } from '../utils/task-regex';
 
 /**
  * Suggests roles when typing a backslash followed by the role shortcut.
@@ -25,7 +26,7 @@ export class RoleSuggest extends EditorSuggest<Role> {
 
         // Check if we're in a task code block or on a task line
         const isInTaskBlock = this.isInTaskBlock(editor, cursor.line);
-        const isTaskLine = /^\s*- \[[ x]\]/.test(line);
+        const isTaskLine = TaskUtils.isTaskLine(line);
 
         // Only trigger if we're in a task code block or on a task line
         if (!isInTaskBlock && !isTaskLine) {

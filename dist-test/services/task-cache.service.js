@@ -1,5 +1,6 @@
 import { TFile, Notice } from 'obsidian';
 import { TaskStatus, TaskPriority } from '../types';
+import { TaskUtils } from '../utils/task-regex';
 export class TaskCacheService {
     constructor(app, taskAssignmentService, visibleRoles, debug) {
         this.app = app;
@@ -107,10 +108,9 @@ export class TaskCacheService {
         const tasks = [];
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            const taskMatch = line.match(/^(\s*)[-*+]\s*\[([x\s])\]\s*(.+)$/);
-            if (taskMatch) {
-                const [, , statusChar, content] = taskMatch;
-                const task = this.parseTaskFromLine(file, i, line, content, statusChar);
+            const taskParsed = TaskUtils.parseTask(line);
+            if (taskParsed) {
+                const task = this.parseTaskFromLine(file, i, line, taskParsed.content, taskParsed.status);
                 if (task) {
                     tasks.push(task);
                 }

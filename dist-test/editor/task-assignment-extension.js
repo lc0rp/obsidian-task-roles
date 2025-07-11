@@ -1,6 +1,7 @@
 import { Decoration, ViewPlugin } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
 import { TaskAssignmentWidget } from '../components/task-assignment-widget';
+import { TaskUtils } from '../utils/task-regex';
 export const taskAssignmentExtension = (plugin) => ViewPlugin.fromClass(class {
     constructor(view) {
         this.decorations = this.buildDecorations(view);
@@ -17,10 +18,9 @@ export const taskAssignmentExtension = (plugin) => ViewPlugin.fromClass(class {
                 const line = view.state.doc.lineAt(pos);
                 const lineText = line.text;
                 // Check if this line is a task (contains checkbox)
-                const taskRegex = /^\s*[-*+]\s*\[[ xX]\]/;
-                if (taskRegex.test(lineText)) {
+                if (TaskUtils.isTaskCaseInsensitive(lineText)) {
                     // Check if there's content after the checkbox
-                    const checkboxMatch = lineText.match(/^\s*[-*+]\s*\[[ xX]\]\s*/);
+                    const checkboxMatch = TaskUtils.getCheckboxPrefix(lineText);
                     if (checkboxMatch) {
                         const afterCheckbox = lineText.substring(checkboxMatch[0].length);
                         // Only add icon if there's content after the checkbox

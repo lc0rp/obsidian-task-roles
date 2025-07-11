@@ -1,4 +1,5 @@
 import { EditorSuggest } from 'obsidian';
+import { TaskUtils } from '../utils/task-regex';
 /**
  * Suggests roles when typing a backslash followed by the role shortcut.
  * Inserts a dataview inline field like `[🚗:: ]` with the cursor positioned
@@ -15,7 +16,7 @@ export class RoleSuggest extends EditorSuggest {
         const before = line.substring(0, cursor.ch);
         // Check if we're in a task code block or on a task line
         const isInTaskBlock = this.isInTaskBlock(editor, cursor.line);
-        const isTaskLine = /^\s*- \[[ x]\]/.test(line);
+        const isTaskLine = TaskUtils.isTaskLine(line);
         // Only trigger if we're in a task code block or on a task line
         if (!isInTaskBlock && !isTaskLine) {
             return null;
