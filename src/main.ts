@@ -1,5 +1,6 @@
 import {
 	Editor,
+	EditorPosition,
 	MarkdownView,
 	Plugin,
 	WorkspaceLeaf
@@ -10,9 +11,12 @@ import { TaskAssignmentService } from './services/task-assignment.service';
 import { TaskCacheService } from './services/task-cache.service';
 import { taskAssignmentExtension } from './editor/task-assignment-extension';
 import { AssignmentSuggest } from './editor/assignment-suggest';
+import { RoleSuggest } from './editor/role-suggest';
 import { AssignmentModal } from './modals/assignment-modal';
 import { TaskAssignmentSettingTab } from './settings/task-assignment-settings-tab';
 import { TaskAssignmentView } from './views/task-assignment-view';
+
+import { syntaxTree } from '@codemirror/language';
 
 export default class TaskAssignmentPlugin extends Plugin {
 	settings: TaskAssignmentSettings;
@@ -73,6 +77,9 @@ export default class TaskAssignmentPlugin extends Plugin {
 		// Register editor suggest for inline assignment
 		this.registerEditorSuggest(new AssignmentSuggest(this.app, this));
 
+		// Register role suggestion for \ shortcuts
+		this.registerEditorSuggest(new RoleSuggest(this.app, this));
+
 		// Register the CodeMirror extension for task icons
 		this.registerEditorExtension(taskAssignmentExtension(this));
 
@@ -109,7 +116,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-		// Ensure default roles exist and have correct icons
+		// Ensure default roles exist and have correct icons and shortcuts
 		const { DEFAULT_ROLES } = await import('./types');
 		for (const defaultRole of DEFAULT_ROLES) {
 			const existingRole = this.settings.roles.find(r => r.id === defaultRole.id);
@@ -118,6 +125,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 				// Update existing default role with correct icon and other properties
 				existingRole.icon = defaultRole.icon;
 				existingRole.name = defaultRole.name;
+				existingRole.shortcut = defaultRole.shortcut;
 				existingRole.isDefault = defaultRole.isDefault;
 				existingRole.order = defaultRole.order;
 			} else if (!this.settings.hiddenDefaultRoles.includes(defaultRole.id)) {
@@ -156,4 +164,54 @@ export default class TaskAssignmentPlugin extends Plugin {
 			!role.isDefault || !this.settings.hiddenDefaultRoles.includes(role.id)
 		);
 	}
-} 
+
+	isInTaskCodeBlock(editor: Editor, line: number): boolean {
+		/** ---------- 1. CM6 fast‑path ---------- */
+		const view = (editor as any).cm; // EditorView in CM6
+		if (view && view.state && view.state.selection) {
+			try {
+				const state = view.state;
+				const pos   = state.selection.main.head;
+				let node    = syntaxTree(state).resolve(pos, -1);
+
+				// Walk up the tree until we find a fenced code block
+				while (node) {
+					if (node.name === 'FencedCode') {
+						const infoNode = node.getChild('FencedCodeInfo');
+						const info = infoNode
+							? state.sliceDoc(infoNode.from, infoNode.to).trim().toLowerCase()
+							: '';
+
+						return info === 'tasks' || info === 'dataview';
+					}
+					node = node.parent;
+				}
+			} catch {
+				/* Fall through to CM5/legacy scan */	
+			}
+		}
+
+		/** ---------- 2. Legacy CM5 / plain scan ---------- */
+		let inside = false;
+		let lang   = '';
+
+		for (let i = 0; i <= line; i++) {
+			const text  = editor.getLine(i).trim();
+			const match = text.match(/^```([\w-]*)/); // opening/closing fence
+
+			if (match) {
+				const currentLang = (match[1] || '').toLowerCase();
+
+				if (!inside) {
+					inside = true;
+					lang   = currentLang;
+				} else {
+					inside = false;
+					lang   = '';
+				}
+			}
+		}
+
+		return inside && (lang === 'tasks' || lang === 'dataview');
+	}
+}
