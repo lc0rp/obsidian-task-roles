@@ -298,11 +298,40 @@ export class TaskAssignmentService {
             cleanLine = cleanLine.replace(regex, '');
         }
 
-        // Remove new format assignments (dataview inline)
+        // Remove new format assignments (dataview inline) - handle nested brackets properly
         for (const role of visibleRoles) {
             const escapedIcon = this.escapeRegex(role.icon);
-            const regex = new RegExp(`\\s*\\[${escapedIcon}::[^\\]]*\\]`, 'g');
-            cleanLine = cleanLine.replace(regex, '');
+            const startPattern = `\\s*\\[${escapedIcon}::\\s*`;
+            const startRegex = new RegExp(startPattern, 'g');
+            let startMatch;
+
+            while ((startMatch = startRegex.exec(cleanLine)) !== null) {
+                const startIndex = startMatch.index;
+                const contentStartIndex = startMatch.index + startMatch[0].length;
+                
+                // Find the matching closing bracket by counting brackets
+                let bracketCount = 1; // We're inside the opening bracket
+                let endIndex = contentStartIndex;
+                
+                for (let i = contentStartIndex; i < cleanLine.length; i++) {
+                    if (cleanLine[i] === '[') {
+                        bracketCount++;
+                    } else if (cleanLine[i] === ']') {
+                        bracketCount--;
+                        if (bracketCount === 0) {
+                            endIndex = i + 1; // Include the closing bracket
+                            break;
+                        }
+                    }
+                }
+                
+                if (bracketCount === 0) {
+                    // Remove the entire assignment including brackets
+                    cleanLine = cleanLine.substring(0, startIndex) + cleanLine.substring(endIndex);
+                    // Reset the regex to start from the beginning since we modified the string
+                    startRegex.lastIndex = 0;
+                }
+            }
         }
 
         return cleanLine.replace(/\s{2,}/g, ' ').trim();

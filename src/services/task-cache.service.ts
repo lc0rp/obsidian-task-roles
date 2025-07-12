@@ -65,7 +65,7 @@ export class TaskCacheService {
             this.cache.clear();
 
             const markdownFiles = this.app.vault.getMarkdownFiles();
-            await Promise.all(markdownFiles.map(file =>
+            await Promise.all(markdownFiles.map((file: TFile) =>
                 this.updateTasksFromFile(file).catch(error => {
                     console.error(`Error updating tasks from file ${file.path}:`, error);
                 })
