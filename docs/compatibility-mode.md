@@ -1,10 +1,13 @@
 # Compatibility Mode
 
-The Task Assignment plugin now includes a **Compatibility Mode** that provides an alternative way to handle role shortcuts using a custom backslash trigger instead of the built-in Obsidian editor suggest system.
+The Task Assignment plugin now includes a **Compatibility Mode** that provides an alternative way to handle role shortcuts
+using a custom backslash trigger instead of the built-in Obsidian editor suggest system.
 
 ## Overview
 
-By default, the plugin uses Obsidian's built-in `EditorSuggest` system for role shortcuts (typing `\` followed by a role shortcut). However, some users may experience conflicts with other plugins or prefer a different interaction model.
+By default, the plugin uses Obsidian's built-in `EditorSuggest` system for role shortcuts (typing `\` followed by a role
+shortcut).
+However, some users may experience conflicts with other plugins or prefer a different interaction model.
 
 Compatibility mode replaces the editor suggest with a custom `ViewPlugin` that:
 
@@ -14,6 +17,13 @@ Compatibility mode replaces the editor suggest with a custom `ViewPlugin` that:
 - Supports mouse interaction
 
 ## How to Enable
+
+### Automatic (Recommended)
+
+If you have the **Tasks plugin** installed, compatibility mode will be automatically enabled by default. This ensures
+optimal compatibility between the two plugins.
+
+### Manual
 
 1. Open Obsidian Settings
 2. Navigate to Task Assignment plugin settings
@@ -26,6 +36,7 @@ Compatibility mode replaces the editor suggest with a custom `ViewPlugin` that:
 
 - Added `compatMode: boolean` to `TaskAssignmentSettings`
 - Default value is `false` (uses standard editor suggest)
+- **Auto-enable**: Automatically set to `true` when Tasks plugin is detected
 - Setting is saved and persists across sessions
 
 ### Conditional Registration

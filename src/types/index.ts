@@ -11,6 +11,7 @@ export interface TaskAssignmentSettings {
     useTaskQueries: boolean;
     debug: boolean;
     compatMode: boolean;
+    compatModeUserSet: boolean;
 }
 
 export interface Role {
@@ -141,18 +142,19 @@ export const DEFAULT_ROLES: Role[] = [
 ];
 
 export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
-	contactSymbol: '@',
-	companySymbol: '+',
-	contactDirectory: 'Contacts',
-	companyDirectory: 'Companies',
-	roles: DEFAULT_ROLES,
-	hiddenDefaultRoles: [],
-	savedViews: [],
-	autoApplyFilters: true,
-	useCompactFilters: false,
-	useTaskQueries: false,
-	debug: false,
-	compatMode: false
+    contactSymbol: '@',
+    companySymbol: '+',
+    contactDirectory: 'Contacts',
+    companyDirectory: 'Companies',
+    roles: DEFAULT_ROLES,
+    hiddenDefaultRoles: [],
+    savedViews: [],
+    autoApplyFilters: true,
+    useCompactFilters: false,
+    useTaskQueries: false,
+    debug: false,
+    compatMode: false,
+    compatModeUserSet: false
 };
 
 export const ASSIGNMENT_COMMENT_START = '<!--TA-->';

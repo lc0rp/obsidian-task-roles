@@ -119,7 +119,14 @@ export default class TaskAssignmentPlugin extends Plugin {
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-        // Ensure default roles exist and have correct icons and shortcuts
+        // Only auto-enable compatibility mode if user has never set it
+        const tasksPlugin = (this.app as any).plugins?.plugins?.["obsidian-tasks-plugin"];
+        if (tasksPlugin && this.settings.compatModeUserSet === false && this.settings.compatMode === false) {
+            this.settings.compatMode = true;
+            await this.saveData(this.settings);
+        }
+
+        // Ensure default roles exist and have correct icons and other properties
         const { DEFAULT_ROLES } = await import('./types');
         for (const defaultRole of DEFAULT_ROLES) {
             const existingRole = this.settings.roles.find(r => r.id === defaultRole.id);
