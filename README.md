@@ -25,6 +25,7 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 - **Informed** 📢: Who needs to be kept informed
 - **Quick shortcuts**: Type `\d`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
   Inside `tasks` or `taskview` code blocks, the shortcut inserts `🚗 =` style markup.
+- **Smart filtering**: Role suggestions only show roles that aren't already present on the task line
 
 ### ⚙️ Customizable Roles
 
@@ -183,6 +184,8 @@ The plugin recognizes and parses various task metadata formats:
 2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
 3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
+5. **Role shortcuts**: Type `\` followed by a role shortcut letter (e.g., `\d` for Drivers) - only shows roles not already
+   assigned
 
 ## Editing Assignments
 

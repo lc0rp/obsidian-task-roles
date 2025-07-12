@@ -2,6 +2,7 @@ import { ViewPlugin } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView } from 'obsidian';
 import { TaskAssignmentSettings, Role } from '../types';
+import { TaskUtils } from '../utils/task-regex';
 
 export function backslashTrigger(app: App, settings: TaskAssignmentSettings) {
     return ViewPlugin.fromClass(class {
@@ -35,8 +36,15 @@ export function backslashTrigger(app: App, settings: TaskAssignmentSettings) {
                 !role.isDefault || !settings.hiddenDefaultRoles.includes(role.id)
             );
 
+            // Get the current line to check for existing roles
+            const line = editor.getLine(cursor.line);
+            const existingRoleIds = TaskUtils.getExistingRoles(line, visibleRoles);
+
+            // Filter out roles that are already present on the line
+            const availableRoles = visibleRoles.filter(role => !existingRoleIds.includes(role.id));
+
             // Create a simple popup with role options
-            this.showRolePopup(visibleRoles, editor, cursor, isInTaskBlock);
+            this.showRolePopup(availableRoles, editor, cursor, isInTaskBlock);
         }
 
         private showRolePopup(roles: Role[], editor: any, cursor: any, isInTaskBlock: boolean) {

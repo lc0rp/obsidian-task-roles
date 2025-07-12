@@ -60,7 +60,16 @@ export class RoleSuggest extends EditorSuggest<Role> {
     getSuggestions(context: EditorSuggestContext): Role[] {
         const query = context.query.toLowerCase();
         const roles = this.plugin.getVisibleRoles();
-        return roles.filter(r => (r.shortcut ?? '').toLowerCase().startsWith(query));
+
+        // Get the current line to check for existing roles
+        const line = context.editor.getLine(context.start.line);
+        const existingRoleIds = TaskUtils.getExistingRoles(line, roles);
+
+        // Filter out roles that are already present on the line
+        const availableRoles = roles.filter(role => !existingRoleIds.includes(role.id));
+
+        // Filter by query
+        return availableRoles.filter(r => (r.shortcut ?? '').toLowerCase().startsWith(query));
     }
 
     renderSuggestion(role: Role, el: HTMLElement): void {

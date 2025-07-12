@@ -98,5 +98,35 @@ export const TaskUtils = {
 
         const [, indentation, status, content] = match;
         return { indentation, status, content };
+    },
+
+    /**
+     * Detect which roles are already present on a line
+     * @param line The line to check
+     * @param visibleRoles Array of visible roles to check for
+     * @returns Array of role IDs that are already present on the line
+     */
+    getExistingRoles(line: string, visibleRoles: any[]): string[] {
+        const existingRoleIds: string[] = [];
+
+        // Check for dataview format: [🚗:: @John]
+        for (const role of visibleRoles) {
+            const escapedIcon = role.icon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const dataviewPattern = new RegExp(`\\[${escapedIcon}::\\s*[^\\]]*\\]`, 'g');
+            if (dataviewPattern.test(line)) {
+                existingRoleIds.push(role.id);
+            }
+        }
+
+        // Check for legacy format: 🚗 [[Contacts/John|@John]]
+        for (const role of visibleRoles) {
+            const escapedIcon = role.icon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const legacyPattern = new RegExp(`${escapedIcon}\\s+\\[\\[`, 'g');
+            if (legacyPattern.test(line)) {
+                existingRoleIds.push(role.id);
+            }
+        }
+
+        return existingRoleIds;
     }
 }; 
