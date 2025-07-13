@@ -11,6 +11,35 @@ export class TaskRolesSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
+    private async createMeContactSetting(containerEl: HTMLElement): Promise<void> {
+        const meExists = await this.plugin.taskRolesService.meContactExists();
+        
+        const setting = new Setting(containerEl)
+            .setName('Create @me contact')
+            .setDesc('Create a special contact file for yourself');
+
+        if (meExists) {
+            setting.addButton(button => button
+                .setButtonText('Create @me')
+                .setDisabled(true)
+                .onClick(() => {}));
+            
+            // Add DONE pill
+            const donePill = setting.controlEl.createSpan({
+                text: 'DONE',
+                cls: 'me-contact-done-pill'
+            });
+        } else {
+            setting.addButton(button => button
+                .setButtonText('Create @me')
+                .onClick(async () => {
+                    await this.plugin.taskRolesService.createMeContact();
+                    // Refresh the settings display to show the new state
+                    this.display();
+                }));
+        }
+    }
+
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
@@ -66,14 +95,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                 }));
 
         // Create @me contact button
-        new Setting(containerEl)
-            .setName('Create @me contact')
-            .setDesc('Create a special contact file for yourself')
-            .addButton(button => button
-                .setButtonText('Create @me')
-                .onClick(async () => {
-                    await this.plugin.taskRolesService.createMeContact();
-                }));
+        this.createMeContactSetting(containerEl);
 
 
         // Debug logging toggle
