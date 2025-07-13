@@ -384,3 +384,88 @@ If your plugin does not need CSS, delete this file.
     opacity: 1;
     text-decoration: underline;
 }
+
+/* Obsidian Tasks Plugin - Summary Row Sticky Positioning */
+/* Target the container that holds task query results */
+.block-language-tasks {
+    position: relative;
+}
+
+/* Target common summary/count elements and move them to top with sticky positioning */
+.tasks-count,
+.task-count,
+.tasks-summary,
+.task-summary,
+.query-summary,
+.task-list-summary,
+[class*="count"],
+[class*="summary"]:not(.task-roles-card):not(.assignee-tag):not(.help-link) {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--background-primary) !important;
+    border-bottom: 1px solid var(--background-modifier-border) !important;
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+    order: -1 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Target parent containers to ensure proper flex/grid ordering */
+.block-language-tasks>div,
+.tasks-container,
+.task-list-container,
+.query-result-container {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Ensure the summary appears at the top of its container */
+.block-language-tasks .tasks-count:first-child,
+.block-language-tasks .task-count:first-child,
+.block-language-tasks .tasks-summary:first-child,
+.block-language-tasks .task-summary:first-child,
+.block-language-tasks .query-summary:first-child,
+.block-language-tasks .task-list-summary:first-child {
+    margin-top: 0 !important;
+}
+
+/* Alternative targeting for potential class patterns */
+.task-query-results .summary-row,
+.task-query-results .count-row,
+.task-query-results .header-row,
+.task-query-results [data-task-count],
+.task-query-results [data-summary] {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--background-primary) !important;
+    border-bottom: 1px solid var(--background-modifier-border) !important;
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+    order: -1 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Target any paragraph or div that contains task count text patterns */
+.block-language-tasks p:first-child:contains("task"),
+.block-language-tasks div:first-child:contains("task"),
+.block-language-tasks span:first-child:contains("task") {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--background-primary) !important;
+    border-bottom: 1px solid var(--background-modifier-border) !important;
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+}
+
+/* Ensure task list items scroll normally while summary stays fixed */
+.block-language-tasks ul,
+.block-language-tasks ol,
+.task-list,
+.tasks-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
