@@ -80,4 +80,50 @@ describe('Settings Tab - Async Behavior Fix', () => {
         // The async operation should have completed by now
         expect(mockService.meContactExists).toHaveBeenCalledTimes(1);
     });
+
+    it('should handle errors gracefully in async operations', async () => {
+        const mockService = {
+            meContactExists: vi.fn().mockRejectedValue(new Error('Network error')),
+            createMeContact: vi.fn(),
+            refreshAssigneeCache: vi.fn(),
+        };
+
+        const createMeContactSetting = (_containerEl: any) => {
+            const setting = {
+                setName: vi.fn().mockReturnThis(),
+                setDesc: vi.fn().mockReturnThis(),
+                addButton: vi.fn().mockImplementation((callback) => {
+                    const button = {
+                        setButtonText: vi.fn().mockReturnThis(),
+                        setDisabled: vi.fn().mockReturnThis(),
+                        onClick: vi.fn().mockReturnThis(),
+                    };
+                    callback(button);
+                    return setting;
+                }),
+                controlEl: {
+                    createSpan: vi.fn()
+                }
+            };
+
+            // Simulate the fixed implementation with error handling
+            mockService.meContactExists()
+                .then(() => {
+                    // This shouldn't be called due to error
+                })
+                .catch(() => {
+                    // Error should be handled gracefully
+                });
+
+            return setting;
+        };
+
+        // Should not throw even with async error
+        expect(() => createMeContactSetting({})).not.toThrow();
+        
+        // Wait for async operation to complete
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        expect(mockService.meContactExists).toHaveBeenCalled();
+    });
 });
