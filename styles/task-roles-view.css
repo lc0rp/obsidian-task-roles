@@ -1266,3 +1266,43 @@ ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency,
     border-radius: 12px;
     letter-spacing: 0.5px;
 }
+
+/* Task Query Error Styles */
+.task-query-error {
+    background-color: var(--background-modifier-error);
+    border: 1px solid var(--text-error);
+    border-radius: 6px;
+    padding: 12px;
+    margin: 8px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    color: var(--text-error);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.task-query-error-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-error);
+    font-size: 14px;
+}
+
+.task-query-error-query {
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 8px;
+    font-family: var(--font-monospace);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    overflow-x: auto;
+}

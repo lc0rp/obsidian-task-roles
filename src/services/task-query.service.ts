@@ -217,7 +217,7 @@ export class TaskQueryService {
 
         // Column header
         const headerDiv = columnDiv.createDiv('task-roles-column-header');
-        const titleEl = headerDiv.createEl('h3', { text: columnQuery.title, cls: 'task-roles-column-title' });
+        headerDiv.createEl('h3', { text: columnQuery.title, cls: 'task-roles-column-title' });
 
         // Query display
         const queryContainer = columnDiv.createDiv('task-query-display');
@@ -231,16 +231,21 @@ export class TaskQueryService {
             ? `\`\`\`tasks\n${columnQuery.query}\n\`\`\``
             : `\`\`\`tasks\n# No specific query for this column\n\`\`\``;
 
-        // Render the query using MarkdownRenderer
-        await MarkdownRenderer.renderMarkdown(
-            queryMarkdown,
-            queryContainer,
-            "virtual/tasks-preview.md",
-            viewContext
-        );
+        try {
+            // Render the query using MarkdownRenderer
+            await MarkdownRenderer.renderMarkdown(
+                queryMarkdown,
+                queryContainer,
+                "virtual/tasks-preview.md",
+                viewContext
+            );
 
-        // Enhance the rendered tasks with better styling
-        this.enhanceTaskDisplay(queryContainer);
+            // Enhance the rendered tasks with better styling
+            this.enhanceTaskDisplay(queryContainer);
+        } catch (error) {
+            // Display formatted error with query debugging
+            this.displayQueryError(queryContainer, error, columnQuery.query, columnQuery.title);
+        }
 
         // Add column content wrapper
         const columnContent = columnDiv.createDiv('task-roles-column-content');
@@ -349,6 +354,31 @@ export class TaskQueryService {
                 htmlContainer.style.setProperty('margin', '0', 'important');
             });
         }, 200); // Additional delay to ensure other plugins have finished their modifications
+    }
+
+    private displayQueryError(container: HTMLElement, error: any, query: string, columnTitle: string): void {
+        container.empty();
+        
+        const errorDiv = container.createDiv('task-query-error');
+        
+        const errorTitle = errorDiv.createDiv('task-query-error-title');
+        errorTitle.setText(`Query Error in ${columnTitle}`);
+        
+        const errorMessage = errorDiv.createDiv();
+        const errorText = error?.message || error?.toString() || 'Unknown error occurred';
+        errorMessage.setText(errorText);
+        
+        const queryDiv = errorDiv.createDiv('task-query-error-query');
+        const queryLabel = queryDiv.createEl('strong');
+        queryLabel.setText('Query:');
+        queryDiv.createEl('br');
+        queryDiv.createEl('span').setText(query || 'No query specified');
+        
+        console.error(`Task Roles Plugin - Query Error in ${columnTitle}:`, {
+            error: error,
+            query: query,
+            columnTitle: columnTitle
+        });
     }
 
     private extractTaskContent(taskItem: HTMLElement): string {
