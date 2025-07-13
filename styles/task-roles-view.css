@@ -1004,6 +1004,15 @@
     overflow-y: auto !important;
 }
 
+/* Remove excessive padding from task query result containers */
+ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency,
+.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 .task-roles-column .task-list-item {
     margin-bottom: 4px;
 }
