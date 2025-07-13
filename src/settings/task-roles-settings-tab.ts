@@ -75,16 +75,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                     await this.plugin.taskRolesService.createMeContact();
                 }));
 
-        // Compact filters toggle
-        new Setting(containerEl)
-            .setName('Use compact filters')
-            .setDesc('Display all filters in a single horizontal line instead of the collapsible panel')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.useCompactFilters)
-                .onChange(async (value) => {
-                    this.plugin.settings.useCompactFilters = value;
-                    await this.plugin.saveSettings();
-                }));
 
         // Debug logging toggle
         new Setting(containerEl)

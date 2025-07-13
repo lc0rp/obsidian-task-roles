@@ -6,7 +6,6 @@ import { ViewConfigurationService } from '../services/view-configuration.service
 import { TaskQueryService } from '../services/task-query.service';
 import { TaskRolesSaveViewModal } from '../modals/save-view-modal';
 import { CompactFiltersComponent } from '../components/compact-filters';
-import { ExpandableFiltersComponent } from '../components/expandable-filters';
 import { TaskCardComponent } from '../components/task-card';
 import { ViewHeaderComponent } from '../components/view-header';
 import type TaskRolesPlugin from '../main';
@@ -21,7 +20,6 @@ export class TaskRolesView extends TaskRolesViewBase {
 
     // Component instances
     private compactFiltersComponent: CompactFiltersComponent;
-    private expandableFiltersComponent: ExpandableFiltersComponent;
     private taskCardComponent: TaskCardComponent;
     private viewHeaderComponent: ViewHeaderComponent;
 
@@ -40,11 +38,6 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentFilters,
             this.updateFilters.bind(this),
             this.register.bind(this)
-        );
-        this.expandableFiltersComponent = new ExpandableFiltersComponent(
-            this.plugin,
-            this.currentFilters,
-            this.updateFilters.bind(this)
         );
         this.taskCardComponent = new TaskCardComponent(
             this.plugin,
@@ -101,14 +94,7 @@ export class TaskRolesView extends TaskRolesViewBase {
     }
 
     private renderFilters(): void {
-        // Use compact filters if the setting is enabled
-        if (this.plugin.settings.useCompactFilters) {
-            this.renderCompactFilters();
-            return;
-        }
-
-        // Otherwise use the original expandable filters
-        this.expandableFiltersComponent.render(this.viewContainerEl);
+        this.renderCompactFilters();
     }
 
     private async renderCompactFilters(): Promise<void> {
@@ -140,8 +126,6 @@ export class TaskRolesView extends TaskRolesViewBase {
         // Force re-render with current filters
         await this.renderAsync();
 
-        // Close the filters section
-        this.closeFiltersSection();
     }
 
     private async cancelFiltersAndClose(): Promise<void> {
@@ -151,23 +135,8 @@ export class TaskRolesView extends TaskRolesViewBase {
         // Re-render with original filters
         await this.renderAsync();
 
-        // Close the filters section
-        this.closeFiltersSection();
     }
 
-    private closeFiltersSection(): void {
-        const filtersEl = document.querySelector('.task-roles-filters');
-        if (!filtersEl) return;
-
-        const filterToggle = filtersEl.querySelector('.task-roles-filter-toggle') as HTMLElement;
-        const filtersContent = filtersEl.querySelector('.task-roles-filters-content') as HTMLElement;
-        const arrowIcon = filtersEl.querySelector('.task-roles-filter-arrow') as HTMLElement;
-
-        if (filterToggle && filtersContent && arrowIcon) {
-            filtersContent.style.display = 'none';
-            filterToggle.classList.remove('active');
-        }
-    }
 
     private renderContent(): void {
         this.viewContentEl = this.viewContainerEl.createDiv('task-roles-content');
