@@ -87,7 +87,29 @@ export abstract class TaskRolesViewBase extends ItemView {
 
             // Status filter
             if (this.currentFilters.statuses && this.currentFilters.statuses.length > 0) {
-                if (!this.currentFilters.statuses.includes(task.status)) {
+                // Use a more flexible filtering approach that supports both direct matches and function-based filters
+                const statusMatches = this.currentFilters.statuses.some(filterStatus => {
+                    // Direct match with task status
+                    if (task.status === filterStatus) {
+                        return true;
+                    }
+                    
+                    // Handle uppercase enum values
+                    const upperCaseStatus = task.status.toUpperCase().replace('-', '_');
+                    if (upperCaseStatus === filterStatus) {
+                        return true;
+                    }
+                    
+                    // Handle function-based filters like 'TODO,IN_PROGRESS'.includes(status)
+                    if (filterStatus.includes(',')) {
+                        const allowedStatuses = filterStatus.split(',').map(s => s.trim());
+                        return allowedStatuses.includes(upperCaseStatus) || allowedStatuses.includes(task.status);
+                    }
+                    
+                    return false;
+                });
+                
+                if (!statusMatches) {
                     return false;
                 }
             }
@@ -261,6 +283,8 @@ export abstract class TaskRolesViewBase extends ItemView {
         ];
 
         for (const task of tasks) {
+            // TaskStatus is already normalized to lowercase with hyphens (e.g., 'in-progress')
+            // so we can directly use task.status to find the matching column
             const column = columns.find(col => col.id === task.status);
             if (column) {
                 column.tasks.push(task);
