@@ -1250,3 +1250,19 @@ ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency,
     font-weight: 500;
     color: var(--text-normal);
 }
+
+/* @me Contact DONE Pill Styles */
+.me-contact-done-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    margin-left: 8px;
+    background-color: var(--color-green);
+    color: var(--text-on-accent);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+}
