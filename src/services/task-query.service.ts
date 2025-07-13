@@ -267,7 +267,88 @@ export class TaskQueryService {
                 // Add progressive disclosure controls
                 this.addProgressiveDisclosure(htmlTaskItem);
             });
+            
+            // Force re-apply our custom CSS after everything is loaded
+            this.reapplyCustomCSS(container);
         }, 100);
+    }
+
+    private reapplyCustomCSS(container: HTMLElement): void {
+        // Force re-apply styles that might be overridden by other plugins
+        setTimeout(() => {
+            const taskItems = container.querySelectorAll('.task-list-item');
+            
+            taskItems.forEach((taskItem: Element) => {
+                const htmlTaskItem = taskItem as HTMLElement;
+                
+                // Force re-apply our custom task styling
+                htmlTaskItem.style.setProperty('margin', '0 0 8px 0', 'important');
+                htmlTaskItem.style.setProperty('padding', '12px', 'important');
+                htmlTaskItem.style.setProperty('background', 'var(--background-primary)', 'important');
+                htmlTaskItem.style.setProperty('border', '1px solid var(--background-modifier-border)', 'important');
+                htmlTaskItem.style.setProperty('border-radius', '6px', 'important');
+                htmlTaskItem.style.setProperty('box-shadow', '0 1px 3px rgba(0, 0, 0, 0.1)', 'important');
+                htmlTaskItem.style.setProperty('transition', 'all 0.2s ease', 'important');
+                htmlTaskItem.style.setProperty('position', 'relative', 'important');
+                htmlTaskItem.style.setProperty('list-style', 'none', 'important');
+                htmlTaskItem.style.setProperty('width', '100%', 'important');
+                htmlTaskItem.style.setProperty('box-sizing', 'border-box', 'important');
+                
+                // Force re-apply priority border colors
+                if (htmlTaskItem.classList.contains('priority-urgent')) {
+                    htmlTaskItem.style.setProperty('border-left', '4px solid var(--text-error)', 'important');
+                    htmlTaskItem.style.setProperty('background', 'linear-gradient(90deg, rgba(255, 67, 54, 0.05) 0%, var(--background-primary) 20%)', 'important');
+                } else if (htmlTaskItem.classList.contains('priority-high')) {
+                    htmlTaskItem.style.setProperty('border-left', '4px solid var(--color-orange)', 'important');
+                    htmlTaskItem.style.setProperty('background', 'linear-gradient(90deg, rgba(255, 152, 0, 0.05) 0%, var(--background-primary) 20%)', 'important');
+                } else if (htmlTaskItem.classList.contains('priority-medium')) {
+                    htmlTaskItem.style.setProperty('border-left', '4px solid var(--color-blue)', 'important');
+                    htmlTaskItem.style.setProperty('background', 'linear-gradient(90deg, rgba(33, 150, 243, 0.05) 0%, var(--background-primary) 20%)', 'important');
+                } else if (htmlTaskItem.classList.contains('priority-low')) {
+                    htmlTaskItem.style.setProperty('border-left', '4px solid var(--color-green)', 'important');
+                    htmlTaskItem.style.setProperty('background', 'linear-gradient(90deg, rgba(76, 175, 80, 0.05) 0%, var(--background-primary) 20%)', 'important');
+                }
+                
+                // Force checkbox positioning
+                const checkbox = htmlTaskItem.querySelector('input[type="checkbox"]') as HTMLElement;
+                if (checkbox) {
+                    checkbox.style.setProperty('position', 'absolute', 'important');
+                    checkbox.style.setProperty('top', '12px', 'important');
+                    checkbox.style.setProperty('left', '12px', 'important');
+                    checkbox.style.setProperty('margin', '0', 'important');
+                    checkbox.style.setProperty('transform', 'scale(1.0)', 'important');
+                }
+                
+                // Force task content margin
+                const taskDescription = htmlTaskItem.querySelector('.task-description, p');
+                if (taskDescription) {
+                    (taskDescription as HTMLElement).style.setProperty('margin-left', '20px', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('margin-bottom', '0', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('line-height', '1.3', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('font-size', '13px', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('color', 'var(--text-normal)', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('word-wrap', 'break-word', 'important');
+                    (taskDescription as HTMLElement).style.setProperty('overflow-wrap', 'break-word', 'important');
+                }
+                
+                // Force task metadata margin
+                const taskMetadata = htmlTaskItem.querySelector('.task-metadata');
+                if (taskMetadata) {
+                    (taskMetadata as HTMLElement).style.setProperty('margin-left', '20px', 'important');
+                    (taskMetadata as HTMLElement).style.setProperty('margin-top', '6px', 'important');
+                }
+            });
+            
+            // Force container padding removal
+            const containers = container.querySelectorAll('ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency, .contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency');
+            containers.forEach((containerEl: Element) => {
+                const htmlContainer = containerEl as HTMLElement;
+                htmlContainer.style.setProperty('padding-left', '0', 'important');
+                htmlContainer.style.setProperty('margin-left', '0', 'important');
+                htmlContainer.style.setProperty('padding', '0', 'important');
+                htmlContainer.style.setProperty('margin', '0', 'important');
+            });
+        }, 200); // Additional delay to ensure other plugins have finished their modifications
     }
 
     private extractTaskContent(taskItem: HTMLElement): string {
