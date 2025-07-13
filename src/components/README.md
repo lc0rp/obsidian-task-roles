@@ -6,7 +6,7 @@ This directory contains UI components that have been extracted from the main vie
 
 ### CompactFiltersComponent (`compact-filters.ts`)
 
-Handles the compact horizontal filter UI that appears when `useCompactFilters` setting is enabled. Includes:
+Handles the compact horizontal filter UI. Includes:
 
 - Search input
 - Assignee selector
@@ -15,15 +15,6 @@ Handles the compact horizontal filter UI that appears when `useCompactFilters` s
 - Priority multiselect dropdown
 - Date filter controls
 - Filter action buttons (clear, cancel, apply, auto-apply toggle)
-
-### ExpandableFiltersComponent (`expandable-filters.ts`)
-
-Handles the traditional expandable filter panel that appears when `useCompactFilters` setting is disabled. Includes:
-
-- Collapsible filter section
-- Grid layout with filter groups
-- All the same filter types as compact filters but in a different layout
-- Filter action buttons
 
 ### TaskCardComponent (`task-card.ts`)
 
