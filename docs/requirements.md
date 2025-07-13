@@ -1,9 +1,9 @@
-# Obsidian Task Assignment
+# Obsidian Task Roles
 
-Obsidian Task Assignment allows you to associate tasks with contacts or companies. It is intended for use with the tasks
-plugin.
+Obsidian Task Roles allows you to associate tasks with roles, contacts or groups (companies). It is intended for use with
+the tasks plugin.
 
-By default, contacts are created with @<contact_name> and groups or companies are created with the +<company_name>
+By default, contacts are created with @<contact_name> and groups or companies are created with the +<group_name>
 
 These are linked to the directory from which the contact originates, using the Mention plugin.
 
@@ -30,10 +30,10 @@ like the others.
 Clicking "Done" in the Assign modal adds the selected contacts or companies to the task by appending them like this: icon
 space comma-separated contact links. The icon is the role icon. Order: DACI. Empty roles aren't shown.
 
-## Editing assignments
+## Editing task roles
 
-Selecting "Assign task roles" on a task that already has roles will display the current data and enable you to edit it.
-Note that only known, unhidden roles will be parsed.
+Selecting "Assign or Update Roles" on a task that already has roles will display the current data and enable you to edit
+it. Note that only known, unhidden roles will be parsed.
 
 ## Task Center Implementation
 
@@ -47,13 +47,13 @@ and real-time task tracking.
 - **Real-time scanning**: Automatically scans all markdown files for tasks
 - **Live updates**: Updates cache when files are modified, created, deleted, or renamed
 - **Comprehensive parsing**: Extracts all task metadata including:
-  - Task assignments and roles
+  - Task roles and assignees
   - Priority levels (🔴🟡🟢 icons, [urgent]/[high]/[low] text, ! indicators)
   - Status indicators (including custom 🚧 in-progress, ❌ cancelled)
   - Dates (due, scheduled, completed, created, modified)
   - Tags (#tag format)
   - File location and line numbers
-- **Persistent storage**: Saves cache to `.obsidian/task-assignment-cache.json`
+- **Persistent storage**: Saves cache to `.obsidian/task-roles-cache.json`
 
 #### **View Layouts**
 
@@ -81,14 +81,6 @@ and real-time task tracking.
 - Tag display
 - Click-to-expand detailed side panel
 
-#### **Task Details Side Panel**
-
-- Full task description and file location
-- Complete assignment information with roles
-- All date fields (created, due, scheduled, completed, modified)
-- Priority and status information
-- Tags display
-
 #### **View Configuration Management**
 
 - **Save Configurations**: Save current filter and layout settings with custom names
@@ -111,14 +103,14 @@ and real-time task tracking.
 
 - **"Open Task Center"**: Opens the main task view
 - **"Refresh Task Cache"**: Manually rebuilds the task cache
-- **"Assign task roles"**: Opens assignment modal (context-sensitive)
+- **"Assign or Update Roles"**: Opens role & assignee modal (context-sensitive)
 
 #### **Access Methods**
 
 - Command palette access
 - Ribbon icon (users icon)
 - Configurable keyboard shortcuts
-- Inline task icons for assignment
+- Inline task icons for role & assignee updates
 
 ## Settings
 
@@ -156,10 +148,10 @@ The plugin follows a modular architecture with clear separation of concerns:
 
 - **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
 - **Types** (`types/`) - TypeScript interfaces and constants including comprehensive task data models
-- **Services** (`services/`) - Business logic including task caching, assignment processing, and view configuration
-- **Components** (`components/`) - Reusable UI widgets including the task assignment widget
+- **Services** (`services/`) - Business logic including task caching, role & assignee processing, and view configuration
+- **Components** (`components/`) - Reusable UI widgets including the task roles widget
 - **Editor** (`editor/`) - CodeMirror extensions and suggestions
-- **Modals** (`modals/`) - Dialog windows for assignments, role editing, and view configuration
+- **Modals** (`modals/`) - Dialog windows for role & assignee editing, and view configuration
 - **Views** (`views/`) - Task Center implementation with base and concrete view classes
 - **Settings** (`settings/`) - Configuration and preferences
 
@@ -168,13 +160,13 @@ The plugin follows a modular architecture with clear separation of concerns:
 #### **Core Services**
 
 - **TaskCacheService** - Real-time task scanning, parsing, caching, and file monitoring
-- **TaskAssignmentService** - Assignment parsing, formatting, and file operations
+- **TaskRolesService** - Role & assignee parsing, formatting, and file operations
 - **ViewConfigurationService** - Saved view management and persistence
 
 #### **View System**
 
-- **TaskAssignmentViewBase** - Abstract base class with common filtering and layout logic
-- **TaskAssignmentView** - Concrete implementation with UI rendering and interaction handling
+- **TaskRolesViewBase** - Abstract base class with common filtering and layout logic
+- **TaskRolesView** - Concrete implementation with UI rendering and interaction handling
 
 #### **Task Data Model**
 
@@ -182,14 +174,14 @@ The plugin follows a modular architecture with clear separation of concerns:
   - File metadata (path, line number, creation/modification dates)
   - Content parsing (description, full content)
   - Status and priority information
-  - Assignment data with parsed roles
+  - Role & assignee data with parsing
   - Date fields (due, scheduled, completed, etc.)
   - Tags and search metadata
 
 #### **Editor Integration**
 
-- **TaskAssignmentExtension** - CodeMirror extension for task decoration with person icons
-- **TaskAssignmentWidget** - Clickable widget for inline task assignment
-- **AssignmentSuggest** - Auto-completion for inline assignment typing
+- **TaskRolesExtension** - CodeMirror extension for task decoration with person icons
+- **TaskRolesInlineWidget** - Clickable widget for inline task roles
+- **TaskRolesSuggest** - Auto-completion for inline role typing
 
 This modular design makes the codebase more maintainable, testable, and extensible for future features.

@@ -38,7 +38,7 @@ git add . && git commit -m "feat(ui): add help links to modal and settings pages
 
 ```text
 Don't forget to commit!
-git add . && git commit -m "fix(modal): resolve assignment parsing issue"
+git add . && git commit -m "fix(modal): resolve role parsing issue"
 ```
 
 ### For documentation

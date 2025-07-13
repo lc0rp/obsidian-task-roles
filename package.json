@@ -1,5 +1,5 @@
 {
-    "name": "obsidian-task-assignment",
+    "name": "obsidian-task-roles",
     "version": "0.0.1",
     "description": "Assign contacts, companies and roles to tasks.",
     "main": "main.js",

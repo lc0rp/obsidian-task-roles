@@ -1,6 +1,6 @@
 # Source Code
 
-This directory contains the main TypeScript source files for the Obsidian Task Assignment plugin, organized into modular
+This directory contains the main TypeScript source files for the Obsidian Task Roles plugin, organized into modular
 subdirectories following best practices.
 
 ## Directory Structure
@@ -20,11 +20,11 @@ subdirectories following best practices.
 
 - `main.ts` - Plugin initialization and command registration
 - `types/index.ts` - All TypeScript interfaces and constants
-- `services/task-assignment.service.ts` - Core business logic
-- `components/task-assignment-widget.ts` - Inline task assignment widget
-- `editor/task-assignment-extension.ts` - CodeMirror extension for task icons
-- `editor/assignment-suggest.ts` - Editor autocompletion for assignments
-- `modals/assignment-modal.ts` - Main assignment dialog
+- `services/task-roles.service.ts` - Core business logic
+- `components/task-roles-widget.ts` - Inline task roles widget
+- `editor/task-roles-extension.ts` - CodeMirror extension for task icons
+- `editor/role-suggest.ts` - Editor autocompletion for role suggestions
+- `modals/task-roles-update-modal.ts` - Main role & assignee update dialog
 - `modals/assignee-selector-modal.ts` - Contact/company selector
 - `modals/role-edit-modal.ts` - Role editing dialog
-- `settings/task-assignment-settings-tab.ts` - Plugin settings panel
+- `settings/task-roles-settings-tab.ts` - Plugin settings panel

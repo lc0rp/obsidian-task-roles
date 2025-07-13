@@ -10,7 +10,7 @@ function createPlugin() {
             return symbol === DEFAULT_SETTINGS.contactSymbol ? ['John'] : ['Acme'];
         })
     };
-    return { app, settings: DEFAULT_SETTINGS, taskAssignmentService: service };
+    return { app, settings: DEFAULT_SETTINGS, taskRolesService: service };
 }
 
 describe('AssigneeSelectorModal', () => {

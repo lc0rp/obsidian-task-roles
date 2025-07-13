@@ -1,16 +1,16 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedAssignment } from '../types';
-import { TaskAssignmentService } from './task-assignment.service';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedRoleAssignment } from '../types';
+import { TaskRolesService } from './task-roles.service';
 import { TaskUtils } from '../utils/task-regex';
 
 export class TaskCacheService {
     private cache: Map<string, TaskData> = new Map();
-    private cacheFilePath = '.obsidian/task-assignment-cache.json';
+    private cacheFilePath = '.obsidian/task-roles-cache.json';
     private isUpdating = false;
 
     constructor(
         private app: App,
-        private taskAssignmentService: TaskAssignmentService,
+        private taskRolesService: TaskRolesService,
         private visibleRoles: Role[],
         private debug: boolean
     ) {
@@ -156,10 +156,10 @@ export class TaskCacheService {
             // Parse status
             const status = this.parseTaskStatus(statusChar, content);
 
-            // Parse assignments
-            const assignments = this.taskAssignmentService.parseTaskAssignments(content, this.visibleRoles);
+            // Parse assigned roles
+            const roleAssignments = this.taskRolesService.parseRoleAssignments(content, this.visibleRoles);
 
-            // Parse description (remove assignments and metadata)
+            // Parse description (remove assigned roles and metadata)
             const description = this.extractTaskDescription(content);
 
             // Parse priority and tags
@@ -173,7 +173,7 @@ export class TaskCacheService {
             const createdDate = new Date(file.stat.ctime);
             const modifiedDate = new Date(file.stat.mtime);
 
-            const searchText = this.buildSearchText(description, file.path, tags, assignments);
+            const searchText = this.buildSearchText(description, file.path, tags, roleAssignments);
 
             return {
                 id: taskId,
@@ -185,7 +185,7 @@ export class TaskCacheService {
                 status,
                 priority,
                 tags,
-                assignments,
+                roleAssignments,
                 dates,
                 createdDate,
                 modifiedDate
@@ -262,21 +262,21 @@ export class TaskCacheService {
     }
 
     private extractTaskDescription(content: string): string {
-        // Remove assignments, dates, priority indicators, and tags
+        // Remove assigned roles, dates, priority indicators, and tags
         let description = content;
 
-        // Remove role assignments - both old and new formats
-        const allIcons = this.visibleRoles.map(r => this.taskAssignmentService.escapeRegex(r.icon)).join('');
+        // Remove role assigned roles - both old and new formats
+        const allIcons = this.visibleRoles.map(r => this.taskRolesService.escapeRegex(r.icon)).join('');
 
-        // Remove old format assignments (icon + wiki-links)
+        // Remove old format assigned roles (icon + wiki-links)
         for (const role of this.visibleRoles) {
-            const regex = new RegExp(`\\s*${this.taskAssignmentService.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'gu');
+            const regex = new RegExp(`\\s*${this.taskRolesService.escapeRegex(role.icon)}\\s+[^${allIcons}]*`, 'gu');
             description = description.replace(regex, '');
         }
 
-        // Remove new format assignments (dataview inline)
+        // Remove new format assigned roles (dataview inline)
         for (const role of this.visibleRoles) {
-            const escapedIcon = this.taskAssignmentService.escapeRegex(role.icon);
+            const escapedIcon = this.taskRolesService.escapeRegex(role.icon);
             const regex = new RegExp(`\\s*\\[${escapedIcon}::[^\\]]*\\]`, 'gu');
             description = description.replace(regex, '');
         }
@@ -300,12 +300,12 @@ export class TaskCacheService {
         return description;
     }
 
-    private buildSearchText(description: string, filePath: string, tags: string[], assignments: ParsedAssignment[]): string {
+    private buildSearchText(description: string, filePath: string, tags: string[], roleAssignments: ParsedRoleAssignment[]): string {
         return [
             description,
             filePath,
             ...tags,
-            ...assignments.flatMap(a => a.assignees)
+            ...roleAssignments.flatMap(a => a.assignees)
         ].join(' ').toLowerCase();
     }
 
@@ -367,14 +367,14 @@ export class TaskCacheService {
                     };
 
                     if (!task.searchText) {
-                        task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.assignments);
+                        task.searchText = this.buildSearchText(task.description, task.filePath, task.tags, task.roleAssignments);
                     }
 
                     this.cache.set(task.id, task);
                 }
             }
         } catch (error) {
-            throw new Error('Failed to load cache from file');
+            throw new Error('Failed to load cache from file.');
         }
     }
 

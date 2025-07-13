@@ -6,7 +6,7 @@ import {
     EditorSuggestContext,
     EditorSuggestTriggerInfo
 } from 'obsidian';
-import type TaskAssignmentPlugin from '../main';
+import type TaskRolesPlugin from '../main';
 import { Role } from '../types';
 import { TaskUtils } from '../utils/task-regex';
 
@@ -16,7 +16,7 @@ import { TaskUtils } from '../utils/task-regex';
  * before the closing bracket.
  */
 export class RoleSuggest extends EditorSuggest<Role> {
-    constructor(public app: App, private plugin: TaskAssignmentPlugin) {
+    constructor(public app: App, private plugin: TaskRolesPlugin) {
         super(app);
     }
 
@@ -36,7 +36,7 @@ export class RoleSuggest extends EditorSuggest<Role> {
         const shortcuts = this.plugin.getVisibleRoles()
             .map(r => r.shortcut)
             .filter((s): s is string => !!s)
-            .map(s => this.plugin.taskAssignmentService.escapeRegex(s))
+            .map(s => this.plugin.taskRolesService.escapeRegex(s))
             .join('');
 
         const pattern = shortcuts

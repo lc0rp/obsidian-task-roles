@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-task-assignment",
-	"name": "Task Assignment",
-	"version": "0.0.1",
-	"minAppVersion": "1.6.5",
-	"description": "Assign contacts, companies and roles to tasks.",
-	"author": "lc0rp",
-	"authorUrl": "https://github.com/lc0rp",
-	"isDesktopOnly": false,
-	"styles": "styles.css"
+    "id": "obsidian-task-roles",
+    "name": "Task Roles",
+    "version": "0.0.1",
+    "minAppVersion": "1.6.5",
+    "description": "Assign roles, contacts, and groups (or companies) to tasks.",
+    "author": "lc0rp",
+    "authorUrl": "https://github.com/lc0rp",
+    "isDesktopOnly": false,
+    "styles": "styles.css"
 }

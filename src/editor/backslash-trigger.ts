@@ -1,10 +1,10 @@
 import { ViewPlugin } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
 import { App, MarkdownView } from 'obsidian';
-import { TaskAssignmentSettings, Role } from '../types';
+import { TaskRolesPluginSettings, Role } from '../types';
 import { TaskUtils } from '../utils/task-regex';
 
-export function backslashTrigger(app: App, settings: TaskAssignmentSettings) {
+export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
     return ViewPlugin.fromClass(class {
         constructor(readonly view: EditorView) {
             this.onKey = this.onKey.bind(this);

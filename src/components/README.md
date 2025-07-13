@@ -5,7 +5,9 @@ This directory contains UI components that have been extracted from the main vie
 ## Component Structure
 
 ### CompactFiltersComponent (`compact-filters.ts`)
+
 Handles the compact horizontal filter UI that appears when `useCompactFilters` setting is enabled. Includes:
+
 - Search input
 - Assignee selector
 - Role multiselect dropdown
@@ -15,14 +17,18 @@ Handles the compact horizontal filter UI that appears when `useCompactFilters` s
 - Filter action buttons (clear, cancel, apply, auto-apply toggle)
 
 ### ExpandableFiltersComponent (`expandable-filters.ts`)
+
 Handles the traditional expandable filter panel that appears when `useCompactFilters` setting is disabled. Includes:
+
 - Collapsible filter section
 - Grid layout with filter groups
 - All the same filter types as compact filters but in a different layout
 - Filter action buttons
 
 ### TaskCardComponent (`task-card.ts`)
+
 Renders individual task cards within columns. Handles:
+
 - Task checkbox for status changes
 - Action icons (priority, link, edit, assign)
 - Task description rendering
@@ -30,7 +36,9 @@ Renders individual task cards within columns. Handles:
 - Task status and priority CSS classes
 
 ### ViewHeaderComponent (`view-header.ts`)
+
 Renders the top header section of the view. Includes:
+
 - Title and icon
 - Current view name display
 - Layout selector dropdown
@@ -41,7 +49,9 @@ Renders the top header section of the view. Includes:
 ## Services
 
 ### TaskQueryService (`../services/task-query.service.ts`)
+
 Handles task query building and rendering when `useTaskQueries` setting is enabled. Includes:
+
 - Filter-to-query conversion
 - Column query building based on layout
 - Query column rendering with markdown
@@ -56,8 +66,9 @@ Handles task query building and rendering when `useTaskQueries` setting is enabl
 
 ## Main View Refactoring
 
-The main `TaskAssignmentView` class has been reduced from ~1600 lines to ~250 lines by:
+The main `TaskRolesView` class has been reduced from ~1600 lines to ~250 lines by:
+
 - Extracting large rendering methods into components
 - Moving complex filter logic to dedicated filter components
 - Moving task query logic to a service
-- Keeping only the coordination logic in the main view 
+- Keeping only the coordination logic in the main view

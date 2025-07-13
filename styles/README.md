@@ -1,6 +1,6 @@
 # Styles
 
-This directory contains the CSS stylesheets for the Obsidian Task Assignment plugin.
+This directory contains the CSS stylesheets for the Obsidian Task Roles plugin.
 
 ## Files
 
@@ -20,7 +20,7 @@ The stylesheet is organized into sections:
 
 ### Core Components
 
-- `.roles-container` - Main roles container in assignment modal
+- `.roles-container` - Main roles container in roles update modal
 - `.role-row` - Individual role rows
 - `.role-header` - Role name and icon header
 - `.assignee-container` - Container for assignee tags
@@ -34,9 +34,9 @@ The stylesheet is organized into sections:
 
 ### Editor Components
 
-- `.task-assignment-icon-container` - Container for inline task icons
-- `.task-assignment-icon-button` - Clickable icon button
-- `.task-assignment-icon` - Icon styling
+- `.task-roles-icon-container` - Container for inline task icons
+- `.task-roles-icon-button` - Clickable icon button
+- `.task-roles-icon` - Icon styling
 
 ### Settings
 

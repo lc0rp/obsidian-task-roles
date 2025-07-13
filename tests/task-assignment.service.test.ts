@@ -1,50 +1,50 @@
 import { describe, it, expect } from 'vitest';
-import { TaskAssignmentService } from '../src/services/task-assignment.service';
+import { TaskRolesService } from '../src/services/task-roles.service';
 import { DEFAULT_SETTINGS, DEFAULT_ROLES } from '../src/types/index';
 
 const appStub = { vault: {}, workspace: {} };
 
 function createService() {
-    return new TaskAssignmentService(appStub, DEFAULT_SETTINGS);
+    return new TaskRolesService(appStub, DEFAULT_SETTINGS);
 }
 
-describe('TaskAssignmentService', () => {
-    it('parseTaskAssignments returns single role', () => {
+describe('TaskRolesService', () => {
+    it('parseRoleAssignments returns single role', () => {
         const service = createService();
         const input = '[🚗:: [[Contacts/John|@John]]]';
-        const result = service.parseTaskAssignments(input, DEFAULT_ROLES);
+        const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
         expect(result).toEqual([
             { role: DEFAULT_ROLES[0], assignees: ['@John'] }
         ]);
     });
 
-    it('applyAssignmentsToLine inserts assignments before metadata', () => {
+    it('applyRoleAssignmentsToLine inserts assigned roles before metadata', () => {
         const service = createService();
         const line = '- [ ] Test task 🔴 📅 2024-01-01';
-        const assignments = [{ roleId: 'drivers', assignees: ['@John'] }];
-        const result = service.applyAssignmentsToLine(line, assignments, DEFAULT_ROLES);
+        const roleAssignments = [{ roleId: 'drivers', assignees: ['@John'] }];
+        const result = service.applyRoleAssignmentsToLine(line, roleAssignments, DEFAULT_ROLES);
         expect(result).toBe(
             '- [ ] Test task [🚗:: [[Contacts/John|@John]]] 🔴 📅 2024-01-01'
         );
     });
 
-    it('parseTaskAssignments handles multiple roles', () => {
+    it('parseRoleAssignments handles multiple roles', () => {
         const service = createService();
         const input = '[🚗:: [[Contacts/John|@John]]] [👍:: [[Contacts/Jane|@Jane]]]';
-        const result = service.parseTaskAssignments(input, DEFAULT_ROLES);
+        const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
         expect(result).toEqual([
             { role: DEFAULT_ROLES[0], assignees: ['@John'] },
             { role: DEFAULT_ROLES[1], assignees: ['@Jane'] }
         ]);
     });
 
-    it('formatAssignments sorts by role order', () => {
+    it('formatRoleAssignments sorts by role order', () => {
         const service = createService();
-        const assignments = [
+        const roleAssignments = [
             { roleId: 'approvers', assignees: ['@Jane'] },
             { roleId: 'drivers', assignees: ['@John'] }
         ];
-        const output = service.formatAssignments(assignments, DEFAULT_ROLES);
+        const output = service.formatRoleAssignments(roleAssignments, DEFAULT_ROLES);
         expect(output).toBe(
             '[🚗:: [[Contacts/John|@John]]] [👍:: [[Contacts/Jane|@Jane]]]'
         );
@@ -57,11 +57,11 @@ describe('TaskAssignmentService', () => {
         expect(escaped).toBe(expected);
     });
 
-    it('applyAssignmentsToLine removes existing assignments with nested brackets', () => {
+    it('applyRoleAssignmentsToLine removes existing assigned roles with nested brackets', () => {
         const service = createService();
         const line = '- [ ] Task [🚗:: [[3-Resources/People/Luke|@Luke]], [[3-Resources/People/Mum|@Mum]]] 📅 2024-01-01';
-        const assignments = [{ roleId: 'approvers', assignees: ['@Manager'] }];
-        const result = service.applyAssignmentsToLine(line, assignments, DEFAULT_ROLES);
+        const roleAssignments = [{ roleId: 'approvers', assignees: ['@Manager'] }];
+        const result = service.applyRoleAssignmentsToLine(line, roleAssignments, DEFAULT_ROLES);
         expect(result).toBe(
             '- [ ] Task [👍:: [[Contacts/Manager|@Manager]]] 📅 2024-01-01'
         );

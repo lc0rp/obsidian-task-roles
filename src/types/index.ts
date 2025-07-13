@@ -1,4 +1,4 @@
-export interface TaskAssignmentSettings {
+export interface TaskRolesPluginSettings {
     contactSymbol: string;
     companySymbol: string;
     contactDirectory: string;
@@ -18,18 +18,18 @@ export interface Role {
     id: string;
     name: string;
     icon: string;
-    /** Single letter shortcut used for quick assignment */
+    /** Single letter shortcut used for quick role selection */
     shortcut?: string;
     isDefault: boolean;
     order: number;
 }
 
-export interface Assignment {
+export interface RoleAssignment {
     roleId: string;
     assignees: string[];
 }
 
-export interface ParsedAssignment {
+export interface ParsedRoleAssignment {
     role: Role;
     assignees: string[];
 }
@@ -45,7 +45,7 @@ export interface TaskData {
     status: TaskStatus;
     priority: TaskPriority;
     tags: string[];
-    assignments: ParsedAssignment[];
+    roleAssignments: ParsedRoleAssignment[];
     dates: TaskDates;
     createdDate: Date;
     modifiedDate: Date;
@@ -141,7 +141,7 @@ export const DEFAULT_ROLES: Role[] = [
     { id: 'informed', name: 'Informed', icon: '📢', shortcut: 'i', isDefault: true, order: 4 }
 ];
 
-export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
+export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
     contactSymbol: '@',
     companySymbol: '+',
     contactDirectory: 'Contacts',
@@ -157,5 +157,5 @@ export const DEFAULT_SETTINGS: TaskAssignmentSettings = {
     compatModeUserSet: false
 };
 
-export const ASSIGNMENT_COMMENT_START = '<!--TA-->';
-export const ASSIGNMENT_COMMENT_END = '<!--/TA-->';
+export const ROLE_ASSIGNMENT_COMMENT_START = '<!--TA-->';
+export const ROLE_ASSIGNMENT_COMMENT_END = '<!--/TA-->';

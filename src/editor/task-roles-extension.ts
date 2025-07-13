@@ -6,11 +6,11 @@ import {
     ViewUpdate
 } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
-import { TaskAssignmentWidget } from '../components/task-assignment-widget';
+import { TaskRolesInlineWidget } from '../components/task-roles-widget';
 import { TaskUtils } from '../utils/task-regex';
-import type TaskAssignmentPlugin from '../main';
+import type TaskRolesPlugin from '../main';
 
-export const taskAssignmentExtension = (plugin: TaskAssignmentPlugin) => ViewPlugin.fromClass(
+export const taskRolesExtension = (plugin: TaskRolesPlugin) => ViewPlugin.fromClass(
     class {
         decorations: DecorationSet;
 
@@ -43,7 +43,7 @@ export const taskAssignmentExtension = (plugin: TaskAssignmentPlugin) => ViewPlu
                             if (afterCheckbox.trim().length > 0) {
                                 const lineNumber = view.state.doc.lineAt(pos).number - 1; // Convert to 0-based
                                 const widget = Decoration.widget({
-                                    widget: new TaskAssignmentWidget(plugin, lineNumber),
+                                    widget: new TaskRolesInlineWidget(plugin, lineNumber),
                                     side: 1, // Place after the line content
                                 });
 

@@ -1,12 +1,15 @@
-# Task Assignment
+# Task Roles
 
-Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Contributors, Informed) methodology.
+Track who owns a task, who needs to be informed about it, who to follow up with, and more.
+
+"Task Roles" lets you assign roles, contacts, and groups (or companies) to tasks using DACI (Driver, Approver, Contributors
+, Informed) methodology.
 
 ## Features
 
-### 🎯 Quick Task Assignment
+### 🎯 Quick Role Updates
 
-- **One-click assignment**: A person icon (👤) appears at the end of every task line for instant access
+- **One-click role update**: A person icon (👤) appears at the end of every task line for instant access
 - **Smart detection**: Icons appear automatically when you start typing task content
 - **Natural workflow**: The cursor stays between the checkbox and icon, so you can type naturally
 
@@ -15,16 +18,16 @@ Assign contacts, companies and roles to tasks using DACI (Driver, Approver, Cont
 - Link tasks to contacts using `@` prefix (e.g., `@John`)
 - Link tasks to companies using `+` prefix (e.g., `+AcmeCorp`)
 - Auto-complete suggestions from configured directories
-- Special `@me` contact for self-assignment
+- Special `@me` contact for self-reference
 
-### 🎭 Role-Based Assignment (DACI)
+### 🎭 Default Roles, based on DACI methodology
 
 - **Drivers** 🚗: Who is responsible for driving the task forward
 - **Approvers** 👍: Who needs to approve the task
 - **Contributors** 👥: Who will contribute to the task
 - **Informed** 📢: Who needs to be kept informed
 - **Quick shortcuts**: Type `\d`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
-  Inside `tasks` or `taskview` code blocks, the shortcut inserts `🚗 =` style markup.
+  This also works inside `tasks` or `taskview` query blocks, where the shortcut inserts `🚗 =` style markup.
 - **Smart filtering**: Role suggestions only show roles that aren't already present on the task line
 
 ### ⚙️ Customizable Roles
@@ -57,7 +60,7 @@ The Task Center supports comprehensive filtering across multiple criteria:
 
 **Entity-Based Filters:**
 
-- **Roles**: Filter by specific roles or tasks with no role assignments
+- **Roles**: Filter by specific roles or tasks with no role assigned
 - **People**: Filter by individual contacts
 - **Companies**: Filter by organizational entities
 - **Combination filters**: Filter by person+role or company+role combinations
@@ -121,27 +124,27 @@ The Task Center uses an intelligent background task cache that:
 - Automatically scans all markdown files for tasks
 - Updates in real-time when files are modified, created, or deleted
 - Parses comprehensive task metadata including:
-  - Assignments and roles
+  - Roles and assignees
   - Dates (due, scheduled, completed, created, modified)
   - Priority levels (🔴 Urgent, 🟡 High, 🟢 Low, or text indicators)
   - Status (including custom indicators like 🚧 for in-progress, ❌ for cancelled)
   - Tags
   - File metadata
-- Stores cache data in `.obsidian/task-assignment-cache.json`
+- Stores cache data in `.obsidian/task-roles-cache.json`
 - Manual refresh available via refresh button or command
 
 ## Usage
 
-### Quick Assignment with Icons
+### Quick Role Addition and Updates with Icons
 
 1. Create a task: `- [ ] Complete project documentation`
 2. Start typing after the checkbox - a users icon automatically appears at the end
-3. Click the icon to open the assignment dialog
+3. Click the icon to open the role edit dialog
 4. Select roles and assign contacts/companies
 
-### Assignment Format
+### Role Format
 
-When you assign people to a task, it gets formatted using dataview inline format:
+When you assign a role to a task, it gets formatted using dataview inline format:
 `[icon:: comma-separated assignees]`
 
 Example: `[🚗:: @John, @Jane] [👍:: @Manager]`
@@ -182,14 +185,14 @@ The plugin recognizes and parses various task metadata formats:
 
 1. **Click the person icon**: Appears automatically at the end of task lines
 2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
-3. **Keyboard shortcut**: Configurable shortcut to trigger assignment
+3. **Keyboard shortcut**: Configurable shortcut to trigger the role edit dialog
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
 5. **Role shortcuts**: Type `\` followed by a role shortcut letter (e.g., `\d` for Drivers) - only shows roles not already
    assigned
 
-## Editing Assignments
+## Editing Roles
 
-Select "Assign task roles to People/Companies" on a task that already has roles to edit existing assignments. Only known,
+Select "Assign or Update Roles" on a task that already has roles setup to edit them. Only known,
 unhidden roles will be parsed and displayed.
 
 ## Settings
@@ -201,7 +204,7 @@ unhidden roles will be parsed and displayed.
 - **Create @me contact**: Button to create the special @me contact if it doesn't exist
 - **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
   Tasks plugin is installed)
-- **Manage roles**:
+- **Assign or Update Roles**:
   - Hide default roles (prevents them from appearing in future dialogs)
   - Add, edit, and delete custom roles
   - Note: Editing custom roles won't update historical records
@@ -212,13 +215,13 @@ unhidden roles will be parsed and displayed.
 
 1. Open Obsidian Settings
 2. Go to Community Plugins
-3. Search for "Task Assignment"
+3. Search for "Task Roles"
 4. Install and enable the plugin
 
 ### Manual Installation
 
 1. Download the latest release from GitHub
-2. Extract the files to your vault's `.obsidian/plugins/obsidian-task-assignment/` folder
+2. Extract the files to your vault's `.obsidian/plugins/obsidian-task-roles/` folder
 3. Reload Obsidian and enable the plugin in settings
 
 ## How It Works
@@ -228,7 +231,7 @@ The plugin uses CodeMirror editor extensions to:
 - Detect task lines in real-time
 - Add clickable person icons at the end of task lines
 - Maintain cursor position between checkbox and icon
-- Trigger assignment dialogs when icons are clicked
+- Trigger role edit dialogs when icons are clicked
 
 This approach is similar to how TaskNotes implements their functionality, providing a seamless user experience.
 
@@ -240,7 +243,7 @@ This plugin is built with TypeScript and follows Obsidian's plugin development g
 
 ```shell
 
-obsidian-task-assignment/
+obsidian-task-roles/
 ├── docs/                    # Documentation files
 ├── src/                     # TypeScript source code
 │   ├── main.ts             # Main plugin entry point
@@ -254,7 +257,7 @@ obsidian-task-assignment/
 │   ├── utils/              # General utilities (reserved for future use)
 │   └── views/              # Task Center view implementation
 ├── styles/                 # CSS stylesheets
-│   └── task-assignment-view.css # Task Center styles
+│   └── task-roles-view.css # Task Center styles
 ├── tests/                  # Test files (future)
 ├── media/                  # Media assets (icons, images)
 ├── manifest.json           # Plugin manifest
@@ -268,10 +271,10 @@ The plugin follows a modular architecture with clear separation of concerns:
 
 - **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
 - **Types** (`types/`) - TypeScript interfaces and constants for task data models
-- **Services** (`services/`) - Business logic including task caching, assignment processing, and view configuration
-- **Components** (`components/`) - Reusable UI widgets including the task assignment icon
+- **Services** (`services/`) - Business logic including task caching, role & assignee processing, and view configuration
+- **Components** (`components/`) - Reusable UI widgets including the task roles icon
 - **Editor** (`editor/`) - CodeMirror extensions and auto-suggestions
-- **Modals** (`modals/`) - Dialog windows for assignment, role editing, and view saving
+- **Modals** (`modals/`) - Dialog windows for role & assignee editing, and view saving
 - **Views** (`views/`) - Task Center implementation with filtering and layout management
 - **Settings** (`settings/`) - Configuration and preferences
 
@@ -280,20 +283,20 @@ The plugin follows a modular architecture with clear separation of concerns:
 **Core Services:**
 
 - **TaskCacheService** - Real-time task scanning, parsing, and caching
-- **TaskAssignmentService** - Assignment parsing, formatting, and file operations
+- **TaskRolesService** - Role & assignee parsing, formatting, and file operations
 - **ViewConfigurationService** - Saved view management
 
 **UI Components:**
 
-- **TaskAssignmentView** - Main Task Center interface
-- **TaskAssignmentWidget** - Inline assignment icon for tasks
-- **AssignmentModal** - Role assignment dialog
-- **SaveViewModal** - View configuration saving interface
+- **TaskRolesView** - Main Task Center interface
+- **TaskRolesInlineWidget** - Inline task roles icon for tasks
+- **AssignmentModel** - Role & assignee update dialog
+- **TaskRolesSaveViewModal** - View configuration saving interface
 
 **Editor Integration:**
 
-- **TaskAssignmentExtension** - CodeMirror extension for task decoration
-- **AssignmentSuggest** - Auto-completion for inline assignments
+- **TaskRolesExtension** - CodeMirror extension for task decoration
+- **TaskRolesSuggest** - Auto-completion for inline role suggestions
 
 This modular design makes the codebase more maintainable, testable, and extensible for future features.
 

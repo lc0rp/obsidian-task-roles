@@ -1,5 +1,5 @@
 import { App, FuzzySuggestModal } from 'obsidian';
-import type TaskAssignmentPlugin from '../main';
+import type TaskRolesPlugin from '../main';
 
 export interface AssigneeSelectorOptions {
     mode: 'readonly' | 'add';
@@ -7,7 +7,7 @@ export interface AssigneeSelectorOptions {
 }
 
 export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
-    plugin: TaskAssignmentPlugin;
+    plugin: TaskRolesPlugin;
     onSelect: (assignee: string) => void;
     contacts: string[] = [];
     companies: string[] = [];
@@ -16,7 +16,7 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
     private noResults = false; // Flag to indicate that the user pressed ↵ with no matches – create something new
     private disableClose = true; // Flag to prevent closing the modal as long as the user keeps making selections
 
-    constructor(app: App, plugin: TaskAssignmentPlugin, onSelect: (assignee: string) => void, options: AssigneeSelectorOptions = { mode: 'add', keepOpen: false }) {
+    constructor(app: App, plugin: TaskRolesPlugin, onSelect: (assignee: string) => void, options: AssigneeSelectorOptions = { mode: 'add', keepOpen: false }) {
         super(app);
         this.plugin = plugin;
         this.onSelect = onSelect;
@@ -36,8 +36,8 @@ export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
     }
 
     async onOpen() {
-        this.contacts = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
-        this.companies = await this.plugin.taskAssignmentService.getContactsAndCompanies(this.plugin.settings.companySymbol);
+        this.contacts = await this.plugin.taskRolesService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
+        this.companies = await this.plugin.taskRolesService.getContactsAndCompanies(this.plugin.settings.companySymbol);
         // Refresh suggestions after async data is loaded
         this.inputEl.dispatchEvent(new Event('input'));
     }

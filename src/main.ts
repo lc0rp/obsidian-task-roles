@@ -5,50 +5,50 @@ import {
     WorkspaceLeaf
 } from 'obsidian';
 
-import { TaskAssignmentSettings, DEFAULT_SETTINGS, Role } from './types';
-import { TaskAssignmentService } from './services/task-assignment.service';
+import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role } from './types';
+import { TaskRolesService } from './services/task-roles.service';
 import { TaskCacheService } from './services/task-cache.service';
-import { taskAssignmentExtension } from './editor/task-assignment-extension';
-import { AssignmentSuggest } from './editor/assignment-suggest';
+import { taskRolesExtension } from './editor/task-roles-extension';
+import { TaskRolesSuggest } from './editor/task-roles-suggest';
 import { RoleSuggest } from './editor/role-suggest';
 import { backslashTrigger } from './editor/backslash-trigger';
-import { AssignmentModal } from './modals/assignment-modal';
-import { TaskAssignmentSettingTab } from './settings/task-assignment-settings-tab';
-import { TaskAssignmentView } from './views/task-assignment-view';
+import { AssignmentModel } from './modals/assignment-modal';
+import { TaskRolesSettingTab } from './settings/task-roles-settings-tab';
+import { TaskRolesView } from './views/task-roles-view';
 import { syntaxTree } from '@codemirror/language';
 
-export default class TaskAssignmentPlugin extends Plugin {
-    settings: TaskAssignmentSettings;
-    taskAssignmentService: TaskAssignmentService;
+export default class TaskRolesPlugin extends Plugin {
+    settings: TaskRolesPluginSettings;
+    taskRolesService: TaskRolesService;
     taskCacheService: TaskCacheService;
 
     async onload() {
         await this.loadSettings();
 
         // Initialize services
-        this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
-        this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+        this.taskRolesService = new TaskRolesService(this.app, this.settings);
+        this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
 
         // Initialize task cache
         await this.taskCacheService.initializeCache();
 
         // Register view
         this.registerView(
-            'task-assignment-view',
-            (leaf) => new TaskAssignmentView(leaf, this, this.taskCacheService)
+            'task-roles-view',
+            (leaf) => new TaskRolesView(leaf, this, this.taskCacheService)
         );
 
-        // Register the assignment command
+        // Register the role assign command
         this.addCommand({
             id: 'assign-task-roles',
-            name: 'Assign task roles',
+            name: 'Assign or Update Roles',
             editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
                 const line = editor.getLine(editor.getCursor().line);
                 const isTask = /^\s*- \[[ x]\]/.test(line);
 
                 if (isTask) {
                     if (!checking) {
-                        this.openAssignmentModal(editor);
+                        this.openRolesModal(editor);
                     }
                     return true;
                 }
@@ -58,7 +58,7 @@ export default class TaskAssignmentPlugin extends Plugin {
 
         // Register view commands
         this.addCommand({
-            id: 'open-task-assignment-view',
+            id: 'open-task-roles-view',
             name: 'Open Task Center',
             callback: () => {
                 this.activateView();
@@ -73,8 +73,8 @@ export default class TaskAssignmentPlugin extends Plugin {
             }
         });
 
-        // Register editor suggest for inline assignment
-        this.registerEditorSuggest(new AssignmentSuggest(this.app, this));
+        // Register editor suggest for inline role suggestions
+        this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
 
         // Register role suggestion for \ shortcuts - conditional based on compatibility mode
         if (this.settings.compatMode) {
@@ -84,10 +84,10 @@ export default class TaskAssignmentPlugin extends Plugin {
         }
 
         // Register the CodeMirror extension for task icons
-        this.registerEditorExtension(taskAssignmentExtension(this));
+        this.registerEditorExtension(taskRolesExtension(this));
 
         // Add settings tab
-        this.addSettingTab(new TaskAssignmentSettingTab(this.app, this));
+        this.addSettingTab(new TaskRolesSettingTab(this.app, this));
     }
 
     async onunload() {
@@ -101,7 +101,7 @@ export default class TaskAssignmentPlugin extends Plugin {
         const { workspace } = this.app;
 
         let leaf: WorkspaceLeaf;
-        const leaves = workspace.getLeavesOfType('task-assignment-view');
+        const leaves = workspace.getLeavesOfType('task-roles-view');
 
         if (leaves.length > 0) {
             // A view is already open, use it
@@ -109,7 +109,7 @@ export default class TaskAssignmentPlugin extends Plugin {
         } else {
             // No view open, create one
             leaf = workspace.getLeaf() || workspace.getRightLeaf(false);
-            await leaf.setViewState({ type: 'task-assignment-view', active: true });
+            await leaf.setViewState({ type: 'task-roles-view', active: true });
         }
 
         // Reveal the leaf
@@ -148,25 +148,25 @@ export default class TaskAssignmentPlugin extends Plugin {
         this.settings.roles.sort((a, b) => a.order - b.order);
 
         // Update services with new settings
-        if (this.taskAssignmentService) {
-            this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
+        if (this.taskRolesService) {
+            this.taskRolesService = new TaskRolesService(this.app, this.settings);
         }
         if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
         }
     }
 
     async saveSettings() {
         await this.saveData(this.settings);
         // Update services with new settings
-        this.taskAssignmentService = new TaskAssignmentService(this.app, this.settings);
+        this.taskRolesService = new TaskRolesService(this.app, this.settings);
         if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskAssignmentService, this.getVisibleRoles(), this.settings.debug);
+            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
         }
     }
 
-    openAssignmentModal(editor: Editor) {
-        new AssignmentModal(this.app, this, editor).open();
+    openRolesModal(editor: Editor) {
+        new AssignmentModel(this.app, this, editor).open();
     }
 
     getVisibleRoles(): Role[] {

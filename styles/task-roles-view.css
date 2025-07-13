@@ -1,0 +1,1036 @@
+/* Task Roles View Styles */
+
+.task-roles-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+}
+
+/* Header Styles */
+.task-roles-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.task-roles-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.task-roles-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.task-roles-title-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.task-roles-current-view {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 12px;
+    padding: 4px 8px;
+    background-color: var(--background-modifier-border);
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.task-roles-current-view-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.task-roles-current-view-name {
+    color: var(--text-normal);
+    font-weight: 600;
+}
+
+.task-roles-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.task-roles-controls-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--background-modifier-border);
+    margin: 0 4px;
+}
+
+.task-roles-refresh-btn {
+    padding: 6px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.task-roles-refresh-btn:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.task-roles-layout-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.task-roles-layout-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-normal);
+}
+
+.task-roles-layout-container {
+    position: relative;
+}
+
+.task-roles-layout-select,
+.task-roles-saved-views-select {
+    padding: 6px 24px 6px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    color: var(--text-normal);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Style for dropdown arrow icon */
+.task-roles-dropdown-arrow {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-normal);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.task-roles-save-view-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--background-modifier-borderefccc);
+    border-radius: 4px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.task-roles-save-view-btn:hover {
+    background-color: var(--interactive-accent-hover);
+}
+
+/* Compact Filters Styles */
+.task-roles-compact-filters {
+    margin-bottom: 16px;
+}
+
+.task-roles-compact-filters-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 16px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background-color: var(--background-secondary);
+    flex-wrap: wrap;
+}
+
+.compact-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.compact-filter-label {
+    font-weight: 600;
+    color: var(--text-normal);
+    font-size: 13px;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.compact-filter-input,
+.compact-filter-select {
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 13px;
+    min-width: 120px;
+    max-width: 200px;
+}
+
+.compact-filter-input {
+    width: 140px;
+}
+
+.compact-filter-assignees {
+    cursor: pointer;
+    width: 180px;
+}
+
+.compact-filter-assignees:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.compact-filter-select {
+    width: 110px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+    padding-right: 24px;
+}
+
+.compact-date-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.compact-date-type {
+    width: 90px;
+}
+
+.compact-filter-date {
+    padding: 4px 6px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 12px;
+    width: 110px;
+}
+
+.compact-date-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin: 0;
+    cursor: pointer;
+}
+
+.compact-date-checkbox input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.compact-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.compact-filter-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.compact-filter-btn:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.compact-filter-apply {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+}
+
+.compact-filter-apply:hover:not(:disabled) {
+    background-color: var(--interactive-accent-hover);
+}
+
+.compact-filter-apply:disabled,
+.compact-filter-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.compact-filter-apply:disabled:hover,
+.compact-filter-cancel:disabled:hover {
+    background-color: var(--interactive-accent);
+}
+
+.compact-auto-apply {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-normal);
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.compact-auto-apply input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Compact Multi-Select Dropdown Styles */
+.compact-multiselect-container {
+    position: relative;
+    display: inline-block;
+}
+
+.compact-multiselect-display {
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    font-size: 13px;
+    min-width: 160px;
+    max-width: 220px;
+    width: 180px;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+    padding-right: 24px;
+}
+
+.compact-multiselect-display:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.compact-multiselect-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    box-shadow: var(--shadow-s);
+    max-height: 280px;
+    overflow-y: auto;
+    margin-top: 2px;
+}
+
+.compact-multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-normal);
+    border-bottom: 1px solid var(--background-modifier-border-hover);
+    margin: 0;
+}
+
+.compact-multiselect-option:last-child {
+    border-bottom: none;
+}
+
+.compact-multiselect-option:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.compact-multiselect-option input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.compact-multiselect-option span {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-multiselect-options {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.compact-multiselect-actions {
+    display: flex;
+    gap: 4px;
+    padding: 6px 8px;
+    border-top: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+}
+
+.compact-multiselect-btn {
+    background: var(--interactive-normal);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--text-normal);
+    flex: 1;
+}
+
+.compact-multiselect-btn:hover {
+    background: var(--interactive-hover);
+}
+
+.compact-multiselect-btn:active {
+    background: var(--interactive-active);
+}
+
+.compact-multiselect-ok {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.compact-multiselect-ok:hover {
+    background: var(--interactive-accent-hover);
+}
+
+/* Responsive adjustments for compact filters */
+@media (max-width: 1200px) {
+    .compact-filter-input {
+        width: 120px;
+    }
+
+    .compact-filter-assignees {
+        width: 160px;
+    }
+
+    .compact-filter-select {
+        width: 100px;
+    }
+
+    .compact-filter-date {
+        width: 100px;
+    }
+
+    .compact-multiselect-display {
+        width: 150px;
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .task-roles-compact-filters-row {
+        gap: 12px;
+        padding: 10px 12px;
+    }
+
+    .compact-filter-group {
+        gap: 4px;
+    }
+
+    .compact-filter-input,
+    .compact-filter-assignees {
+        width: 100px;
+        min-width: 100px;
+    }
+
+    .compact-filter-select {
+        width: 80px;
+    }
+
+    .compact-filter-date {
+        width: 80px;
+    }
+
+    .compact-multiselect-display {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    .compact-date-container {
+        gap: 2px;
+    }
+
+    .compact-filter-actions {
+        gap: 8px;
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Filters Styles */
+.task-roles-filters {
+    margin-bottom: 16px;
+}
+
+.task-roles-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.task-roles-filter-toggle:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.task-roles-filter-toggle.active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+}
+
+.task-roles-filter-arrow {
+    margin-left: auto;
+    color: inherit;
+}
+
+.task-roles-filters-content {
+    margin-top: 12px;
+    padding: 20px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background-color: var(--background-secondary);
+}
+
+.task-roles-filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+    max-width: 1200px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--text-normal);
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.filter-group input[type="text"],
+.filter-group input[type="date"],
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 14px;
+}
+
+/* Date type select specific styling */
+.task-roles-date-type-select {
+    padding: 10px 32px 10px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 14px;
+    line-height: 1.4;
+    min-height: 40px;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Assignees input styling */
+.task-roles-assignees-input {
+    cursor: pointer;
+}
+
+.task-roles-assignees-input:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+/* Date range styling */
+.date-range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.date-range-input {
+    flex: 1;
+}
+
+.date-range-separator {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.filter-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    align-items: start;
+}
+
+.filter-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.filter-checkboxes input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.date-range-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.date-range-container label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.task-roles-filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.task-roles-auto-apply-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-roles-auto-apply-checkbox {
+    margin: 0;
+    cursor: pointer;
+}
+
+.task-roles-auto-apply-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-normal);
+    cursor: pointer;
+    user-select: none;
+}
+
+.task-roles-apply-filters-btn,
+.task-roles-cancel-filters-btn,
+.task-roles-clear-filters-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.task-roles-apply-filters-btn:hover,
+.task-roles-cancel-filters-btn:hover,
+.task-roles-clear-filters-btn:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.task-roles-apply-filters-btn:disabled,
+.task-roles-cancel-filters-btn:disabled {
+    background-color: var(--background-modifier-border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.task-roles-apply-filters-btn:disabled:hover,
+.task-roles-cancel-filters-btn:disabled:hover {
+    background-color: var(--background-modifier-border);
+}
+
+.task-roles-apply-filters-btn {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.task-roles-apply-filters-btn:hover:not(:disabled) {
+    background-color: var(--interactive-accent-hover);
+}
+
+/* Content Styles */
+.task-roles-content {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.task-roles-columns {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    overflow-x: auto;
+    padding-bottom: 16px;
+}
+
+.task-roles-column {
+    min-width: 280px;
+    max-width: 320px;
+    flex-shrink: 0;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--background-modifier-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.task-roles-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.task-roles-column-title {
+    font-weight: 600;
+    color: var(--text-normal);
+    font-size: 14px;
+}
+
+.task-roles-column-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    background-color: var(--background-modifier-border);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.task-roles-column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Task Card Styles */
+.task-roles-card {
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.task-roles-card:hover {
+    background-color: var(--background-modifier-hover);
+    border-color: var(--interactive-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-roles-card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.task-roles-card input[type="checkbox"] {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.task-roles-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-roles-card-description {
+    font-size: 14px;
+    color: var(--text-normal);
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.task-roles-card-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.task-roles-card-due-date {
+    font-size: 12px;
+    color: var(--text-muted);
+    background-color: var(--background-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.task-roles-card-scheduled-date,
+.task-roles-card-completed-date {
+    font-size: 12px;
+    color: var(--text-muted);
+    background-color: var(--background-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.task-roles-card-due-date.overdue {
+    background-color: var(--text-error);
+    color: var(--text-on-accent);
+}
+
+.task-roles-card-priority {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.task-roles-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.task-roles-card-tag {
+    font-size: 11px;
+    color: var(--text-accent);
+    background-color: var(--background-secondary);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Action icons row */
+.task-roles-card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.task-card-action-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    opacity: 0.4;
+    transition: opacity 0.2s ease;
+}
+
+.task-card-action-icon.clickable {
+    cursor: pointer;
+}
+
+.task-card-action-icon.clickable:hover {
+    color: var(--text-normal);
+}
+
+.task-roles-card:hover .task-card-action-icon {
+    opacity: 1;
+}
+
+/* Task Status Classes */
+.task-status-todo {
+    border-left: 3px solid var(--text-muted);
+}
+
+.task-status-in-progress {
+    border-left: 3px solid var(--color-orange);
+}
+
+.task-status-done {
+    border-left: 3px solid var(--color-green);
+    opacity: 0.7;
+}
+
+.task-status-cancelled {
+    border-left: 3px solid var(--text-error);
+    opacity: 0.6;
+}
+
+/* Task Priority Classes */
+.task-priority-urgent .task-roles-card-priority {
+    background-color: var(--text-error);
+    color: var(--text-on-accent);
+}
+
+.task-priority-high .task-roles-card-priority {
+    background-color: var(--color-orange);
+    color: var(--text-on-accent);
+}
+
+.task-priority-medium .task-roles-card-priority {
+    background-color: var(--color-blue);
+    color: var(--text-on-accent);
+}
+
+.task-priority-low .task-roles-card-priority {
+    background-color: var(--color-green);
+    color: var(--text-on-accent);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .task-roles-view {
+        padding: 8px;
+    }
+
+    .task-roles-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .task-roles-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .task-roles-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .task-roles-columns {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .task-roles-column {
+        min-width: auto;
+        max-width: none;
+    }
+
+}
+
+/* Dark theme adjustments */
+.theme-dark .task-roles-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .task-roles-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+
+/* Scrollbar styling */
+.task-roles-column-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.task-roles-column-content::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+}
+
+.task-roles-column-content::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 3px;
+}
+
+.task-roles-column-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Backslash Trigger Compatibility Mode Styles */
+.backslash-trigger-popup {
+    position: fixed;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    box-shadow: var(--shadow-s);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    min-width: 200px;
+}
+
+.backslash-trigger-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.backslash-trigger-option:last-child {
+    border-bottom: none;
+}
+
+.backslash-trigger-option:hover,
+.backslash-trigger-option.selected {
+    background-color: var(--background-modifier-hover);
+}
+
+.backslash-trigger-option span:first-child {
+    font-size: 16px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.backslash-trigger-option span:last-child {
+    font-weight: 500;
+    color: var(--text-normal);
+}

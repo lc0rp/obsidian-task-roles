@@ -1,12 +1,12 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import { DEFAULT_ROLES, Role } from '../types';
 import { RoleEditModal } from '../modals/role-edit-modal';
-import type TaskAssignmentPlugin from '../main';
+import type TaskRolesPlugin from '../main';
 
-export class TaskAssignmentSettingTab extends PluginSettingTab {
-    plugin: TaskAssignmentPlugin;
+export class TaskRolesSettingTab extends PluginSettingTab {
+    plugin: TaskRolesPlugin;
 
-    constructor(app: App, plugin: TaskAssignmentPlugin) {
+    constructor(app: App, plugin: TaskRolesPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
@@ -15,7 +15,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h3', { text: 'Task Assignment Settings' });
+        containerEl.createEl('h3', { text: 'Task Roles Settings' });
 
         // Contact symbol setting
         new Setting(containerEl)
@@ -72,7 +72,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
             .addButton(button => button
                 .setButtonText('Create @me')
                 .onClick(async () => {
-                    await this.plugin.taskAssignmentService.createMeContact();
+                    await this.plugin.taskRolesService.createMeContact();
                 }));
 
         // Compact filters toggle
@@ -133,7 +133,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
         for (const role of DEFAULT_ROLES) {
             new Setting(containerEl)
                 .setName(`${role.icon} ${role.name}`)
-                .setDesc('Hide this role from future assignment dialogs')
+                .setDesc('Hide this role from future role update dialogs')
                 .addToggle(toggle => toggle
                     .setValue(this.plugin.settings.hiddenDefaultRoles.includes(role.id))
                     .onChange(async (value) => {
@@ -237,7 +237,7 @@ export class TaskAssignmentSettingTab extends PluginSettingTab {
         const helpDiv = containerEl.createDiv('help-link-container');
         const helpLink = helpDiv.createEl('a', {
             text: 'Need help? View documentation',
-            href: 'https://github.com/lc0rp/obsidian-task-assignment/docs/help.md',
+            href: 'https://github.com/lc0rp/obsidian-task-roles/docs/help.md',
             cls: 'help-link'
         });
         helpLink.setAttribute('target', '_blank');
