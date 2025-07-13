@@ -240,6 +240,11 @@ export class TaskQueryService {
                 viewContext
             );
 
+            // Check for Tasks plugin errors in the rendered content
+            setTimeout(() => {
+                this.checkForTasksPluginErrors(queryContainer, columnQuery.query, columnQuery.title);
+            }, 500);
+
             // Enhance the rendered tasks with better styling
             this.enhanceTaskDisplay(queryContainer);
         } catch (error) {
@@ -354,6 +359,32 @@ export class TaskQueryService {
                 htmlContainer.style.setProperty('margin', '0', 'important');
             });
         }, 200); // Additional delay to ensure other plugins have finished their modifications
+    }
+
+    private checkForTasksPluginErrors(container: HTMLElement, query: string, columnTitle: string): void {
+        // Check for common Tasks plugin error patterns in the rendered content
+        const contentText = container.textContent || '';
+        
+        // Look for error messages that the Tasks plugin displays
+        const errorPatterns = [
+            /Tasks query: do not understand/i,
+            /Problem line:/i,
+            /Error:/i,
+            /Invalid query/i,
+            /Unknown instruction/i,
+            /Malformed query/i
+        ];
+        
+        const hasError = errorPatterns.some(pattern => pattern.test(contentText));
+        
+        if (hasError) {
+            // Extract the error message
+            const lines = contentText.split('\n').filter(line => line.trim());
+            const errorMessage = lines.join('\n').trim();
+            
+            // Replace the content with our formatted error
+            this.displayQueryError(container, { message: errorMessage }, query, columnTitle);
+        }
     }
 
     private displayQueryError(container: HTMLElement, error: any, query: string, columnTitle: string): void {
