@@ -115,6 +115,19 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // Task display mode setting
+        new Setting(containerEl)
+            .setName('Task display mode')
+            .setDesc('Choose how task metadata is displayed: minimal (show on hover) or detailed (always visible)')
+            .addDropdown(dropdown => dropdown
+                .addOption('minimal', 'Minimal (hover to show details)')
+                .addOption('detailed', 'Detailed (always show metadata)')
+                .setValue(this.plugin.settings.taskDisplayMode)
+                .onChange(async (value: 'minimal' | 'detailed') => {
+                    this.plugin.settings.taskDisplayMode = value;
+                    await this.plugin.saveSettings();
+                }));
+
         // Disable task caching toggle
         new Setting(containerEl)
             .setName('Disable task caching')

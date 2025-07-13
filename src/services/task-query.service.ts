@@ -217,10 +217,14 @@ export class TaskQueryService {
 
         // Column header
         const headerDiv = columnDiv.createDiv('task-roles-column-header');
-        headerDiv.createEl('h3', { text: columnQuery.title });
+        const titleEl = headerDiv.createEl('h3', { text: columnQuery.title, cls: 'task-roles-column-title' });
 
         // Query display
         const queryContainer = columnDiv.createDiv('task-query-display');
+        
+        // Add progressive disclosure classes based on plugin settings
+        const styleMode = this.plugin.settings.taskDisplayMode || 'detailed';
+        queryContainer.addClass(`tasks-styled--${styleMode}`);
 
         // Create markdown content for the query
         const queryMarkdown = columnQuery.query
@@ -235,10 +239,149 @@ export class TaskQueryService {
             viewContext
         );
 
-        // Add some styling to make it clear this is a query preview
-        queryContainer.style.fontSize = '0.9em';
-        queryContainer.style.opacity = '0.8';
-        queryContainer.style.marginTop = '10px';
+        // Enhance the rendered tasks with better styling
+        this.enhanceTaskDisplay(queryContainer);
+
+        // Add column content wrapper
+        const columnContent = columnDiv.createDiv('task-roles-column-content');
+        columnContent.appendChild(queryContainer);
+    }
+
+    private enhanceTaskDisplay(container: HTMLElement): void {
+        // Use a timeout to allow the markdown renderer to complete
+        setTimeout(() => {
+            const taskItems = container.querySelectorAll('.task-list-item');
+            
+            taskItems.forEach((taskItem: Element) => {
+                const htmlTaskItem = taskItem as HTMLElement;
+                
+                // Extract task content for analysis
+                const taskContent = this.extractTaskContent(htmlTaskItem);
+                
+                // Add priority classes based on content
+                this.addPriorityClasses(htmlTaskItem, taskContent);
+                
+                // Add metadata elements
+                this.addTaskMetadata(htmlTaskItem, taskContent);
+                
+                // Add progressive disclosure controls
+                this.addProgressiveDisclosure(htmlTaskItem);
+            });
+        }, 100);
+    }
+
+    private extractTaskContent(taskItem: HTMLElement): string {
+        const textContent = taskItem.textContent || '';
+        return textContent.trim();
+    }
+
+    private addPriorityClasses(taskItem: HTMLElement, content: string): void {
+        // Detect priority from content
+        if (content.includes('🔴') || content.includes('[urgent]') || content.includes('!!!')) {
+            taskItem.addClass('priority-urgent');
+            this.addPriorityBadge(taskItem, 'urgent');
+        } else if (content.includes('🟡') || content.includes('[high]') || content.includes('!!')) {
+            taskItem.addClass('priority-high');
+            this.addPriorityBadge(taskItem, 'high');
+        } else if (content.includes('🟢') || content.includes('[low]') || content.includes('!')) {
+            taskItem.addClass('priority-low');
+            this.addPriorityBadge(taskItem, 'low');
+        } else {
+            taskItem.addClass('priority-medium');
+            this.addPriorityBadge(taskItem, 'medium');
+        }
+    }
+
+    private addPriorityBadge(taskItem: HTMLElement, priority: string): void {
+        const existingBadge = taskItem.querySelector('.task-priority');
+        if (existingBadge) return;
+
+        const priorityBadge = taskItem.createDiv('task-priority');
+        priorityBadge.textContent = priority.toUpperCase();
+    }
+
+    private addTaskMetadata(taskItem: HTMLElement, content: string): void {
+        const metadataContainer = taskItem.createDiv('task-metadata');
+        
+        // Extract and add dates
+        this.addDateMetadata(metadataContainer, content);
+        
+        // Extract and add roles/assignees
+        this.addRoleAssigneeMetadata(metadataContainer, content);
+        
+        // Extract and add tags
+        this.addTagMetadata(metadataContainer, content);
+    }
+
+    private addDateMetadata(container: HTMLElement, content: string): void {
+        // Due date pattern: 📅 YYYY-MM-DD
+        const dueDateMatch = content.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+        if (dueDateMatch) {
+            const dateEl = container.createDiv('task-date');
+            const dueDate = new Date(dueDateMatch[1]);
+            const today = new Date();
+            
+            if (dueDate < today) {
+                dateEl.addClass('overdue');
+            }
+            
+            dateEl.textContent = `Due: ${dueDateMatch[1]}`;
+        }
+
+        // Scheduled date pattern: ⏰ YYYY-MM-DD
+        const scheduledMatch = content.match(/⏰\s*(\d{4}-\d{2}-\d{2})/);
+        if (scheduledMatch) {
+            const dateEl = container.createDiv('task-date');
+            dateEl.textContent = `Scheduled: ${scheduledMatch[1]}`;
+        }
+    }
+
+    private addRoleAssigneeMetadata(container: HTMLElement, content: string): void {
+        // Role pattern: @role(role-name)
+        const roleMatches = content.matchAll(/@role\(([^)]+)\)/g);
+        for (const match of roleMatches) {
+            const roleEl = container.createDiv('task-role');
+            roleEl.textContent = match[1];
+        }
+
+        // Assignee patterns: @person or &company
+        const assigneeMatches = content.matchAll(/[@&]([^\s,]+)/g);
+        for (const match of assigneeMatches) {
+            if (match[0].startsWith('@role(')) continue; // Skip role matches
+            
+            const assigneeEl = container.createDiv('task-assignee');
+            if (match[0].startsWith('&')) {
+                assigneeEl.addClass('company');
+            }
+            assigneeEl.textContent = match[1];
+        }
+    }
+
+    private addTagMetadata(container: HTMLElement, content: string): void {
+        // Tag pattern: #tag
+        const tagMatches = content.matchAll(/#([^\s]+)/g);
+        for (const match of tagMatches) {
+            const tagEl = container.createDiv('task-tag');
+            tagEl.textContent = `#${match[1]}`;
+        }
+    }
+
+    private addProgressiveDisclosure(taskItem: HTMLElement): void {
+        const metadata = taskItem.querySelector('.task-metadata');
+        if (!metadata) return;
+
+        // Add click handler for minimal mode
+        taskItem.addEventListener('mouseenter', () => {
+            if (taskItem.closest('.tasks-styled--minimal')) {
+                (metadata as HTMLElement).style.display = 'flex';
+            }
+        });
+
+        taskItem.addEventListener('mouseleave', () => {
+            if (taskItem.closest('.tasks-styled--minimal')) {
+                (metadata as HTMLElement).style.display = 'none';
+            }
+        });
     }
 
     private getUniquePeople(): string[] {
