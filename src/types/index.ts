@@ -9,6 +9,7 @@ export interface TaskRolesPluginSettings {
     autoApplyFilters: boolean;
     useCompactFilters: boolean;
     useTaskQueries: boolean;
+    disableTaskCaching: boolean;
     debug: boolean;
     compatMode: boolean;
     compatModeUserSet: boolean;
@@ -152,6 +153,7 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
     autoApplyFilters: true,
     useCompactFilters: false,
     useTaskQueries: false,
+    disableTaskCaching: false,
     debug: false,
     compatMode: false,
     compatModeUserSet: false

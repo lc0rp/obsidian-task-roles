@@ -132,6 +132,7 @@ The Task Center uses an intelligent background task cache that:
   - File metadata
 - Stores cache data in `.obsidian/task-roles-cache.json`
 - Manual refresh available via refresh button or command
+- **Can be disabled** in settings to reduce memory usage (may impact performance)
 
 ## Usage
 
@@ -202,8 +203,12 @@ unhidden roles will be parsed and displayed.
 - **Select @ directory**: Choose directory for contacts (affects future data only)
 - **Select + directory**: Choose directory for companies (affects future data only)
 - **Create @me contact**: Button to create the special @me contact if it doesn't exist
+- **Use compact filters**: Display all filters in a single horizontal line instead of the collapsible panel
+- **Enable debug logging**: Log additional information to the console
 - **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
   Tasks plugin is installed)
+- **Use task queries for content**: Experimental query-based approach for rendering content
+- **Disable task caching**: Turn off task caching to reduce memory usage (may impact performance)
 - **Assign or Update Roles**:
   - Hide default roles (prevents them from appearing in future dialogs)
   - Add, edit, and delete custom roles

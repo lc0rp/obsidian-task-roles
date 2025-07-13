@@ -12,9 +12,12 @@ export class TaskCacheService {
         private app: App,
         private taskRolesService: TaskRolesService,
         private visibleRoles: Role[],
-        private debug: boolean
+        private debug: boolean,
+        private disableTaskCaching: boolean = false
     ) {
-        this.setupEventListeners();
+        if (!this.disableTaskCaching) {
+            this.setupEventListeners();
+        }
     }
 
     private setupEventListeners() {
@@ -45,6 +48,13 @@ export class TaskCacheService {
     }
 
     async initializeCache(): Promise<void> {
+        if (this.disableTaskCaching) {
+            if (this.debug) {
+                console.log('Task caching is disabled');
+            }
+            return;
+        }
+
         try {
             await this.loadCacheFromFile();
         } catch (error) {
@@ -56,6 +66,13 @@ export class TaskCacheService {
     }
 
     async refreshCache(): Promise<void> {
+        if (this.disableTaskCaching) {
+            if (this.debug) {
+                console.log('Task caching is disabled, skipping cache refresh');
+            }
+            return;
+        }
+
         if (this.isUpdating) return;
 
         this.isUpdating = true;
@@ -82,6 +99,10 @@ export class TaskCacheService {
     }
 
     private async updateTasksFromFile(file: TFile): Promise<void> {
+        if (this.disableTaskCaching) {
+            return;
+        }
+
         try {
             const content = await this.app.vault.read(file);
             const lines = content.split('\n');

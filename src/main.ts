@@ -27,7 +27,7 @@ export default class TaskRolesPlugin extends Plugin {
 
         // Initialize services
         this.taskRolesService = new TaskRolesService(this.app, this.settings);
-        this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
+        this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
 
         // Initialize task cache
         await this.taskCacheService.initializeCache();
@@ -152,7 +152,7 @@ export default class TaskRolesPlugin extends Plugin {
             this.taskRolesService = new TaskRolesService(this.app, this.settings);
         }
         if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
+            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
         }
     }
 
@@ -161,7 +161,7 @@ export default class TaskRolesPlugin extends Plugin {
         // Update services with new settings
         this.taskRolesService = new TaskRolesService(this.app, this.settings);
         if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug);
+            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
         }
     }
 
