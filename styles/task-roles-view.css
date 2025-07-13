@@ -735,6 +735,8 @@
     border: 1px solid var(--background-modifier-border);
     display: flex;
     flex-direction: column;
+    height: 100%;
+    max-height: 100%;
 }
 
 .task-roles-column-header {
@@ -767,6 +769,7 @@
     flex: 1;
     overflow-y: auto;
     min-height: 0;
+    max-height: calc(100% - 60px);
 }
 
 /* Task Card Styles */
