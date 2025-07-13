@@ -848,7 +848,7 @@
 /* Task content wrapper - offset for checkbox */
 .task-query-display .task-list-item .task-description,
 .task-query-display .task-list-item > p {
-    margin-left: 24px !important;
+    margin-left: 20px !important;
     margin-bottom: 0 !important;
     line-height: 1.3 !important;
     font-size: 13px !important;
@@ -884,7 +884,7 @@
     flex-wrap: wrap !important;
     gap: 4px !important;
     margin-top: 6px !important;
-    margin-left: 24px !important;
+    margin-left: 20px !important;
 }
 
 .task-query-display .task-list-item .task-tag,
