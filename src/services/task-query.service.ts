@@ -158,7 +158,7 @@ export class TaskQueryService {
                             statusTitle = 'To Do';
                             break;
                         case TaskStatus.IN_PROGRESS:
-                            statusQuery = baseQuery ? `${baseQuery} AND in-progress` : 'in-progress';
+                            statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'IN_PROGRESS'` : `filter by function task.status.type === 'IN_PROGRESS'`;
                             statusTitle = 'In Progress';
                             break;
                         case TaskStatus.DONE:
@@ -166,7 +166,7 @@ export class TaskQueryService {
                             statusTitle = 'Done';
                             break;
                         case TaskStatus.CANCELLED:
-                            statusQuery = baseQuery ? `${baseQuery} AND cancelled` : 'cancelled';
+                            statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'CANCELLED'` : `filter by function task.status.type === 'CANCELLED'`;
                             statusTitle = 'Cancelled';
                             break;
                         default:
