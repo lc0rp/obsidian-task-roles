@@ -11,33 +11,37 @@ export class TaskRolesSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
-    private async createMeContactSetting(containerEl: HTMLElement): Promise<void> {
-        const meExists = await this.plugin.taskRolesService.meContactExists();
-        
+    private createMeContactSetting(containerEl: HTMLElement): void {
         const setting = new Setting(containerEl)
             .setName('Create @me contact')
             .setDesc('Create a special contact file for yourself');
 
-        if (meExists) {
-            setting.addButton(button => button
-                .setButtonText('Create @me')
-                .setDisabled(true)
-                .onClick(() => {}));
-            
-            // Add DONE pill
-            const donePill = setting.controlEl.createSpan({
-                text: 'DONE',
-                cls: 'me-contact-done-pill'
-            });
-        } else {
-            setting.addButton(button => button
+        // Initially create button in enabled state
+        let button: any;
+        setting.addButton(btn => {
+            button = btn
                 .setButtonText('Create @me')
                 .onClick(async () => {
                     await this.plugin.taskRolesService.createMeContact();
                     // Refresh the settings display to show the new state
                     this.display();
-                }));
-        }
+                });
+        });
+
+        // Asynchronously check if @me exists and update the setting
+        this.plugin.taskRolesService.meContactExists().then(meExists => {
+            if (meExists) {
+                // Disable the button and clear its click handler
+                button.setDisabled(true);
+                button.onClick(() => {});
+                
+                // Add DONE pill
+                setting.controlEl.createSpan({
+                    text: 'DONE',
+                    cls: 'me-contact-done-pill'
+                });
+            }
+        });
     }
 
     display(): void {
