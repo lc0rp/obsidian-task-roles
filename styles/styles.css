@@ -7,7 +7,7 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-/* Task Assignment Plugin Styles */
+/* Task Roles Plugin Styles */
 
 .roles-container {
     margin: 1em 0;
@@ -259,41 +259,41 @@ If your plugin does not need CSS, delete this file.
         align-items: flex-start;
         gap: 0.25em;
     }
-    
+
     .new-role-row {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .button-container {
         flex-direction: column;
     }
 }
 
-/* Task Assignment Icon Styles */
-.task-assignment-icon-container button.task-assignment-icon-button {
+/* Task Roles Icon Styles */
+.task-roles-icon-container button.task-roles-icon-button {
     /* Layout */
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    
+
     /* Sizing */
     width: 15px;
     height: 15px;
     margin-left: 8px;
     padding: 0;
-    
+
     /* Visual styling */
     background: transparent;
     color: var(--text-muted);
     border: none;
     border-radius: 3px;
-    
+
     /* Interactivity */
     cursor: pointer;
     opacity: 0.6;
     transition: all 0.15s ease;
-    
+
     /* Reset button styles */
     font-family: inherit;
     font-size: inherit;
@@ -304,7 +304,7 @@ If your plugin does not need CSS, delete this file.
     vertical-align: baseline;
 }
 
-.task-assignment-icon-container button.task-assignment-icon-button:hover {
+.task-roles-icon-container button.task-roles-icon-button:hover {
     opacity: 1;
     background: var(--interactive-accent);
     color: var(--text-on-accent);
@@ -312,22 +312,22 @@ If your plugin does not need CSS, delete this file.
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.task-assignment-icon-container button.task-assignment-icon-button:active {
+.task-roles-icon-container button.task-roles-icon-button:active {
     transform: scale(0.95);
 }
 
-.task-assignment-icon-container button.task-assignment-icon-button:focus {
+.task-roles-icon-container button.task-roles-icon-button:focus {
     outline: 2px solid var(--interactive-accent);
     outline-offset: 1px;
 }
 
 /* Hide assignment icons in reading view */
-.markdown-reading-view .task-assignment-icon-container button.task-assignment-icon-button {
+.markdown-reading-view .task-roles-icon-container button.task-roles-icon-button {
     display: none;
 }
 
 /* Ensure icons appear after task content */
-.cm-line:has(.task-assignment-icon-container button.task-assignment-icon-button) {
+.cm-line:has(.task-roles-icon-container button.task-roles-icon-button) {
     position: relative;
 }
 
@@ -336,13 +336,13 @@ If your plugin does not need CSS, delete this file.
     position: relative;
 }
 
-.task-assignment-icon-container button.task-assignment-icon-button {
+.task-roles-icon-container button.task-roles-icon-button {
     position: relative;
     z-index: 1;
 }
 
 /* Icon inside the convert button */
-.task-assignment-icon-container .task-assignment-icon {
+.task-roles-icon-container .task-roles-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -350,14 +350,14 @@ If your plugin does not need CSS, delete this file.
     height: 14px;
 }
 
-.task-assignment-icon-container .task-assignment-icon svg {
+.task-roles-icon-container .task-roles-icon svg {
     width: 12px;
     height: 12px;
 }
 
 /* Responsive behavior for smaller screens */
 @media (max-width: 768px) {
-    .task-assignment-icon-container button.task-assignment-icon-button {
+    .task-roles-icon-container button.task-roles-icon-button {
         font-size: 16px;
         margin-left: 6px;
     }
