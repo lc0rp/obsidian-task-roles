@@ -87,23 +87,32 @@ export abstract class TaskRolesViewBase extends ItemView {
 
             // Status filter
             if (this.currentFilters.statuses && this.currentFilters.statuses.length > 0) {
-                // Use a more flexible filtering approach that supports both direct matches and function-based filters
                 const statusMatches = this.currentFilters.statuses.some(filterStatus => {
-                    // Direct match with task status
-                    if (task.status === filterStatus) {
+                    // For DONE and TODO statuses, use direct filtering as they are reliable
+                    if (filterStatus === 'done' && task.status === 'done') {
+                        return true;
+                    }
+                    if (filterStatus === 'todo' && task.status === 'todo') {
                         return true;
                     }
                     
-                    // Handle uppercase enum values
+                    // For other statuses (IN_PROGRESS, CANCELLED), use function-based approach
+                    // This handles patterns like 'TODO,IN_PROGRESS'.includes(task.status.type)
                     const upperCaseStatus = task.status.toUpperCase().replace('-', '_');
-                    if (upperCaseStatus === filterStatus) {
-                        return true;
-                    }
                     
-                    // Handle function-based filters like 'TODO,IN_PROGRESS'.includes(status)
+                    // Handle function-based filters with includes pattern
                     if (filterStatus.includes(',')) {
                         const allowedStatuses = filterStatus.split(',').map(s => s.trim());
-                        return allowedStatuses.includes(upperCaseStatus) || allowedStatuses.includes(task.status);
+                        return allowedStatuses.includes(upperCaseStatus);
+                    }
+                    
+                    // Handle single status function filters for non-reliable statuses
+                    const filterStatusUpper = String(filterStatus).toUpperCase().replace('-', '_');
+                    if (upperCaseStatus === 'IN_PROGRESS' && filterStatusUpper === 'IN_PROGRESS') {
+                        return true;
+                    }
+                    if (upperCaseStatus === 'CANCELLED' && filterStatusUpper === 'CANCELLED') {
+                        return true;
                     }
                     
                     return false;
