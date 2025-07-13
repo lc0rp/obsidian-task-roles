@@ -5,42 +5,92 @@ import type TaskRolesPlugin from '../main';
 
 export class TaskRolesSettingTab extends PluginSettingTab {
     plugin: TaskRolesPlugin;
+    private abortController: AbortController | null = null;
 
     constructor(app: App, plugin: TaskRolesPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
 
-    private async createMeContactSetting(containerEl: HTMLElement): Promise<void> {
-        const meExists = await this.plugin.taskRolesService.meContactExists();
-        
+    private createMeContactSetting(containerEl: HTMLElement): void {
         const setting = new Setting(containerEl)
             .setName('Create @me contact')
             .setDesc('Create a special contact file for yourself');
 
-        if (meExists) {
-            setting.addButton(button => button
-                .setButtonText('Create @me')
-                .setDisabled(true)
-                .onClick(() => {}));
+        // State management for button
+        let button: any;
+        let isCreating = false;
+        let originalClickHandler: (() => Promise<void>) | null = null;
+
+        // Create the button with click handler
+        setting.addButton(btn => {
+            button = btn.setButtonText('Create @me');
             
-            // Add DONE pill
-            const donePill = setting.controlEl.createSpan({
-                text: 'DONE',
-                cls: 'me-contact-done-pill'
-            });
-        } else {
-            setting.addButton(button => button
-                .setButtonText('Create @me')
-                .onClick(async () => {
+            originalClickHandler = async () => {
+                // Prevent multiple clicks during creation
+                if (isCreating) return;
+                
+                try {
+                    isCreating = true;
+                    button.setDisabled(true);
+                    button.setButtonText('Creating...');
+                    
                     await this.plugin.taskRolesService.createMeContact();
+                    
                     // Refresh the settings display to show the new state
                     this.display();
-                }));
-        }
+                } catch (error) {
+                    console.error('Failed to create @me contact:', error);
+                    // Reset button state on error
+                    button.setDisabled(false);
+                    button.setButtonText('Create @me');
+                } finally {
+                    isCreating = false;
+                }
+            };
+            
+            button.onClick(originalClickHandler);
+        });
+
+        // Asynchronously check if @me exists and update the setting
+        this.plugin.taskRolesService.meContactExists()
+            .then(meExists => {
+                // Check if component is still mounted (abort controller not aborted)
+                if (this.abortController?.signal.aborted) return;
+                
+                if (meExists) {
+                    // Disable the button and remove click handler properly
+                    button.setDisabled(true);
+                    button.setButtonText('Create @me');
+                    
+                    // Remove the original click handler by setting a no-op
+                    button.onClick(() => {});
+                    
+                    // Add DONE pill
+                    setting.controlEl.createSpan({
+                        text: 'DONE',
+                        cls: 'me-contact-done-pill'
+                    });
+                }
+            })
+            .catch(error => {
+                // Check if component is still mounted
+                if (this.abortController?.signal.aborted) return;
+                
+                console.error('Failed to check @me contact existence:', error);
+                // Button remains in default enabled state on error
+            });
     }
 
     display(): void {
+        // Cancel any pending async operations
+        if (this.abortController) {
+            this.abortController.abort();
+        }
+        
+        // Create new abort controller for this display cycle
+        this.abortController = new AbortController();
+        
         const { containerEl } = this;
         containerEl.empty();
 
@@ -278,5 +328,16 @@ export class TaskRolesSettingTab extends PluginSettingTab {
         });
         helpLink.setAttribute('target', '_blank');
         helpLink.setAttribute('rel', 'noopener noreferrer');
+    }
+
+    /**
+     * Cleanup method to cancel pending async operations
+     * Call this when the settings tab is being destroyed
+     */
+    cleanup(): void {
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
     }
 } 

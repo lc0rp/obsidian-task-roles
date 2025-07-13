@@ -26,4 +26,59 @@ export class App { }
 export class Plugin { }
 export class Notice { }
 export class TFile { }
-export class TFolder { } 
+export class TFolder { }
+export class Modal { 
+    constructor(app: any) {}
+    open() {}
+    close() {}
+}
+export class PluginSettingTab {
+    constructor(app: any, plugin: any) {}
+}
+export class Setting {
+    controlEl = {
+        createSpan: vi.fn().mockReturnValue({})
+    };
+    
+    constructor(containerEl: any) {}
+    
+    setName(name: string) { return this; }
+    setDesc(desc: string) { return this; }
+    addText(callback: (text: any) => void) {
+        const mockTextComponent = {
+            setPlaceholder: vi.fn().mockReturnThis(),
+            setValue: vi.fn().mockReturnThis(),
+            onChange: vi.fn().mockReturnThis(),
+            inputEl: {}
+        };
+        callback(mockTextComponent);
+        return this;
+    }
+    addButton(callback: (button: any) => void) {
+        const mockButtonComponent = {
+            setButtonText: vi.fn().mockReturnThis(),
+            setDisabled: vi.fn().mockReturnThis(),
+            onClick: vi.fn().mockReturnThis(),
+            setCta: vi.fn().mockReturnThis()
+        };
+        callback(mockButtonComponent);
+        return this;
+    }
+    addToggle(callback: (toggle: any) => void) {
+        const mockToggleComponent = {
+            setValue: vi.fn().mockReturnThis(),
+            onChange: vi.fn().mockReturnThis()
+        };
+        callback(mockToggleComponent);
+        return this;
+    }
+    addDropdown(callback: (dropdown: any) => void) {
+        const mockDropdownComponent = {
+            addOption: vi.fn().mockReturnThis(),
+            setValue: vi.fn().mockReturnThis(),
+            onChange: vi.fn().mockReturnThis()
+        };
+        callback(mockDropdownComponent);
+        return this;
+    }
+} 
