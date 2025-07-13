@@ -772,6 +772,63 @@
     max-height: calc(100% - 60px);
 }
 
+/* Task Query Display Styles */
+.task-query-display {
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.task-query-display .task-list-item,
+.task-query-display .contains-task-list {
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+.task-query-display .workspace-leaf-content {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+}
+
+.task-query-display pre {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+}
+
+.task-query-display .CodeMirror-scroll {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+}
+
+/* Ensure task blocks within columns are constrained */
+.task-roles-column .task-query-display {
+    height: 100%;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.task-roles-column .task-query-display > div {
+    height: 100%;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+/* Override Obsidian's default task list styling within columns */
+.task-roles-column ul.contains-task-list,
+.task-roles-column .block-language-tasks {
+    max-height: 100% !important;
+    overflow-y: auto !important;
+}
+
+.task-roles-column .task-list-item {
+    margin-bottom: 4px;
+}
+
+/* Ensure code blocks containing tasks are constrained */
+.task-roles-column .markdown-rendered .block-language-tasks {
+    max-height: calc(100vh - 250px) !important;
+    overflow-y: auto !important;
+}
+
 /* Task Card Styles */
 .task-roles-card {
     background-color: var(--background-primary);
