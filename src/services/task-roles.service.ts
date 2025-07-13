@@ -338,12 +338,13 @@ export class TaskRolesService {
     }
 
     async createMeContact(): Promise<void> {
-        const contactPath = `${this.settings.contactDirectory}/Me.md`;
-
-        if (await this.app.vault.adapter.exists(contactPath)) {
+        // Check if any case variation already exists
+        if (await this.meContactExists()) {
             new Notice('Contact @me already exists');
             return;
         }
+
+        const contactPath = `${this.settings.contactDirectory}/Me.md`;
 
         // Ensure directory exists
         const dir = this.settings.contactDirectory;
@@ -354,6 +355,21 @@ export class TaskRolesService {
         await this.app.vault.create(contactPath, '# Me\n\nThis is your personal contact file.');
         new Notice('Created @me contact');
         await this.refreshAssigneeCache();
+    }
+
+    async meContactExists(): Promise<boolean> {
+        const possiblePaths = [
+            `${this.settings.contactDirectory}/Me.md`,
+            `${this.settings.contactDirectory}/me.md`,
+            `${this.settings.contactDirectory}/ME.md`
+        ];
+        
+        for (const path of possiblePaths) {
+            if (await this.app.vault.adapter.exists(path)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     async createContactOrCompany(assignee: string): Promise<void> {
