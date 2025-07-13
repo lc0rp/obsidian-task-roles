@@ -1,6 +1,6 @@
 import { WorkspaceLeaf } from 'obsidian';
 import { TaskRolesViewBase } from './task-roles-view-base';
-import { TaskData, ViewFilters } from '../types';
+import { TaskData, ViewFilters, ViewLayout } from '../types';
 import { TaskCacheService } from '../services/task-cache.service';
 import { ViewConfigurationService } from '../services/view-configuration.service';
 import { TaskQueryService } from '../services/task-query.service';
@@ -217,6 +217,20 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentFilters = config.filters;
             this.currentSort = config.sortBy;
             this.currentViewName = config.name;
+            if (this.plugin.settings.useTaskQueries) {
+                this.renderAsync();
+            } else {
+                this.render();
+            }
+        }
+    }
+
+    // Override the base class updateLayout method to handle async rendering
+    protected updateLayout(newLayout: ViewLayout): void {
+        this.currentLayout = newLayout;
+        if (this.plugin.settings.useTaskQueries) {
+            this.renderAsync();
+        } else {
             this.render();
         }
     }
