@@ -201,7 +201,7 @@ export class TaskQueryService {
                     { title: 'Today', query: baseQuery ? `${baseQuery} AND due today` : 'due today', icon: 'clock-arrow-down', isEmoji: false },
                     { title: 'This Week', query: baseQuery ? `${baseQuery} AND due this week` : 'due this week', icon: 'calendar-arrow-down', isEmoji: false },
                     { title: 'Next Week', query: baseQuery ? `${baseQuery} AND due next week` : 'due next week', icon: 'calendar-arrow-up', isEmoji: false },
-                    { title: 'No Due Date', query: baseQuery ? `${baseQuery} AND no due date` : 'no due date', icon: 'calendar-x-2', isEmoji: false }
+                    { title: 'No Due Date', query: baseQuery ? `${baseQuery} AND no due date` : 'no due date', icon: 'calendar', isEmoji: false }
                 ];
 
                 for (const dateColumn of dateColumns) {
