@@ -110,9 +110,10 @@ export class TaskQueryService {
                     });
                 }
                 // Add "No Role" column
+                const noRoleConditions = visibleRoles.map(role => `description does not include ${role.icon}`);
                 const noRoleQuery = baseQuery
-                    ? `${baseQuery} AND no-role`
-                    : 'no-role';
+                    ? `${baseQuery}\n${noRoleConditions.join('\n')}`
+                    : noRoleConditions.join('\n');
                 columnQueries.push({
                     title: 'No Role',
                     query: noRoleQuery
