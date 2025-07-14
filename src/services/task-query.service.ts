@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from 'obsidian';
+import { MarkdownRenderer, setIcon } from 'obsidian';
 import { ViewFilters, ViewLayout, TaskStatus } from '../types';
 import { TaskCacheService } from './task-cache.service';
 import type TaskRolesPlugin from '../main';
@@ -92,9 +92,9 @@ export class TaskQueryService {
         return queryParts.join(' AND ');
     }
 
-    buildColumnQueries(layout: ViewLayout, filters: ViewFilters): Array<{ title: string, query: string }> {
+    buildColumnQueries(layout: ViewLayout, filters: ViewFilters): Array<{ title: string, query: string, icon?: string, isEmoji?: boolean }> {
         const baseQuery = this.buildTaskQueryFromFilters(filters);
-        const columnQueries: Array<{ title: string, query: string }> = [];
+        const columnQueries: Array<{ title: string, query: string, icon?: string, isEmoji?: boolean }> = [];
 
         // Determine columns based on current layout
         switch (layout) {
@@ -106,7 +106,9 @@ export class TaskQueryService {
                         : `description includes ${role.icon}`;
                     columnQueries.push({
                         title: role.name,
-                        query: roleQuery
+                        query: roleQuery,
+                        icon: role.icon,
+                        isEmoji: true
                     });
                 }
                 // Add "No Role" column
@@ -116,7 +118,9 @@ export class TaskQueryService {
                     : noRoleConditions.join('\n');
                 columnQueries.push({
                     title: 'No Role',
-                    query: noRoleQuery
+                    query: noRoleQuery,
+                    icon: 'user-x',
+                    isEmoji: false
                 });
                 break;
 
@@ -152,32 +156,40 @@ export class TaskQueryService {
                 for (const status of statuses) {
                     let statusQuery: string;
                     let statusTitle: string;
+                    let statusIcon: string;
 
                     switch (status) {
                         case TaskStatus.TODO:
                             statusQuery = baseQuery ? `${baseQuery} AND not done` : 'not done';
                             statusTitle = 'To Do';
+                            statusIcon = 'circle-dashed';
                             break;
                         case TaskStatus.IN_PROGRESS:
                             statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'IN_PROGRESS'` : `filter by function task.status.type === 'IN_PROGRESS'`;
                             statusTitle = 'In Progress';
+                            statusIcon = 'loader-circle';
                             break;
                         case TaskStatus.DONE:
                             statusQuery = baseQuery ? `${baseQuery} AND done` : 'done';
                             statusTitle = 'Done';
+                            statusIcon = 'circle-check-big';
                             break;
                         case TaskStatus.CANCELLED:
                             statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'CANCELLED'` : `filter by function task.status.type === 'CANCELLED'`;
                             statusTitle = 'Cancelled';
+                            statusIcon = 'circle-off';
                             break;
                         default:
                             statusQuery = baseQuery || '';
                             statusTitle = status;
+                            statusIcon = 'circle';
                     }
 
                     columnQueries.push({
                         title: statusTitle,
-                        query: statusQuery
+                        query: statusQuery,
+                        icon: statusIcon,
+                        isEmoji: false
                     });
                 }
                 break;
@@ -185,11 +197,11 @@ export class TaskQueryService {
             case ViewLayout.DATE:
                 // Date-based columns
                 const dateColumns = [
-                    { title: 'Overdue', query: baseQuery ? `${baseQuery} AND due before today` : 'due before today' },
-                    { title: 'Today', query: baseQuery ? `${baseQuery} AND due today` : 'due today' },
-                    { title: 'This Week', query: baseQuery ? `${baseQuery} AND due this week` : 'due this week' },
-                    { title: 'Next Week', query: baseQuery ? `${baseQuery} AND due next week` : 'due next week' },
-                    { title: 'No Due Date', query: baseQuery ? `${baseQuery} AND no due date` : 'no due date' }
+                    { title: 'Overdue', query: baseQuery ? `${baseQuery} AND due before today` : 'due before today', icon: 'clock-alert', isEmoji: false },
+                    { title: 'Today', query: baseQuery ? `${baseQuery} AND due today` : 'due today', icon: 'clock-arrow-down', isEmoji: false },
+                    { title: 'This Week', query: baseQuery ? `${baseQuery} AND due this week` : 'due this week', icon: 'calendar-arrow-down', isEmoji: false },
+                    { title: 'Next Week', query: baseQuery ? `${baseQuery} AND due next week` : 'due next week', icon: 'calendar-arrow-up', isEmoji: false },
+                    { title: 'No Due Date', query: baseQuery ? `${baseQuery} AND no due date` : 'no due date', icon: 'calendar-x-2', isEmoji: false }
                 ];
 
                 for (const dateColumn of dateColumns) {
@@ -201,7 +213,9 @@ export class TaskQueryService {
                 // Single column with all tasks
                 columnQueries.push({
                     title: 'All Tasks',
-                    query: baseQuery || ''
+                    query: baseQuery || '',
+                    icon: 'list-todo',
+                    isEmoji: false
                 });
         }
 
@@ -210,7 +224,7 @@ export class TaskQueryService {
 
     async renderQueryColumn(
         container: HTMLElement,
-        columnQuery: { title: string, query: string },
+        columnQuery: { title: string, query: string, icon?: string, isEmoji?: boolean },
         viewContext: any
     ): Promise<void> {
         const columnDiv = container.createDiv('task-roles-column');
@@ -218,7 +232,22 @@ export class TaskQueryService {
 
         // Column header
         const headerDiv = columnDiv.createDiv('task-roles-column-header');
-        headerDiv.createEl('h3', { text: columnQuery.title, cls: 'task-roles-column-title' });
+        const titleEl = headerDiv.createEl('h3', { cls: 'task-roles-column-title' });
+        
+        // Add icon if available
+        if (columnQuery.icon) {
+            if (columnQuery.isEmoji) {
+                // Use emoji icon
+                titleEl.createSpan('column-icon-emoji').setText(columnQuery.icon);
+            } else {
+                // Use Obsidian system icon
+                const iconSpan = titleEl.createSpan('column-icon');
+                setIcon(iconSpan, columnQuery.icon);
+            }
+        }
+        
+        // Add title text
+        titleEl.createSpan('column-title-text').setText(columnQuery.title);
 
         // Query display
         const queryContainer = columnDiv.createDiv('task-query-display');
