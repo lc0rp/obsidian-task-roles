@@ -238,16 +238,34 @@ export class TaskQueryService {
         if (columnQuery.icon) {
             if (columnQuery.isEmoji) {
                 // Use emoji icon
-                titleEl.createSpan('column-icon-emoji').setText(columnQuery.icon);
+                const emojiIcon = titleEl.createSpan('column-icon-emoji');
+                emojiIcon.setText(columnQuery.icon);
+                emojiIcon.style.marginRight = '8px';
+                emojiIcon.style.fontSize = '16px';
+                emojiIcon.style.lineHeight = '1';
+                emojiIcon.style.verticalAlign = 'middle';
             } else {
                 // Use Obsidian system icon
                 const iconSpan = titleEl.createSpan('column-icon');
                 setIcon(iconSpan, columnQuery.icon);
+                iconSpan.style.marginRight = '8px';
+                iconSpan.style.display = 'inline-flex';
+                iconSpan.style.alignItems = 'center';
+                iconSpan.style.verticalAlign = 'middle';
+                iconSpan.style.width = '16px';
+                iconSpan.style.height = '16px';
             }
         }
         
         // Add title text
-        titleEl.createSpan('column-title-text').setText(columnQuery.title);
+        const titleText = titleEl.createSpan('column-title-text');
+        titleText.setText(columnQuery.title);
+        titleText.style.verticalAlign = 'middle';
+        
+        // Style the title element for better alignment
+        titleEl.style.display = 'flex';
+        titleEl.style.alignItems = 'center';
+        titleEl.style.gap = '0';
 
         // Query display
         const queryContainer = columnDiv.createDiv('task-query-display');
