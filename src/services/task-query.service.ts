@@ -102,8 +102,8 @@ export class TaskQueryService {
                 const visibleRoles = this.plugin.getVisibleRoles();
                 for (const role of visibleRoles) {
                     const roleQuery = baseQuery
-                        ? `${baseQuery} AND role:${role.name}`
-                        : `role:${role.name}`;
+                        ? `${baseQuery} AND description includes ${role.icon}`
+                        : `description includes ${role.icon}`;
                     columnQueries.push({
                         title: role.name,
                         query: roleQuery
