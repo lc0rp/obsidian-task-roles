@@ -89,14 +89,25 @@ export class TaskQueryService {
 
             const dateParts: string[] = [];
 
-            if (from) {
-                dateParts.push(`${dateType}:>=${from.toISOString().split('T')[0]}`);
-            }
-            if (to) {
-                dateParts.push(`${dateType}:<=${to.toISOString().split('T')[0]}`);
-            }
+            // Handle "Include no dates" checkbox
             if (includeNotSet) {
-                dateParts.push(`no-${dateType}`);
+                dateParts.push(`no ${dateType} date`);
+            }
+
+            // Handle date range logic
+            if (from && to) {
+                // Both dates provided - use range format
+                const fromDate = from.toISOString().split('T')[0];
+                const toDate = to.toISOString().split('T')[0];
+                dateParts.push(`${dateType} in ${fromDate} ${toDate}`);
+            } else if (from) {
+                // Only from date provided
+                const fromDate = from.toISOString().split('T')[0];
+                dateParts.push(`${dateType} on ${fromDate}`);
+            } else if (to) {
+                // Only to date provided
+                const toDate = to.toISOString().split('T')[0];
+                dateParts.push(`${dateType} on ${toDate}`);
             }
 
             if (dateParts.length > 0) {
