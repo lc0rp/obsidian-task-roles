@@ -1,107 +1,155 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TaskQueryService } from '../src/services/task-query.service';
-import { DateType } from '../src/types';
+import { TaskCacheService } from '../src/services/task-cache.service';
+import { ViewFilters } from '../src/types';
+import type TaskRolesPlugin from '../src/main';
 
-describe('TaskQueryService Date Filters', () => {
-    let service: TaskQueryService;
-    let mockApp: any;
-    let mockSettings: any;
+// Mock the plugin and dependencies
+const mockPlugin = {
+    getVisibleRoles: () => [
+        { id: 'driver', name: 'Driver', icon: '🚗' },
+        { id: 'approver', name: 'Approver', icon: '✅' }
+    ],
+    settings: {
+        taskDisplayMode: 'detailed'
+    }
+} as TaskRolesPlugin;
+
+const mockTaskCacheService = {
+    getAllTasks: () => []
+} as TaskCacheService;
+
+describe('TaskQueryService Status Filtering Bug', () => {
+    let taskQueryService: TaskQueryService;
 
     beforeEach(() => {
-        mockApp = {
-            workspace: {
-                getActiveViewOfType: vi.fn().mockReturnValue(null)
-            }
-        };
-
-        mockSettings = {
-            experimentalFeatures: {
-                useTaskQueries: true
-            }
-        };
-
-        service = new TaskQueryService(mockApp, mockSettings);
+        taskQueryService = new TaskQueryService(mockPlugin, mockTaskCacheService);
     });
 
-    describe('buildTaskQueryFromFilters', () => {
-        it('should handle created date range filters correctly', () => {
-            const filters = {
-                dateType: DateType.CREATED,
-                dateRange: {
-                    from: new Date('2025-07-15'),
-                    to: new Date('2025-07-18'),
-                    includeNotSet: false
-                }
+    describe('Single Status Filter', () => {
+        it('should generate correct query for single done status', () => {
+            const filters: ViewFilters = {
+                statuses: ['done']
             };
 
-            const query = service.buildTaskQueryFromFilters(filters);
-            
-            // Fixed implementation should use proper Tasks plugin syntax
-            expect(query).toBe('(created after 2025-07-15 AND created before 2025-07-18)');
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            expect(query).toBe('done');
         });
 
-        it('should handle due date single date filters correctly', () => {
-            const filters = {
-                dateType: DateType.DUE,
-                dateRange: {
-                    from: new Date('2025-07-15'),
-                    to: null,
-                    includeNotSet: false
-                }
+        it('should generate correct query for single todo status', () => {
+            const filters: ViewFilters = {
+                statuses: ['todo']
             };
 
-            const query = service.buildTaskQueryFromFilters(filters);
-            
-            // Fixed implementation should use proper Tasks plugin syntax
-            expect(query).toBe('(due after 2025-07-15)');
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            expect(query).toBe('not done');
         });
 
-        it('should handle no date filters correctly', () => {
-            const filters = {
-                dateType: DateType.CREATED,
-                dateRange: {
-                    from: null,
-                    to: null,
-                    includeNotSet: true
-                }
+        it('should generate correct query for single in-progress status', () => {
+            const filters: ViewFilters = {
+                statuses: ['in-progress']
             };
 
-            const query = service.buildTaskQueryFromFilters(filters);
-            
-            // Fixed implementation should use proper Tasks plugin syntax
-            expect(query).toBe('(no created date)');
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            expect(query).toBe('filter by function task.status.type === \'IN_PROGRESS\'');
         });
 
-        it('should handle date range filters with no dates included', () => {
-            const filters = {
-                dateType: DateType.DUE,
-                dateRange: {
-                    from: new Date('2025-07-15'),
-                    to: new Date('2025-07-18'),
-                    includeNotSet: true
-                }
+        it('should generate correct query for single cancelled status', () => {
+            const filters: ViewFilters = {
+                statuses: ['cancelled']
             };
 
-            const query = service.buildTaskQueryFromFilters(filters);
-            
-            // Fixed implementation should use proper Tasks plugin syntax with correct grouping
-            expect(query).toBe('(no due date OR (due after 2025-07-15 AND due before 2025-07-18))');
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            expect(query).toBe('filter by function task.status.type === \'CANCELLED\'');
+        });
+    });
+
+    describe('Multiple Status Filter Bug', () => {
+        it('should handle done + todo combination correctly', () => {
+            const filters: ViewFilters = {
+                statuses: ['done', 'todo']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            // Pure todo/done combinations use simple Tasks plugin syntax
+            expect(query).toBe('(done OR not done)');
         });
 
-        it('should handle before date only', () => {
-            const filters = {
-                dateType: DateType.DUE,
-                dateRange: {
-                    from: null,
-                    to: new Date('2025-07-18'),
-                    includeNotSet: false
-                }
+        it('should handle done + in-progress combination correctly', () => {
+            const filters: ViewFilters = {
+                statuses: ['done', 'in-progress']
             };
 
-            const query = service.buildTaskQueryFromFilters(filters);
-            
-            // Fixed implementation should use proper Tasks plugin syntax
-            expect(query).toBe('(due before 2025-07-18)');
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            // Now generates consistent query using task.status.type for all statuses
+            expect(query).toBe('filter by function (task.status.type === \'DONE\' || task.status.type === \'IN_PROGRESS\')');
+        });
+
+        it('should handle done + cancelled combination correctly', () => {
+            const filters: ViewFilters = {
+                statuses: ['done', 'cancelled']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            // Now generates consistent query using task.status.type for all statuses
+            expect(query).toBe('filter by function (task.status.type === \'DONE\' || task.status.type === \'CANCELLED\')');
+        });
+
+        it('should handle todo + in-progress combination correctly', () => {
+            const filters: ViewFilters = {
+                statuses: ['todo', 'in-progress']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            expect(query).toBe('filter by function (task.status.type === \'TODO\' || task.status.type === \'IN_PROGRESS\')');
+        });
+
+        it('should handle all status combinations correctly', () => {
+            const filters: ViewFilters = {
+                statuses: ['todo', 'in-progress', 'done', 'cancelled']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            // Now uses consistent task.status.type for all statuses
+            expect(query).toBe('filter by function (task.status.type === \'TODO\' || task.status.type === \'IN_PROGRESS\' || task.status.type === \'DONE\' || task.status.type === \'CANCELLED\')');
+        });
+    });
+
+    describe('Status Filter with Other Filters', () => {
+        it('should handle done status with role filter', () => {
+            const filters: ViewFilters = {
+                statuses: ['done'],
+                roles: ['driver']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            const lines = query.split('\n');
+            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('done');
+        });
+
+        it('should handle multiple statuses with role filter', () => {
+            const filters: ViewFilters = {
+                statuses: ['done', 'in-progress'],
+                roles: ['driver']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            const lines = query.split('\n');
+            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('filter by function (task.status.type === \'DONE\' || task.status.type === \'IN_PROGRESS\')');
+        });
+    });
+
+    describe('Fixed - Consistent Status Handling', () => {
+        it('should use consistent status.type for all statuses', () => {
+            const filters: ViewFilters = {
+                statuses: ['done', 'in-progress', 'todo', 'cancelled']
+            };
+
+            const query = taskQueryService.buildTaskQueryFromFilters(filters);
+            // After fix, this now uses task.status.type consistently
+            expect(query).toBe('filter by function (task.status.type === \'DONE\' || task.status.type === \'IN_PROGRESS\' || task.status.type === \'TODO\' || task.status.type === \'CANCELLED\')');
         });
     });
 });

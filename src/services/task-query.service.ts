@@ -73,22 +73,38 @@ export class TaskQueryService {
                     queryLines.push(`filter by function task.status.type === '${(status as string).toUpperCase()}'`);
                 }
             } else {
-                // For multiple status filters, combine them in a single filter by function expression
-                const statusConditions: string[] = [];
-                for (const status of filters.statuses) {
-                    if (status === 'todo') {
-                        statusConditions.push('!task.done');
-                    } else if (status === 'done') {
-                        statusConditions.push('task.done');
-                    } else if (status === 'in-progress') {
-                        statusConditions.push('task.status.type === \'IN_PROGRESS\'');
-                    } else if (status === 'cancelled') {
-                        statusConditions.push('task.status.type === \'CANCELLED\'');
-                    } else {
-                        statusConditions.push(`task.status.type === '${(status as string).toUpperCase()}'`);
+                // For multiple status filters, check if we can use simple Tasks plugin syntax
+                const hasOnlyTodoAndDone = filters.statuses.every(status => status === 'todo' || status === 'done');
+                
+                if (hasOnlyTodoAndDone) {
+                    // Use simple Tasks plugin syntax for todo/done only combinations
+                    const statusQueries = filters.statuses.map(status => {
+                        if (status === 'todo') {
+                            return 'not done';
+                        } else if (status === 'done') {
+                            return 'done';
+                        }
+                        return status;
+                    });
+                    queryLines.push(`(${statusQueries.join(' OR ')})`);
+                } else {
+                    // For mixed statuses, use consistent task.status.type for all statuses
+                    const statusConditions: string[] = [];
+                    for (const status of filters.statuses) {
+                        if (status === 'todo') {
+                            statusConditions.push('task.status.type === \'TODO\'');
+                        } else if (status === 'done') {
+                            statusConditions.push('task.status.type === \'DONE\'');
+                        } else if (status === 'in-progress') {
+                            statusConditions.push('task.status.type === \'IN_PROGRESS\'');
+                        } else if (status === 'cancelled') {
+                            statusConditions.push('task.status.type === \'CANCELLED\'');
+                        } else {
+                            statusConditions.push(`task.status.type === '${(status as string).toUpperCase()}'`);
+                        }
                     }
+                    queryLines.push(`filter by function (${statusConditions.join(' || ')})`);
                 }
-                queryLines.push(`filter by function (${statusConditions.join(' || ')})`);
             }
         }
 
