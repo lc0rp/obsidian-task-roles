@@ -96,22 +96,43 @@ export class TaskQueryService {
 
             // Handle date range logic
             if (from && to) {
-                // Both dates provided - use range format
+                // Both dates provided - use after/before format for range
                 const fromDate = from.toISOString().split('T')[0];
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} in ${fromDate} ${toDate}`);
+                dateParts.push(`${dateType} after ${fromDate}`);
+                dateParts.push(`${dateType} before ${toDate}`);
             } else if (from) {
-                // Only from date provided
+                // Only from date provided - use after
                 const fromDate = from.toISOString().split('T')[0];
-                dateParts.push(`${dateType} on ${fromDate}`);
+                dateParts.push(`${dateType} after ${fromDate}`);
             } else if (to) {
-                // Only to date provided
+                // Only to date provided - use before
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} on ${toDate}`);
+                dateParts.push(`${dateType} before ${toDate}`);
             }
 
             if (dateParts.length > 0) {
-                queryParts.push(`(${dateParts.join(' OR ')})`);
+                // Handle complex logic for combining no date with date range
+                if (includeNotSet && (from || to)) {
+                    // Separate no date from actual date filters
+                    const noDateParts = dateParts.filter(part => part.includes('no '));
+                    const dateParts2 = dateParts.filter(part => !part.includes('no '));
+                    
+                    if (dateParts2.length > 1) {
+                        // Multiple date parts (range) - join with AND, then OR with no date
+                        queryParts.push(`(${noDateParts.join(' OR ')} OR (${dateParts2.join(' AND ')}))`);
+                    } else if (dateParts2.length === 1) {
+                        // Single date part - OR with no date
+                        queryParts.push(`(${noDateParts.join(' OR ')} OR ${dateParts2.join(' OR ')})`);
+                    } else {
+                        // Only no date parts
+                        queryParts.push(`(${noDateParts.join(' OR ')})`);
+                    }
+                } else {
+                    // No complex logic needed - just join appropriately
+                    const joinOperator = (from && to) ? ' AND ' : ' OR ';
+                    queryParts.push(`(${dateParts.join(joinOperator)})`);
+                }
             }
         }
 
