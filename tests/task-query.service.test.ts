@@ -1,0 +1,177 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { TaskQueryService } from '../src/services/task-query.service';
+import { TaskCacheService } from '../src/services/task-cache.service';
+import { ViewFilters, Role } from '../src/types';
+
+// Mock plugin
+const mockPlugin = {
+    getVisibleRoles: vi.fn(() => [
+        { id: 'driver', name: 'Driver', icon: '🚗' },
+        { id: 'approver', name: 'Approver', icon: '✅' }
+    ] as Role[])
+};
+
+const mockTaskCacheService = {} as TaskCacheService;
+
+describe('TaskQueryService', () => {
+    let service: TaskQueryService;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        service = new TaskQueryService(mockPlugin as any, mockTaskCacheService);
+    });
+
+    it('should build query from role filters', () => {
+        const filters: ViewFilters = {
+            roles: ['driver', 'approver'],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(role:Driver OR role:Approver)');
+    });
+
+    it('should handle "none-set" role filter', () => {
+        const filters: ViewFilters = {
+            roles: ['none-set'],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(no-role)');
+    });
+
+    it('should build query from people filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: ['john', 'jane'],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(assignee:john OR assignee:jane)');
+    });
+
+    it('should build query from company filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: ['acme', 'corp'],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(assignee:acme OR assignee:corp)');
+    });
+
+    it('should build query from status filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: [],
+            statuses: ['todo', 'done'],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(not done OR done)');
+    });
+
+    it('should build query from tag filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: ['urgent', 'project'],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(#urgent OR #project)');
+    });
+
+    it('should build query from priority filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priorities: ['high', 'medium']
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(priority is high OR priority is medium)');
+    });
+
+    it('should combine multiple filter types with AND', () => {
+        const filters: ViewFilters = {
+            roles: ['driver'],
+            people: ['john'],
+            companies: [],
+            statuses: ['todo'],
+            tags: ['urgent'],
+            priorities: ['high']
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(role:Driver) AND (assignee:john) AND (not done) AND (priority is high) AND (#urgent)');
+    });
+
+    it('should return empty string for no filters', () => {
+        const filters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priorities: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('');
+    });
+
+    it('should handle unknown role IDs', () => {
+        const filters: ViewFilters = {
+            roles: ['unknown-role'],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(role:unknown-role)');
+    });
+
+    it('should handle mixed role types', () => {
+        const filters: ViewFilters = {
+            roles: ['driver', 'none-set', 'unknown-role'],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('(role:Driver OR no-role OR role:unknown-role)');
+    });
+});
