@@ -41,7 +41,27 @@ export class TaskQueryService {
 
         // Convert status filters to query syntax
         if (filters.statuses && filters.statuses.length > 0) {
-            const statusQueries = filters.statuses.map(status => `status:${status}`);
+            const statusQueries = filters.statuses.map(status => {
+                // Handle 'todo' and 'not done' as simple additions
+                if (status === 'todo') {
+                    return 'not done';
+                }
+                // Handle 'done' as simple addition
+                else if (status === 'done') {
+                    return 'done';
+                }
+                // Handle other statuses with function syntax
+                else if (status === 'in-progress') {
+                    return 'filter by function task.status.type === \'IN_PROGRESS\'';
+                }
+                else if (status === 'cancelled') {
+                    return 'filter by function task.status.type === \'CANCELLED\'';
+                }
+                // Default handling for other statuses with function syntax
+                else {
+                    return `filter by function task.status.type === '${(status as string).toUpperCase()}'`;
+                }
+            });
             queryParts.push(`(${statusQueries.join(' OR ')})`);
         }
 
@@ -49,9 +69,9 @@ export class TaskQueryService {
         if (filters.priorities && filters.priorities.length > 0) {
             const priorityQueries = filters.priorities.map(priority => {
                 if (priority === 'none-set') {
-                    return 'priority:medium AND no-explicit-priority';
+                    return 'priority is none';
                 }
-                return `priority:${priority}`;
+                return `priority is ${priority}`;
             });
             queryParts.push(`(${priorityQueries.join(' OR ')})`);
         }
@@ -122,33 +142,6 @@ export class TaskQueryService {
                     icon: 'user-x',
                     isEmoji: false
                 });
-                break;
-
-            case ViewLayout.ASSIGNEES:
-                // Get unique people from current filters or all people
-                const people = filters.people && filters.people.length > 0
-                    ? filters.people
-                    : this.getUniquePeople();
-
-                for (const person of people) {
-                    if (person === 'none-set') {
-                        const noAssigneeQuery = baseQuery
-                            ? `${baseQuery} AND no-assignee`
-                            : 'no-assignee';
-                        columnQueries.push({
-                            title: 'Unassigned',
-                            query: noAssigneeQuery
-                        });
-                    } else {
-                        const personQuery = baseQuery
-                            ? `${baseQuery} AND assignee:${person}`
-                            : `assignee:${person}`;
-                        columnQueries.push({
-                            title: person,
-                            query: personQuery
-                        });
-                    }
-                }
                 break;
 
             case ViewLayout.STATUS:

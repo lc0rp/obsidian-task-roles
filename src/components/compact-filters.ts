@@ -371,10 +371,12 @@ export class CompactFiltersComponent {
         allDropdowns.push(priorityDropdown);
 
         const priorities = [
-            { value: TaskPriority.URGENT, label: 'Urgent' },
+            { value: TaskPriority.HIGHEST, label: 'Urgent' },
             { value: TaskPriority.HIGH, label: 'High' },
             { value: TaskPriority.MEDIUM, label: 'Medium' },
-            { value: TaskPriority.LOW, label: 'Low' }
+            { value: TaskPriority.NONE, label: 'Normal' },
+            { value: TaskPriority.LOW, label: 'Low' },
+            { value: TaskPriority.LOWEST, label: 'Lowest' }
         ];
         const totalPriorities = priorities.length + 1; // +1 for "None" option
 

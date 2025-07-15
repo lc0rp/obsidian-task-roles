@@ -67,10 +67,12 @@ export enum TaskStatus {
 }
 
 export enum TaskPriority {
-    LOW = 'low',
-    MEDIUM = 'medium',
+    HIGHEST = 'highest',
     HIGH = 'high',
-    URGENT = 'urgent'
+    MEDIUM = 'medium',
+    NONE = 'none',
+    LOW = 'low',
+    LOWEST = 'lowest'
 }
 
 // View configuration types
