@@ -61,7 +61,7 @@ export class ViewHeaderComponent {
         const layouts = [
             { value: ViewLayout.STATUS, label: 'Status View' },
             { value: ViewLayout.ROLE, label: 'Role View' },
-            { value: ViewLayout.ASSIGNEES, label: 'Assignees View' },
+            // { value: ViewLayout.ASSIGNEES, label: 'Assignees View' }, // Hidden for now
             { value: ViewLayout.DATE, label: 'Date View' }
         ];
 
