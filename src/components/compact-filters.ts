@@ -378,11 +378,11 @@ export class CompactFiltersComponent {
             { value: TaskPriority.LOW, label: 'Low' },
             { value: TaskPriority.LOWEST, label: 'Lowest' }
         ];
-        const totalPriorities = priorities.length + 1; // +1 for "None" option
+        const totalPriorities = priorities.length;
 
         // Store original priorities for cancel functionality
-        let originalPriorities: (TaskPriority | 'none-set')[] = [...(this.currentFilters.priorities || [])];
-        let tempPriorities: (TaskPriority | 'none-set')[] = [...originalPriorities];
+        let originalPriorities: TaskPriority[] = [...(this.currentFilters.priorities || [])];
+        let tempPriorities: TaskPriority[] = [...originalPriorities];
 
         // Update priority display text
         const updatePriorityDisplay = () => {
@@ -415,8 +415,8 @@ export class CompactFiltersComponent {
         dropdown: HTMLElement,
         priorities: any[],
         totalPriorities: number,
-        tempPriorities: (TaskPriority | 'none-set')[],
-        originalPriorities: (TaskPriority | 'none-set')[],
+        tempPriorities: TaskPriority[],
+        originalPriorities: TaskPriority[],
         updateDisplay: () => void
     ): void {
         const optionsContainer = dropdown.createDiv('compact-multiselect-options');
@@ -427,16 +427,8 @@ export class CompactFiltersComponent {
         allPrioritiesCheckbox.checked = tempPriorities.length === totalPriorities;
         allPrioritiesLabel.createSpan().setText('All Priorities');
 
-        // Add "None" option for priority
-        const nonePriorityLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-        const nonePriorityCheckbox = nonePriorityLabel.createEl('input', { type: 'checkbox' });
-        nonePriorityCheckbox.checked = tempPriorities.includes('none-set');
-        nonePriorityLabel.createSpan().setText('None');
-
         // Add priority options
-        const priorityCheckboxes: { checkbox: HTMLInputElement; value: TaskPriority | 'none-set' }[] = [
-            { checkbox: nonePriorityCheckbox, value: 'none-set' }
-        ];
+        const priorityCheckboxes: { checkbox: HTMLInputElement; value: TaskPriority }[] = [];
 
         for (const priority of priorities) {
             const priorityLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
@@ -459,7 +451,7 @@ export class CompactFiltersComponent {
             e.stopPropagation();
             if (allPrioritiesCheckbox.checked) {
                 tempPriorities.length = 0;
-                tempPriorities.push('none-set' as const, ...priorities.map(p => p.value));
+                tempPriorities.push(...priorities.map(p => p.value));
             } else {
                 tempPriorities.length = 0;
             }

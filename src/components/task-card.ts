@@ -146,7 +146,7 @@ export class TaskCardComponent {
 
     private getTaskPriorityClass(priority: TaskPriority): string {
         switch (priority) {
-            case TaskPriority.URGENT:
+            case TaskPriority.HIGHEST:
                 return 'task-priority-urgent';
             case TaskPriority.HIGH:
                 return 'task-priority-high';
@@ -161,7 +161,7 @@ export class TaskCardComponent {
 
     private getPriorityIconName(priority: TaskPriority): string {
         switch (priority) {
-            case TaskPriority.URGENT:
+            case TaskPriority.HIGHEST:
                 return 'alert-octagon';
             case TaskPriority.HIGH:
                 return 'arrow-up';

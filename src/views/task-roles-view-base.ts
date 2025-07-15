@@ -125,23 +125,8 @@ export abstract class TaskRolesViewBase extends ItemView {
 
             // Priority filter
             if (this.currentFilters.priorities && this.currentFilters.priorities.length > 0) {
-                const hasNoneSetFilter = this.currentFilters.priorities.includes('none-set');
-                const hasExplicitPriority = this.hasExplicitPriority(task);
-
                 // Check if task matches any of the selected priority filters
-                let priorityMatches = false;
-
-                // Check for "none-set" filter (tasks with MEDIUM priority but no explicit priority indicators)
-                if (hasNoneSetFilter && task.priority === TaskPriority.MEDIUM && !hasExplicitPriority) {
-                    priorityMatches = true;
-                }
-
-                // Check for explicit priority matches
-                if (this.currentFilters.priorities.some(p => p !== 'none-set' && p === task.priority)) {
-                    priorityMatches = true;
-                }
-
-                if (!priorityMatches) {
+                if (!this.currentFilters.priorities.includes(task.priority)) {
                     return false;
                 }
             }
@@ -195,13 +180,6 @@ export abstract class TaskRolesViewBase extends ItemView {
         }
     }
 
-    private hasExplicitPriority(task: TaskData): boolean {
-        // Check if task content contains explicit priority indicators
-        const content = task.content.toLowerCase();
-        return content.includes('🔴') || content.includes('🟡') || content.includes('🟢') ||
-            content.includes('[urgent]') || content.includes('[high]') || content.includes('[low]') ||
-            content.includes('!!!') || content.includes('!!');
-    }
 
     // Sorting methods
     protected sortTasks(tasks: TaskData[]): TaskData[] {
@@ -241,7 +219,7 @@ export abstract class TaskRolesViewBase extends ItemView {
 
     private compareUrgency(a: TaskData, b: TaskData): number {
         // Priority first
-        const priorityOrder = { [TaskPriority.URGENT]: 4, [TaskPriority.HIGH]: 3, [TaskPriority.MEDIUM]: 2, [TaskPriority.LOW]: 1 };
+        const priorityOrder = { [TaskPriority.HIGHEST]: 6, [TaskPriority.HIGH]: 5, [TaskPriority.MEDIUM]: 4, [TaskPriority.NONE]: 3, [TaskPriority.LOW]: 2, [TaskPriority.LOWEST]: 1 };
         const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
         if (priorityDiff !== 0) return priorityDiff;
 
@@ -464,7 +442,7 @@ export abstract class TaskRolesViewBase extends ItemView {
     // Utility methods
     protected getTaskPriorityClass(priority: TaskPriority): string {
         switch (priority) {
-            case TaskPriority.URGENT:
+            case TaskPriority.HIGHEST:
                 return 'task-priority-urgent';
             case TaskPriority.HIGH:
                 return 'task-priority-high';
