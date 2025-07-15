@@ -236,7 +236,7 @@ export class TaskCacheService {
 
     private parseTaskPriority(content: string): TaskPriority {
         if (content.includes('🔴') || content.includes('[urgent]') || content.includes('!!!')) {
-            return TaskPriority.URGENT;
+            return TaskPriority.HIGHEST;
         }
 
         if (content.includes('🟡') || content.includes('[high]') || content.includes('!!')) {

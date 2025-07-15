@@ -96,16 +96,9 @@ export class TaskQueryService {
         if (filters.priorities && filters.priorities.length > 0) {
             if (filters.priorities.length === 1) {
                 const priority = filters.priorities[0];
-                if (priority === 'none-set') {
-                    queryLines.push('priority is none');
-                } else {
-                    queryLines.push(`priority is ${priority}`);
-                }
+                queryLines.push(`priority is ${priority}`);
             } else {
                 const priorityQueries = filters.priorities.map(priority => {
-                    if (priority === 'none-set') {
-                        return 'priority is none';
-                    }
                     return `priority is ${priority}`;
                 });
                 queryLines.push(`(${priorityQueries.join(' OR ')})`);
