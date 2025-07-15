@@ -13,73 +13,111 @@ export class TaskQueryService {
     }
 
     buildTaskQueryFromFilters(filters: ViewFilters): string {
-        const queryParts: string[] = [];
+        const queryLines: string[] = [];
 
         // Convert role filters to query syntax
         if (filters.roles && filters.roles.length > 0) {
-            const roleQueries = filters.roles.map(roleId => {
+            if (filters.roles.length === 1) {
+                const roleId = filters.roles[0];
                 if (roleId === 'none-set') {
-                    return 'no-role';
+                    queryLines.push('no-role');
+                } else {
+                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
+                    queryLines.push(role ? `role:${role.name}` : `role:${roleId}`);
                 }
-                const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
-                return role ? `role:${role.name}` : `role:${roleId}`;
-            });
-            queryParts.push(`(${roleQueries.join(' OR ')})`);
+            } else {
+                const roleQueries = filters.roles.map(roleId => {
+                    if (roleId === 'none-set') {
+                        return 'no-role';
+                    }
+                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
+                    return role ? `role:${role.name}` : `role:${roleId}`;
+                });
+                queryLines.push(`(${roleQueries.join(' OR ')})`);
+            }
         }
 
         // Convert people filters to query syntax
         if (filters.people && filters.people.length > 0) {
-            const peopleQueries = filters.people.map(person => `assignee:${person}`);
-            queryParts.push(`(${peopleQueries.join(' OR ')})`);
+            if (filters.people.length === 1) {
+                queryLines.push(`assignee:${filters.people[0]}`);
+            } else {
+                const peopleQueries = filters.people.map(person => `assignee:${person}`);
+                queryLines.push(`(${peopleQueries.join(' OR ')})`);
+            }
         }
 
         // Convert company filters to query syntax
         if (filters.companies && filters.companies.length > 0) {
-            const companyQueries = filters.companies.map(company => `assignee:${company}`);
-            queryParts.push(`(${companyQueries.join(' OR ')})`);
+            if (filters.companies.length === 1) {
+                queryLines.push(`assignee:${filters.companies[0]}`);
+            } else {
+                const companyQueries = filters.companies.map(company => `assignee:${company}`);
+                queryLines.push(`(${companyQueries.join(' OR ')})`);
+            }
         }
 
         // Convert status filters to query syntax
         if (filters.statuses && filters.statuses.length > 0) {
-            const statusQueries = filters.statuses.map(status => {
-                // Handle 'todo' and 'not done' as simple additions
+            if (filters.statuses.length === 1) {
+                const status = filters.statuses[0];
                 if (status === 'todo') {
-                    return 'not done';
+                    queryLines.push('not done');
+                } else if (status === 'done') {
+                    queryLines.push('done');
+                } else if (status === 'in-progress') {
+                    queryLines.push('filter by function task.status.type === \'IN_PROGRESS\'');
+                } else if (status === 'cancelled') {
+                    queryLines.push('filter by function task.status.type === \'CANCELLED\'');
+                } else {
+                    queryLines.push(`filter by function task.status.type === '${(status as string).toUpperCase()}'`);
                 }
-                // Handle 'done' as simple addition
-                else if (status === 'done') {
-                    return 'done';
-                }
-                // Handle other statuses with function syntax
-                else if (status === 'in-progress') {
-                    return 'filter by function task.status.type === \'IN_PROGRESS\'';
-                }
-                else if (status === 'cancelled') {
-                    return 'filter by function task.status.type === \'CANCELLED\'';
-                }
-                // Default handling for other statuses with function syntax
-                else {
-                    return `filter by function task.status.type === '${(status as string).toUpperCase()}'`;
-                }
-            });
-            queryParts.push(`(${statusQueries.join(' OR ')})`);
+            } else {
+                const statusQueries = filters.statuses.map(status => {
+                    if (status === 'todo') {
+                        return 'not done';
+                    } else if (status === 'done') {
+                        return 'done';
+                    } else if (status === 'in-progress') {
+                        return 'filter by function task.status.type === \'IN_PROGRESS\'';
+                    } else if (status === 'cancelled') {
+                        return 'filter by function task.status.type === \'CANCELLED\'';
+                    } else {
+                        return `filter by function task.status.type === '${(status as string).toUpperCase()}'`;
+                    }
+                });
+                queryLines.push(`(${statusQueries.join(' OR ')})`);
+            }
         }
 
         // Convert priority filters to query syntax
         if (filters.priorities && filters.priorities.length > 0) {
-            const priorityQueries = filters.priorities.map(priority => {
+            if (filters.priorities.length === 1) {
+                const priority = filters.priorities[0];
                 if (priority === 'none-set') {
-                    return 'priority is none';
+                    queryLines.push('priority is none');
+                } else {
+                    queryLines.push(`priority is ${priority}`);
                 }
-                return `priority is ${priority}`;
-            });
-            queryParts.push(`(${priorityQueries.join(' OR ')})`);
+            } else {
+                const priorityQueries = filters.priorities.map(priority => {
+                    if (priority === 'none-set') {
+                        return 'priority is none';
+                    }
+                    return `priority is ${priority}`;
+                });
+                queryLines.push(`(${priorityQueries.join(' OR ')})`);
+            }
         }
 
         // Convert tag filters to query syntax
         if (filters.tags && filters.tags.length > 0) {
-            const tagQueries = filters.tags.map(tag => `#${tag}`);
-            queryParts.push(`(${tagQueries.join(' OR ')})`);
+            if (filters.tags.length === 1) {
+                queryLines.push(`#${filters.tags[0]}`);
+            } else {
+                const tagQueries = filters.tags.map(tag => `#${tag}`);
+                queryLines.push(`(${tagQueries.join(' OR ')})`);
+            }
         }
 
         // Convert date range filters to query syntax
@@ -111,16 +149,20 @@ export class TaskQueryService {
             }
 
             if (dateParts.length > 0) {
-                queryParts.push(`(${dateParts.join(' OR ')})`);
+                if (dateParts.length === 1) {
+                    queryLines.push(dateParts[0]);
+                } else {
+                    queryLines.push(`(${dateParts.join(' OR ')})`);
+                }
             }
         }
 
         // Convert text search to query syntax
         if (filters.textSearch && filters.textSearch.trim()) {
-            queryParts.push(`"${filters.textSearch.trim()}"`);
+            queryLines.push(`"${filters.textSearch.trim()}"`);
         }
 
-        return queryParts.join(' AND ');
+        return queryLines.join('\n');
     }
 
     buildColumnQueries(layout: ViewLayout, filters: ViewFilters): Array<{ title: string, query: string, icon?: string, isEmoji?: boolean }> {
@@ -133,7 +175,7 @@ export class TaskQueryService {
                 const visibleRoles = this.plugin.getVisibleRoles();
                 for (const role of visibleRoles) {
                     const roleQuery = baseQuery
-                        ? `${baseQuery} AND description includes ${role.icon}`
+                        ? `${baseQuery}\ndescription includes ${role.icon}`
                         : `description includes ${role.icon}`;
                     columnQueries.push({
                         title: role.name,
@@ -164,22 +206,22 @@ export class TaskQueryService {
 
                     switch (status) {
                         case TaskStatus.TODO:
-                            statusQuery = baseQuery ? `${baseQuery} AND not done` : 'not done';
+                            statusQuery = baseQuery ? `${baseQuery}\nnot done` : 'not done';
                             statusTitle = 'To Do';
                             statusIcon = 'circle-dashed';
                             break;
                         case TaskStatus.IN_PROGRESS:
-                            statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'IN_PROGRESS'` : `filter by function task.status.type === 'IN_PROGRESS'`;
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'IN_PROGRESS'` : `filter by function task.status.type === 'IN_PROGRESS'`;
                             statusTitle = 'In Progress';
                             statusIcon = 'loader-circle';
                             break;
                         case TaskStatus.DONE:
-                            statusQuery = baseQuery ? `${baseQuery} AND done` : 'done';
+                            statusQuery = baseQuery ? `${baseQuery}\ndone` : 'done';
                             statusTitle = 'Done';
                             statusIcon = 'circle-check-big';
                             break;
                         case TaskStatus.CANCELLED:
-                            statusQuery = baseQuery ? `${baseQuery} AND filter by function task.status.type === 'CANCELLED'` : `filter by function task.status.type === 'CANCELLED'`;
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'CANCELLED'` : `filter by function task.status.type === 'CANCELLED'`;
                             statusTitle = 'Cancelled';
                             statusIcon = 'circle-off';
                             break;
@@ -201,11 +243,11 @@ export class TaskQueryService {
             case ViewLayout.DATE:
                 // Date-based columns
                 const dateColumns = [
-                    { title: 'Overdue', query: baseQuery ? `${baseQuery} AND due before today` : 'due before today', icon: 'clock-alert', isEmoji: false },
-                    { title: 'Today', query: baseQuery ? `${baseQuery} AND due today` : 'due today', icon: 'clock-arrow-down', isEmoji: false },
-                    { title: 'This Week', query: baseQuery ? `${baseQuery} AND due this week` : 'due this week', icon: 'calendar-arrow-down', isEmoji: false },
-                    { title: 'Next Week', query: baseQuery ? `${baseQuery} AND due next week` : 'due next week', icon: 'calendar-arrow-up', isEmoji: false },
-                    { title: 'No Due Date', query: baseQuery ? `${baseQuery} AND no due date` : 'no due date', icon: 'calendar', isEmoji: false }
+                    { title: 'Overdue', query: baseQuery ? `${baseQuery}\ndue before today` : 'due before today', icon: 'clock-alert', isEmoji: false },
+                    { title: 'Today', query: baseQuery ? `${baseQuery}\ndue today` : 'due today', icon: 'clock-arrow-down', isEmoji: false },
+                    { title: 'This Week', query: baseQuery ? `${baseQuery}\ndue this week` : 'due this week', icon: 'calendar-arrow-down', isEmoji: false },
+                    { title: 'Next Week', query: baseQuery ? `${baseQuery}\ndue next week` : 'due next week', icon: 'calendar-arrow-up', isEmoji: false },
+                    { title: 'No Due Date', query: baseQuery ? `${baseQuery}\nno due date` : 'no due date', icon: 'calendar', isEmoji: false }
                 ];
 
                 for (const dateColumn of dateColumns) {
