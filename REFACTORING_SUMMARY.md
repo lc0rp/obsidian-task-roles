@@ -2,7 +2,8 @@
 
 ## Overview
 
-Successfully broke down the large `task-roles-view.ts` file (~1600 lines) into smaller, more manageable components and services. This improves maintainability, readability, and follows better software engineering practices.
+Successfully broke down the large `task-roles-view.ts` file (~1600 lines) into smaller, more manageable components and services.
+This improves maintainability, readability, and follows better software engineering practices.
 
 ## Files Created
 
