@@ -17,54 +17,114 @@ export class TaskQueryService {
 
         // Convert role filters to query syntax
         if (filters.roles && filters.roles.length > 0) {
-            if (filters.roles.length === 1) {
-                const roleId = filters.roles[0];
-                if (roleId === 'none-set') {
-                    queryLines.push('no-role');
-                } else {
-                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
-                    queryLines.push(role ? `role:${role.name}` : `role:${roleId}`);
-                }
-            } else {
-                const roleQueries = filters.roles.map(roleId => {
+            // Skip filtering if "All" is selected (no filter needed)
+            const hasAll = filters.roles.includes('all');
+            if (!hasAll) {
+                const visibleRoles = this.plugin.getVisibleRoles();
+                
+                if (filters.roles.length === 1) {
+                    const roleId = filters.roles[0];
                     if (roleId === 'none-set') {
-                        return 'no-role';
+                        // Use the same pattern as buildColumnQueries for "No Role"
+                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
+                        queryLines.push(`(${noRoleConditions.join(' AND ')})`);
+                    } else {
+                        // Use description includes pattern like buildColumnQueries
+                        const role = visibleRoles.find(r => r.id === roleId);
+                        if (role) {
+                            queryLines.push(`(description includes ${role.icon})`);
+                        }
                     }
-                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
-                    return role ? `role:${role.name}` : `role:${roleId}`;
-                });
-                queryLines.push(`(${roleQueries.join(' OR ')})`);
+                } else {
+                    // Handle multiple role selections
+                    const roleQueries: string[] = [];
+                    const hasNoneSet = filters.roles.includes('none-set');
+                    
+                    // Add conditions for specific roles
+                    const specificRoles = filters.roles.filter(roleId => roleId !== 'none-set');
+                    for (const roleId of specificRoles) {
+                        const role = visibleRoles.find(r => r.id === roleId);
+                        if (role) {
+                            roleQueries.push(`(description includes ${role.icon})`);
+                        }
+                    }
+                    
+                    // Add "none-set" condition if selected
+                    if (hasNoneSet) {
+                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
+                        // For "none-set", we need ALL conditions to be true (AND logic)
+                        roleQueries.push(`(${noRoleConditions.join(' AND ')})`);
+                    }
+                    
+                    if (roleQueries.length > 0) {
+                        queryLines.push(`(${roleQueries.join(' OR ')})`);
+                    }
+                }
             }
         }
 
         // Convert people filters to query syntax
         if (filters.people && filters.people.length > 0) {
-            if (filters.people.length === 1) {
-                queryLines.push(`assignee:${filters.people[0]}`);
-            } else {
-                const peopleQueries = filters.people.map(person => `assignee:${person}`);
+            const visibleRoles = this.plugin.getVisibleRoles();
+            const peopleQueries: string[] = [];
+            
+            for (const person of filters.people) {
+                const personRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*${person.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    personRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this person with OR
+                if (personRoleQueries.length > 0) {
+                    peopleQueries.push(`(${personRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (peopleQueries.length > 0) {
                 queryLines.push(`(${peopleQueries.join(' OR ')})`);
             }
         }
 
         // Convert company filters to query syntax
         if (filters.companies && filters.companies.length > 0) {
-            if (filters.companies.length === 1) {
-                queryLines.push(`assignee:${filters.companies[0]}`);
-            } else {
-                const companyQueries = filters.companies.map(company => `assignee:${company}`);
+            const visibleRoles = this.plugin.getVisibleRoles();
+            const companyQueries: string[] = [];
+            
+            for (const company of filters.companies) {
+                const companyRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*\\+${company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    companyRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this company with OR
+                if (companyRoleQueries.length > 0) {
+                    companyQueries.push(`(${companyRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (companyQueries.length > 0) {
                 queryLines.push(`(${companyQueries.join(' OR ')})`);
             }
         }
 
         // Convert status filters to query syntax
         if (filters.statuses && filters.statuses.length > 0) {
+            // In the status view, todo column means not done and not in progress
+            // and done column means done and not cancelled.
             if (filters.statuses.length === 1) {
                 const status = filters.statuses[0];
                 if (status === 'todo') {
                     queryLines.push('not done');
+                    queryLines.push('filter by function task.status.type !== \'IN_PROGRESS\''); // Exclude in-progress tasks
                 } else if (status === 'done') {
                     queryLines.push('done');
+                    queryLines.push('filter by function task.status.type !== \'CANCELLED\''); // Exclude cancelled tasks
                 } else if (status === 'in-progress') {
                     queryLines.push('filter by function task.status.type === \'IN_PROGRESS\'');
                 } else if (status === 'cancelled') {
@@ -73,22 +133,42 @@ export class TaskQueryService {
                     queryLines.push(`filter by function task.status.type === '${(status as string).toUpperCase()}'`);
                 }
             } else {
-                // For multiple status filters, combine them in a single filter by function expression
-                const statusConditions: string[] = [];
-                for (const status of filters.statuses) {
-                    if (status === 'todo') {
-                        statusConditions.push('!task.done');
-                    } else if (status === 'done') {
-                        statusConditions.push('task.done');
-                    } else if (status === 'in-progress') {
-                        statusConditions.push('task.status.type === \'IN_PROGRESS\'');
-                    } else if (status === 'cancelled') {
-                        statusConditions.push('task.status.type === \'CANCELLED\'');
-                    } else {
-                        statusConditions.push(`task.status.type === '${(status as string).toUpperCase()}'`);
+                // For multiple status filters, check if we can use simple Tasks plugin syntax
+                const hasOnlyTodoAndDone = filters.statuses.every(status => status === 'todo' || status === 'done');
+                
+                if (hasOnlyTodoAndDone) {
+                    // Check if both todo and done are selected - this covers all tasks
+                    const hasTodo = filters.statuses.includes(TaskStatus.TODO);
+                    const hasDone = filters.statuses.includes(TaskStatus.DONE);
+                    
+                    if (hasTodo && hasDone) {
+                        // In filters, todo should mean not done and not in progress (we can skip the in-progress check here, because it is implied)
+                        queryLines.push('filter by function task.status.type !== \'IN_PROGRESS\''); // Exclude in-progress tasks
+                        // And done should mean done and not cancelled (we can skip the done check here, because it is implied))
+                        queryLines.push('filter by function task.status.type !== \'CANCELLED\''); // Exclude cancelled tasks    
+                    } else if (hasTodo) {
+                        queryLines.push('not done');
+                    } else if (hasDone) {
+                        queryLines.push('done');
                     }
+                } else {
+                    // For mixed statuses, use consistent task.status.type for all statuses
+                    const statusConditions: string[] = [];
+                    for (const status of filters.statuses) {
+                        if (status === 'todo') {
+                            statusConditions.push('task.status.type === \'TODO\'');
+                        } else if (status === 'done') {
+                            statusConditions.push('task.status.type === \'DONE\'');
+                        } else if (status === 'in-progress') {
+                            statusConditions.push('task.status.type === \'IN_PROGRESS\'');
+                        } else if (status === 'cancelled') {
+                            statusConditions.push('task.status.type === \'CANCELLED\'');
+                        } else {
+                            statusConditions.push(`task.status.type === '${(status as string).toUpperCase()}'`);
+                        }
+                    }
+                    queryLines.push(`filter by function (${statusConditions.join(' || ')})`);
                 }
-                queryLines.push(`filter by function (${statusConditions.join(' || ')})`);
             }
         }
 
@@ -99,9 +179,9 @@ export class TaskQueryService {
                 queryLines.push(`priority is ${priority}`);
             } else {
                 const priorityQueries = filters.priorities.map(priority => {
-                    return `priority is ${priority}`;
+                    return `(priority is ${priority})`;
                 });
-                queryLines.push(`(${priorityQueries.join(' OR ')})`);
+                queryLines.push(`${priorityQueries.join(' OR ')}`);
             }
         }
 
@@ -124,30 +204,50 @@ export class TaskQueryService {
 
             // Handle "Include no dates" checkbox
             if (includeNotSet) {
-                dateParts.push(`no ${dateType} date`);
+                dateParts.push(`(no ${dateType} date)`);
             }
+
+            // For start date, we say "starts" instead of "start"
+            const dateTypeForQuery = dateType === 'start' ? 'starts' : dateType;
 
             // Handle date range logic
             if (from && to) {
-                // Both dates provided - use range format
+                // Both dates provided - use after/before format for range
                 const fromDate = from.toISOString().split('T')[0];
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} in ${fromDate} ${toDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${fromDate} ${toDate})`);
             } else if (from) {
-                // Only from date provided
+                // Only from date provided - use after
                 const fromDate = from.toISOString().split('T')[0];
-                dateParts.push(`${dateType} on ${fromDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${fromDate})`);
             } else if (to) {
-                // Only to date provided
+                // Only to date provided - use before
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} on ${toDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${toDate})`);
             }
 
             if (dateParts.length > 0) {
-                if (dateParts.length === 1) {
-                    queryLines.push(dateParts[0]);
+                // No complex logic needed - just join appropriately
+                const joinOperator = ' OR ';
+                queryLines.push(`${dateParts.join(joinOperator)}`);
+                // Handle complex logic for combining no date with date range
+                if (0 && includeNotSet && (from || to)) {
+                    // Separate no date from actual date filters
+                    const noDateParts = dateParts.filter(part => part.includes('no '));
+                    const dateParts2 = dateParts.filter(part => !part.includes('no '));
+                    
+                    if (dateParts2.length > 1) {
+                        // Multiple date parts (range) - join with AND, then OR with no date
+                        queryLines.push(`(${noDateParts.join(' OR ')} OR (${dateParts2.join(' AND ')}))`);
+                    } else if (dateParts2.length === 1) {
+                        // Single date part - OR with no date
+                        queryLines.push(`(${noDateParts.join(' OR ')} OR ${dateParts2.join(' OR ')})`);
+                    } else {
+                        // Only no date parts
+                        queryLines.push(`(${noDateParts.join(' OR ')})`);
+                    }
                 } else {
-                    queryLines.push(`(${dateParts.join(' OR ')})`);
+                    
                 }
             }
         }
@@ -201,7 +301,7 @@ export class TaskQueryService {
 
                     switch (status) {
                         case TaskStatus.TODO:
-                            statusQuery = baseQuery ? `${baseQuery}\nnot done` : 'not done';
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'TODO'` : `filter by function task.status.type === 'TODO'`;
                             statusTitle = 'To Do';
                             statusIcon = 'circle-dashed';
                             break;
@@ -211,7 +311,7 @@ export class TaskQueryService {
                             statusIcon = 'loader-circle';
                             break;
                         case TaskStatus.DONE:
-                            statusQuery = baseQuery ? `${baseQuery}\ndone` : 'done';
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'DONE'` : `filter by function task.status.type === 'DONE'`;
                             statusTitle = 'Done';
                             statusIcon = 'circle-check-big';
                             break;

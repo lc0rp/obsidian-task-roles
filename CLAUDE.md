@@ -122,6 +122,41 @@ The plugin extensively uses CodeMirror 6 for editor integration:
 
 ## Development Guidelines
 
+### Test-Driven Development Workflow
+
+**CRITICAL**: All coding tasks must follow this Test-Driven Development (TDD) workflow:
+
+1. **Write Tests First**: Before implementing any bug fix or feature, write tests that:
+   - Verify the current bug/issue exists (tests should fail initially)
+   - Define the expected behavior after the fix
+   - Cover edge cases and error conditions
+
+2. **Implement the Fix**: Write the minimal code needed to make the tests pass
+
+3. **Verify Tests Pass**: Run `npm run test` to ensure all tests pass
+
+4. **Iterate**: Repeat steps 1-3 until all functionality is complete and tests pass
+
+5. **Update Documentation**: Update relevant documentation if the changes affect user-facing behavior
+
+6. **Coverage Verification**: Run `npm run coverage` and report on coverage improvements
+
+**Example TDD Workflow:**
+
+```bash
+# 1. Write failing test
+npm run test  # Should fail, proving the bug exists
+
+# 2. Implement fix
+# Make code changes...
+
+# 3. Verify tests pass
+npm run test  # Should pass
+
+# 4. Check coverage
+npm run coverage  # Report coverage improvements
+```
+
 ### TypeScript Standards
 
 - Strict TypeScript configuration with `noImplicitAny` and `strictNullChecks`
@@ -135,13 +170,16 @@ The plugin extensively uses CodeMirror 6 for editor integration:
 - TypeScript compilation must succeed without errors
 - Markdown documentation must pass markdownlint validation
 - Use meaningful variable names and add comments for complex logic
+- **MANDATORY**: All bug fixes and features must have accompanying tests
 
 ### Testing Approach
 
 - Vitest for unit testing with mocked Obsidian APIs
 - Test files located in `tests/` directory
 - Mock Obsidian API in `tests/__mocks__/obsidian.ts`
-- Coverage reporting with c8 provider
+- Coverage reporting with @vitest/coverage-v8 provider
+- **Target**: Maintain or improve test coverage with each change
+- **Minimum**: New code must have at least 80% test coverage
 
 ### File Organization
 

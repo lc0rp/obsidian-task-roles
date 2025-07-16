@@ -518,9 +518,12 @@ export class CompactFiltersComponent {
         addWhiteArrow(dateTypeSelect);
         const dateTypes = [
             { value: DateType.DUE, label: 'Due' },
+            { value: DateType.DONE, label: 'Done' },
+            { value: DateType.SCHEDULED, label: 'Scheduled' },
+            { value: DateType.START, label: 'Start' },  
             { value: DateType.CREATED, label: 'Created' },
-            { value: DateType.COMPLETED, label: 'Completed' },
-            { value: DateType.SCHEDULED, label: 'Scheduled' }
+            { value: DateType.CANCELLED, label: 'Cancelled' },
+            { value: DateType.HAPPENS, label: 'Happens' }
         ];
 
         for (const dateType of dateTypes) {
@@ -588,12 +591,12 @@ export class CompactFiltersComponent {
     private renderFilterActions(container: HTMLElement): void {
         const actionsGroup = container.createDiv('compact-filter-actions');
 
-        // Clear filters button
-        const clearFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-clear' });
-        const clearFiltersIcon = clearFiltersBtn.createEl('span');
-        setIcon(clearFiltersIcon, 'rotate-ccw');
-        clearFiltersBtn.title = 'Clear filters';
-        clearFiltersBtn.onclick = async () => {
+        // Reset filters button
+        const resetFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-clear' });
+        const resetFiltersIcon = resetFiltersBtn.createEl('span');
+        setIcon(resetFiltersIcon, 'rotate-ccw');
+        resetFiltersBtn.title = 'Reset filters';
+        resetFiltersBtn.onclick = async () => {
             this.updateFiltersCallback({});
         };
 
@@ -711,8 +714,8 @@ export class CompactFiltersComponent {
     }
 
     private showAssigneeSelector(updateCallback: () => void): void {
-        import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
-            new AssigneeSelectorModal(this.plugin.app, this.plugin, (selectedAssignee: string) => {
+        import('../modals/contact-company-picker-modal').then(({ ContactCompanyPickerModal }) => {
+            new ContactCompanyPickerModal(this.plugin.app, this.plugin, (selectedAssignee: string) => {
                 // Determine if it's a person or company based on the symbol
                 const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
                 const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);

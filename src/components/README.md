@@ -1,6 +1,7 @@
 # Components
 
-This directory contains UI components that have been extracted from the main view for better maintainability and separation of concerns.
+This directory contains UI components that have been extracted from the main view for better maintainability and
+separation of concerns.
 
 ## Component Structure
 

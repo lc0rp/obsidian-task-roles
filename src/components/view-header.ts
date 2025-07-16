@@ -55,7 +55,7 @@ export class ViewHeaderComponent {
 
         // Layout selector with label
         const layoutContainer = controlsEl.createDiv('task-roles-layout-container');
-        layoutContainer.createSpan('task-roles-layout-label').setText('Show:');
+        layoutContainer.createSpan('task-roles-layout-label').setText('Change View:');
 
         const layoutSelect = layoutContainer.createEl('select', { cls: 'task-roles-layout-select' });
         const layouts = [

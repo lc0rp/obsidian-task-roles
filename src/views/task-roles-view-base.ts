@@ -167,14 +167,20 @@ export abstract class TaskRolesViewBase extends ItemView {
 
     private getTaskDateByType(task: TaskData, dateType: DateType): Date | undefined {
         switch (dateType) {
-            case DateType.CREATED:
-                return task.dates.created || task.createdDate;
             case DateType.DUE:
                 return task.dates.due;
-            case DateType.COMPLETED:
-                return task.dates.completed;
+            case DateType.DONE:
+                return task.dates.done;
             case DateType.SCHEDULED:
                 return task.dates.scheduled;
+            case DateType.START:
+                return task.dates.start;
+            case DateType.CREATED:
+                return task.dates.created || task.createdDate;
+            case DateType.CANCELLED:
+                return task.dates.cancelled;
+            case DateType.HAPPENS:
+                return task.dates.happens || task.dates.start || task.dates.scheduled || task.dates.due;
             default:
                 return undefined;
         }

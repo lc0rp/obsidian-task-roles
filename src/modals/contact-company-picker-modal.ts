@@ -6,7 +6,7 @@ export interface AssigneeSelectorOptions {
     keepOpen?: boolean;
 }
 
-export class AssigneeSelectorModal extends FuzzySuggestModal<string> {
+export class ContactCompanyPickerModal extends FuzzySuggestModal<string> {
     plugin: TaskRolesPlugin;
     onSelect: (assignee: string) => void;
     contacts: string[] = [];
