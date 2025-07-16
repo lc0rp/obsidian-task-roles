@@ -59,12 +59,16 @@ export class TaskQueryService {
 
         // Convert status filters to query syntax
         if (filters.statuses && filters.statuses.length > 0) {
+            // In the status view, todo column means not done and not in progress
+            // and done column means done and not cancelled.
             if (filters.statuses.length === 1) {
                 const status = filters.statuses[0];
                 if (status === 'todo') {
                     queryLines.push('not done');
+                    queryLines.push('filter by function task.status.type !== \'IN_PROGRESS\''); // Exclude in-progress tasks
                 } else if (status === 'done') {
                     queryLines.push('done');
+                    queryLines.push('filter by function task.status.type !== \'CANCELLED\''); // Exclude cancelled tasks
                 } else if (status === 'in-progress') {
                     queryLines.push('filter by function task.status.type === \'IN_PROGRESS\'');
                 } else if (status === 'cancelled') {
@@ -77,16 +81,20 @@ export class TaskQueryService {
                 const hasOnlyTodoAndDone = filters.statuses.every(status => status === 'todo' || status === 'done');
                 
                 if (hasOnlyTodoAndDone) {
-                    // Use simple Tasks plugin syntax for todo/done only combinations
-                    const statusQueries = filters.statuses.map(status => {
-                        if (status === 'todo') {
-                            return 'not done';
-                        } else if (status === 'done') {
-                            return 'done';
-                        }
-                        return status;
-                    });
-                    queryLines.push(`(${statusQueries.join(' OR ')})`);
+                    // Check if both todo and done are selected - this covers all tasks
+                    const hasTodo = filters.statuses.includes(TaskStatus.TODO);
+                    const hasDone = filters.statuses.includes(TaskStatus.DONE);
+                    
+                    if (hasTodo && hasDone) {
+                        // In filters, todo should mean not done and not in progress (we can skip the in-progress check here, because it is implied)
+                        queryLines.push('filter by function task.status.type !== \'IN_PROGRESS\''); // Exclude in-progress tasks
+                        // And done should mean done and not cancelled (we can skip the done check here, because it is implied))
+                        queryLines.push('filter by function task.status.type !== \'CANCELLED\''); // Exclude cancelled tasks    
+                    } else if (hasTodo) {
+                        queryLines.push('not done');
+                    } else if (hasDone) {
+                        queryLines.push('done');
+                    }
                 } else {
                     // For mixed statuses, use consistent task.status.type for all statuses
                     const statusConditions: string[] = [];
@@ -115,9 +123,9 @@ export class TaskQueryService {
                 queryLines.push(`priority is ${priority}`);
             } else {
                 const priorityQueries = filters.priorities.map(priority => {
-                    return `priority is ${priority}`;
+                    return `(priority is ${priority})`;
                 });
-                queryLines.push(`(${priorityQueries.join(' OR ')})`);
+                queryLines.push(`${priorityQueries.join(' OR ')}`);
             }
         }
 
@@ -140,47 +148,50 @@ export class TaskQueryService {
 
             // Handle "Include no dates" checkbox
             if (includeNotSet) {
-                dateParts.push(`no ${dateType} date`);
+                dateParts.push(`(no ${dateType} date)`);
             }
+
+            // For start date, we say "starts" instead of "start"
+            const dateTypeForQuery = dateType === 'start' ? 'starts' : dateType;
 
             // Handle date range logic
             if (from && to) {
                 // Both dates provided - use after/before format for range
                 const fromDate = from.toISOString().split('T')[0];
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} after ${fromDate}`);
-                dateParts.push(`${dateType} before ${toDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${fromDate} ${toDate})`);
             } else if (from) {
                 // Only from date provided - use after
                 const fromDate = from.toISOString().split('T')[0];
-                dateParts.push(`${dateType} after ${fromDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${fromDate})`);
             } else if (to) {
                 // Only to date provided - use before
                 const toDate = to.toISOString().split('T')[0];
-                dateParts.push(`${dateType} before ${toDate}`);
+                dateParts.push(`(${dateTypeForQuery} ${toDate})`);
             }
 
             if (dateParts.length > 0) {
+                // No complex logic needed - just join appropriately
+                const joinOperator = ' OR ';
+                queryLines.push(`${dateParts.join(joinOperator)}`);
                 // Handle complex logic for combining no date with date range
-                if (includeNotSet && (from || to)) {
+                if (0 && includeNotSet && (from || to)) {
                     // Separate no date from actual date filters
                     const noDateParts = dateParts.filter(part => part.includes('no '));
                     const dateParts2 = dateParts.filter(part => !part.includes('no '));
                     
                     if (dateParts2.length > 1) {
                         // Multiple date parts (range) - join with AND, then OR with no date
-                        queryParts.push(`(${noDateParts.join(' OR ')} OR (${dateParts2.join(' AND ')}))`);
+                        queryLines.push(`(${noDateParts.join(' OR ')} OR (${dateParts2.join(' AND ')}))`);
                     } else if (dateParts2.length === 1) {
                         // Single date part - OR with no date
-                        queryParts.push(`(${noDateParts.join(' OR ')} OR ${dateParts2.join(' OR ')})`);
+                        queryLines.push(`(${noDateParts.join(' OR ')} OR ${dateParts2.join(' OR ')})`);
                     } else {
                         // Only no date parts
-                        queryParts.push(`(${noDateParts.join(' OR ')})`);
+                        queryLines.push(`(${noDateParts.join(' OR ')})`);
                     }
                 } else {
-                    // No complex logic needed - just join appropriately
-                    const joinOperator = (from && to) ? ' AND ' : ' OR ';
-                    queryParts.push(`(${dateParts.join(joinOperator)})`);
+                    
                 }
             }
         }
@@ -234,7 +245,7 @@ export class TaskQueryService {
 
                     switch (status) {
                         case TaskStatus.TODO:
-                            statusQuery = baseQuery ? `${baseQuery}\nnot done` : 'not done';
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'TODO'` : `filter by function task.status.type === 'TODO'`;
                             statusTitle = 'To Do';
                             statusIcon = 'circle-dashed';
                             break;
@@ -244,7 +255,7 @@ export class TaskQueryService {
                             statusIcon = 'loader-circle';
                             break;
                         case TaskStatus.DONE:
-                            statusQuery = baseQuery ? `${baseQuery}\ndone` : 'done';
+                            statusQuery = baseQuery ? `${baseQuery}\nfilter by function task.status.type === 'DONE'` : `filter by function task.status.type === 'DONE'`;
                             statusTitle = 'Done';
                             statusIcon = 'circle-check-big';
                             break;

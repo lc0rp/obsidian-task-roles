@@ -46,7 +46,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(no-role)');
+        expect(query).toBe('no-role');
     });
 
     it('should build query from people filters', () => {
@@ -88,7 +88,9 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(not done OR done)');
+        // When both todo and done are selected, no status filter is needed
+        // as this would match all tasks - avoids Boolean combination error
+        expect(query).toBe('');
     });
 
     it('should build query from tag filters', () => {
@@ -130,7 +132,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(role:Driver) AND (assignee:john) AND (not done) AND (priority is high) AND (#urgent)');
+        expect(query).toBe('role:Driver\nassignee:john\nnot done\npriority is high\n#urgent');
     });
 
     it('should return empty string for no filters', () => {
@@ -158,7 +160,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(role:unknown-role)');
+        expect(query).toBe('role:unknown-role');
     });
 
     it('should handle mixed role types', () => {
@@ -173,5 +175,20 @@ describe('TaskQueryService', () => {
 
         const query = service.buildTaskQueryFromFilters(filters);
         expect(query).toBe('(role:Driver OR no-role OR role:unknown-role)');
+    });
+
+    it('should handle todo+done combination with other filters to avoid Boolean combination error', () => {
+        const filters: ViewFilters = {
+            roles: ['driver'],
+            people: [],
+            companies: [],
+            statuses: ['todo', 'done'], // This should not generate "(done OR not done)" error
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        // Should only include role filter, not status filter to avoid Boolean combination error
+        expect(query).toBe('role:Driver');
     });
 });

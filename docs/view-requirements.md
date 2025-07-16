@@ -19,10 +19,13 @@ The Task Center now supports comprehensive filtering across multiple criteria:
 
 - **Date Range**: From-to date range selection and "not set" option ✅
 - **Date Types**: Support for multiple date types: ✅
-  - Created date ✅
   - Due date ✅
-  - Completed date ✅
+  - Done date ✅
   - Scheduled date ✅
+  - Start date ✅
+  - Created date ✅
+  - Cancelled date ✅
+  - Happens date ✅
 
 #### **Content-Based Filters** ✅ COMPLETED
 

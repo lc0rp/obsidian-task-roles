@@ -1,3 +1,5 @@
+import { CANCELLED } from "dns";
+
 export interface TaskRolesPluginSettings {
     contactSymbol: string;
     companySymbol: string;
@@ -53,10 +55,13 @@ export interface TaskData {
 }
 
 export interface TaskDates {
-    created?: Date;
     due?: Date;
-    completed?: Date;
+    done?: Date;
     scheduled?: Date;
+    start?: Date;
+    created?: Date;
+    cancelled?: Date;
+    happens?: Date;
 }
 
 export enum TaskStatus {
@@ -111,17 +116,23 @@ export interface DateRange {
 }
 
 export enum DateType {
-    CREATED = 'created',
     DUE = 'due',
-    COMPLETED = 'completed',
-    SCHEDULED = 'scheduled'
+    DONE = 'done',
+    SCHEDULED = 'scheduled',
+    START = 'start',
+    CREATED = 'created',
+    CANCELLED = 'cancelled',
+    HAPPENS = 'happens'
 }
 
 export const TASK_DATE_ICONS: Record<keyof TaskDates, string> = {
     due: '📅',
+    done: '✅',
     scheduled: '⏳',
-    completed: '✅',
-    created: '🗓️'
+    start: '🟢',
+    created: '🗓️',
+    cancelled: '🚫',
+    happens: '🔄'
 };
 
 export interface SortOption {

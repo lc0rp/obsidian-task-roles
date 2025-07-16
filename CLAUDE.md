@@ -142,6 +142,7 @@ The plugin extensively uses CodeMirror 6 for editor integration:
 6. **Coverage Verification**: Run `npm run coverage` and report on coverage improvements
 
 **Example TDD Workflow:**
+
 ```bash
 # 1. Write failing test
 npm run test  # Should fail, proving the bug exists
