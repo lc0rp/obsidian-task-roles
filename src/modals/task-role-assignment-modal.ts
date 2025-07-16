@@ -1,13 +1,13 @@
 import { App, Modal, Editor } from 'obsidian';
-import { RoleAssignment, ParsedRoleAssignment, Role } from '../types';
-import { AssigneeSelectorModal } from './assignee-selector-modal';
+import { TaskRoleAssignment, ParsedTaskRoleAssignment, Role } from '../types';
+import { ContactCompanyPickerModal } from './contact-company-picker-modal';
 import type TaskRolesPlugin from '../main';
 
-export class AssignmentModel extends Modal {
+export class TaskRoleAssignmentModal extends Modal {
     plugin: TaskRolesPlugin;
     editor: Editor;
-    roleAssignments: RoleAssignment[] = [];
-    existingRoleAssignments: ParsedRoleAssignment[] = [];
+    roleAssignments: TaskRoleAssignment[] = [];
+    existingRoleAssignments: ParsedTaskRoleAssignment[] = [];
 
     constructor(app: App, plugin: TaskRolesPlugin, editor: Editor) {
         super(app);
@@ -141,7 +141,7 @@ export class AssignmentModel extends Modal {
     }
 
     showAssigneeSelector(roleId: string, container: HTMLElement) {
-        new AssigneeSelectorModal(this.app, this.plugin, async (assignee: string) => {
+        new ContactCompanyPickerModal(this.app, this.plugin, async (assignee: string) => {
             // Create the contact/company file if it doesn't exist
             await this.plugin.taskRolesService.createContactOrCompany(assignee);
 

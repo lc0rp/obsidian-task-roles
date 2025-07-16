@@ -1,5 +1,5 @@
 import { App, TFile, Notice } from 'obsidian';
-import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedRoleAssignment } from '../types';
+import { TaskData, TaskStatus, TaskPriority, TaskDates, Role, ParsedTaskRoleAssignment } from '../types';
 import { TaskRolesService } from './task-roles.service';
 import { TaskUtils } from '../utils/task-regex';
 
@@ -321,7 +321,7 @@ export class TaskCacheService {
         return description;
     }
 
-    private buildSearchText(description: string, filePath: string, tags: string[], roleAssignments: ParsedRoleAssignment[]): string {
+    private buildSearchText(description: string, filePath: string, tags: string[], roleAssignments: ParsedTaskRoleAssignment[]): string {
         return [
             description,
             filePath,

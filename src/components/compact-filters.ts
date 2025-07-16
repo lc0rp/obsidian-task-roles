@@ -692,8 +692,8 @@ export class CompactFiltersComponent {
     }
 
     private showAssigneeSelector(updateCallback: () => void): void {
-        import('../modals/assignee-selector-modal').then(({ AssigneeSelectorModal }) => {
-            new AssigneeSelectorModal(this.plugin.app, this.plugin, (selectedAssignee: string) => {
+        import('../modals/contact-company-picker-modal').then(({ ContactCompanyPickerModal }) => {
+            new ContactCompanyPickerModal(this.plugin.app, this.plugin, (selectedAssignee: string) => {
                 // Determine if it's a person or company based on the symbol
                 const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
                 const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);

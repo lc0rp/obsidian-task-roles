@@ -12,7 +12,7 @@ import { taskRolesExtension } from './editor/task-roles-extension';
 import { TaskRolesSuggest } from './editor/task-roles-suggest';
 import { RoleSuggest } from './editor/role-suggest';
 import { backslashTrigger } from './editor/backslash-trigger';
-import { AssignmentModel } from './modals/assignment-modal';
+import { TaskRoleAssignmentModal } from './modals/task-role-assignment-modal';
 import { TaskRolesSettingTab } from './settings/task-roles-settings-tab';
 import { TaskRolesView } from './views/task-roles-view';
 import { syntaxTree } from '@codemirror/language';
@@ -166,7 +166,7 @@ export default class TaskRolesPlugin extends Plugin {
     }
 
     openRolesModal(editor: Editor) {
-        new AssignmentModel(this.app, this, editor).open();
+        new TaskRoleAssignmentModal(this.app, this, editor).open();
     }
 
     getVisibleRoles(): Role[] {

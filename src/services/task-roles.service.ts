@@ -1,5 +1,5 @@
 import { App, TFile, TFolder, Notice } from 'obsidian';
-import { TaskRolesPluginSettings, Role, RoleAssignment, ParsedRoleAssignment, ROLE_ASSIGNMENT_COMMENT_START, ROLE_ASSIGNMENT_COMMENT_END } from '../types/index.js';
+import { TaskRolesPluginSettings, Role, TaskRoleAssignment, ParsedTaskRoleAssignment, ROLE_ASSIGNMENT_COMMENT_START, ROLE_ASSIGNMENT_COMMENT_END } from '../types/index.js';
 
 export class TaskRolesService {
     private contactCache: string[] = [];
@@ -82,8 +82,8 @@ export class TaskRolesService {
         return files.sort();
     }
 
-    parseRoleAssignments(taskText: string, visibleRoles: Role[]): ParsedRoleAssignment[] {
-        const roleAssignments: ParsedRoleAssignment[] = [];
+    parseRoleAssignments(taskText: string, visibleRoles: Role[]): ParsedTaskRoleAssignment[] {
+        const roleAssignments: ParsedTaskRoleAssignment[] = [];
 
         // First, try to parse new dataview inline format [🚗:: @John]
         const dataviewAssignedRoles = this.parseDataviewAssignedRoles(taskText, visibleRoles);
@@ -98,8 +98,8 @@ export class TaskRolesService {
         return roleAssignments;
     }
 
-    private parseDataviewAssignedRoles(taskText: string, visibleRoles: Role[]): ParsedRoleAssignment[] {
-        const roleAssignments: ParsedRoleAssignment[] = [];
+    private parseDataviewAssignedRoles(taskText: string, visibleRoles: Role[]): ParsedTaskRoleAssignment[] {
+        const roleAssignments: ParsedTaskRoleAssignment[] = [];
 
         // Parse dataview inline format: [🚗:: @John, @Jane]
         for (const role of visibleRoles) {
@@ -140,8 +140,8 @@ export class TaskRolesService {
         return roleAssignments;
     }
 
-    private parseLegacyRoleAssignments(taskText: string, visibleRoles: Role[]): ParsedRoleAssignment[] {
-        const roleAssignments: ParsedRoleAssignment[] = [];
+    private parseLegacyRoleAssignments(taskText: string, visibleRoles: Role[]): ParsedTaskRoleAssignment[] {
+        const roleAssignments: ParsedTaskRoleAssignment[] = [];
 
         const sanitized = taskText
             .replace(new RegExp(ROLE_ASSIGNMENT_COMMENT_START, 'g'), '')
@@ -204,7 +204,7 @@ export class TaskRolesService {
         return assignees;
     }
 
-    formatRoleAssignments(roleAssignments: RoleAssignment[], visibleRoles: Role[]): string {
+    formatRoleAssignments(roleAssignments: TaskRoleAssignment[], visibleRoles: Role[]): string {
         const parts: string[] = [];
 
         // Sort by role order
@@ -263,7 +263,7 @@ export class TaskRolesService {
         return index;
     }
 
-    applyRoleAssignmentsToLine(line: string, roleAssignments: RoleAssignment[], visibleRoles: Role[]): string {
+    applyRoleAssignmentsToLine(line: string, roleAssignments: TaskRoleAssignment[], visibleRoles: Role[]): string {
         const roleAssignmentsText = this.formatRoleAssignments(roleAssignments, visibleRoles);
 
         // Clean line by removing both old and new format role assignments
