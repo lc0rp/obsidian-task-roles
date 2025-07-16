@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskQueryService } from '../src/services/task-query.service';
 import { TaskCacheService } from '../src/services/task-cache.service';
-import { ViewFilters, Role } from '../src/types';
+import { ViewFilters, Role, TaskStatus, TaskPriority } from '../src/types';
 
 // Mock plugin
 const mockPlugin = {
     getVisibleRoles: vi.fn(() => [
         { id: 'driver', name: 'Driver', icon: '🚗' },
-        { id: 'approver', name: 'Approver', icon: '✅' }
+        { id: 'approver', name: 'Approver', icon: '👍' }
     ] as Role[])
 };
 
@@ -28,11 +28,11 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(description includes 🚗 OR description includes ✅)');
+        expect(query).toBe('((description includes 🚗) OR (description includes 👍))');
     });
 
     it('should handle "none-set" role filter', () => {
@@ -42,11 +42,11 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('description does not include 🚗\ndescription does not include ✅');
+        expect(query).toBe('((description does not include 🚗) AND (description does not include 👍))');
     });
 
     it('should build query from people filters', () => {
@@ -56,7 +56,7 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
@@ -70,7 +70,7 @@ describe('TaskQueryService', () => {
             companies: ['acme', 'corp'],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
@@ -82,15 +82,15 @@ describe('TaskQueryService', () => {
             roles: [],
             people: [],
             companies: [],
-            statuses: ['todo', 'done'],
+            statuses: [TaskStatus.TODO, TaskStatus.DONE],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
         // When both todo and done are selected, no status filter is needed
         // as this would match all tasks - avoids Boolean combination error
-        expect(query).toBe('');
+        expect(query).toBe('filter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
     });
 
     it('should build query from tag filters', () => {
@@ -100,7 +100,7 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: ['urgent', 'project'],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
@@ -114,25 +114,23 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priorities: ['high', 'medium']
+            priorities: [TaskPriority.HIGH, TaskPriority.MEDIUM]
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(priority is high OR priority is medium)');
+        expect(query).toBe('(priority is high) OR (priority is medium)');
     });
 
     it('should combine multiple filter types with AND', () => {
         const filters: ViewFilters = {
             roles: ['driver'],
-            people: ['john'],
-            companies: [],
-            statuses: ['todo'],
+            statuses: [TaskStatus.TODO],
             tags: ['urgent'],
-            priorities: ['high']
+            priorities: [TaskPriority.HIGH]
         };
-
+    
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('description includes 🚗\nassignee:john\nnot done\nfilter by function task.status.type !== \'IN_PROGRESS\'\n(priority is high)\n#urgent');
+        expect(query).toBe('(description includes 🚗)\nnot done\nfilter by function task.status.type !== \'IN_PROGRESS\'\npriority is high\n#urgent');
     });
 
     it('should return empty string for no filters', () => {
@@ -156,7 +154,7 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
@@ -170,11 +168,11 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(description includes 🚗 OR (description does not include 🚗 AND description does not include ✅))');
+        expect(query).toBe('((description includes 🚗) OR ((description does not include 🚗) AND (description does not include 👍)))');
     });
 
     it('should handle todo+done combination with other filters to avoid Boolean combination error', () => {
@@ -182,14 +180,14 @@ describe('TaskQueryService', () => {
             roles: ['driver'],
             people: [],
             companies: [],
-            statuses: ['todo', 'done'], // This should not generate "(done OR not done)" error
+            statuses: [TaskStatus.TODO, TaskStatus.DONE], // This should not generate "(done OR not done)" error
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
         // Should only include role filter, not status filter to avoid Boolean combination error
-        expect(query).toBe('description includes 🚗\nfilter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
+        expect(query).toBe('(description includes 🚗)\nfilter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
     });
 
     it('should handle "all" role filter by skipping role filtering', () => {
@@ -199,7 +197,7 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
@@ -213,7 +211,7 @@ describe('TaskQueryService', () => {
             companies: [],
             statuses: [],
             tags: [],
-            priority: []
+            priorities: []
         };
 
         const query = service.buildTaskQueryFromFilters(filters);

@@ -26,13 +26,13 @@ export class TaskQueryService {
                     const roleId = filters.roles[0];
                     if (roleId === 'none-set') {
                         // Use the same pattern as buildColumnQueries for "No Role"
-                        const noRoleConditions = visibleRoles.map(role => `description does not include ${role.icon}`);
-                        queryLines.push(...noRoleConditions);
+                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
+                        queryLines.push(`(${noRoleConditions.join(' AND ')})`);
                     } else {
                         // Use description includes pattern like buildColumnQueries
                         const role = visibleRoles.find(r => r.id === roleId);
                         if (role) {
-                            queryLines.push(`description includes ${role.icon}`);
+                            queryLines.push(`(description includes ${role.icon})`);
                         }
                     }
                 } else {
@@ -45,13 +45,13 @@ export class TaskQueryService {
                     for (const roleId of specificRoles) {
                         const role = visibleRoles.find(r => r.id === roleId);
                         if (role) {
-                            roleQueries.push(`description includes ${role.icon}`);
+                            roleQueries.push(`(description includes ${role.icon})`);
                         }
                     }
                     
                     // Add "none-set" condition if selected
                     if (hasNoneSet) {
-                        const noRoleConditions = visibleRoles.map(role => `description does not include ${role.icon}`);
+                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
                         // For "none-set", we need ALL conditions to be true (AND logic)
                         roleQueries.push(`(${noRoleConditions.join(' AND ')})`);
                     }

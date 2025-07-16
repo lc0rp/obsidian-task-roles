@@ -8,7 +8,7 @@ import type TaskRolesPlugin from '../src/main';
 const mockPlugin = {
     getVisibleRoles: () => [
         { id: 'driver', name: 'Driver', icon: '🚗' },
-        { id: 'approver', name: 'Approver', icon: '✅' }
+        { id: 'approver', name: 'Approver', icon: '👍' }
     ],
     settings: {
         taskDisplayMode: 'detailed'
