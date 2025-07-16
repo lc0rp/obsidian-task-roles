@@ -7,7 +7,6 @@ import {
 
 import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role } from './types';
 import { TaskRolesService } from './services/task-roles.service';
-import { TaskCacheService } from './services/task-cache.service';
 import { taskRolesExtension } from './editor/task-roles-extension';
 import { TaskRolesSuggest } from './editor/task-roles-suggest';
 import { RoleSuggest } from './editor/role-suggest';
@@ -20,22 +19,17 @@ import { syntaxTree } from '@codemirror/language';
 export default class TaskRolesPlugin extends Plugin {
     settings: TaskRolesPluginSettings;
     taskRolesService: TaskRolesService;
-    taskCacheService: TaskCacheService;
 
     async onload() {
         await this.loadSettings();
 
         // Initialize services
         this.taskRolesService = new TaskRolesService(this.app, this.settings);
-        this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
-
-        // Initialize task cache
-        await this.taskCacheService.initializeCache();
 
         // Register view
         this.registerView(
             'task-roles-view',
-            (leaf) => new TaskRolesView(leaf, this, this.taskCacheService)
+            (leaf) => new TaskRolesView(leaf, this)
         );
 
         // Register the role assign command
@@ -65,13 +59,6 @@ export default class TaskRolesPlugin extends Plugin {
             }
         });
 
-        this.addCommand({
-            id: 'refresh-task-cache',
-            name: 'Refresh Task Cache',
-            callback: () => {
-                this.taskCacheService.refreshCache();
-            }
-        });
 
         // Register editor suggest for inline role suggestions
         this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
@@ -91,10 +78,7 @@ export default class TaskRolesPlugin extends Plugin {
     }
 
     async onunload() {
-        // Clean up task cache service
-        if (this.taskCacheService) {
-            this.taskCacheService.destroy();
-        }
+        // Clean up services
     }
 
     async activateView() {
@@ -151,18 +135,12 @@ export default class TaskRolesPlugin extends Plugin {
         if (this.taskRolesService) {
             this.taskRolesService = new TaskRolesService(this.app, this.settings);
         }
-        if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
-        }
     }
 
     async saveSettings() {
         await this.saveData(this.settings);
         // Update services with new settings
         this.taskRolesService = new TaskRolesService(this.app, this.settings);
-        if (this.taskCacheService) {
-            this.taskCacheService = new TaskCacheService(this.app, this.taskRolesService, this.getVisibleRoles(), this.settings.debug, this.settings.disableTaskCaching);
-        }
     }
 
     openRolesModal(editor: Editor) {

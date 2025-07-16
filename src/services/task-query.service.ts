@@ -1,15 +1,12 @@
 import { MarkdownRenderer, setIcon } from 'obsidian';
 import { ViewFilters, ViewLayout, TaskStatus } from '../types';
-import { TaskCacheService } from './task-cache.service';
 import type TaskRolesPlugin from '../main';
 
 export class TaskQueryService {
     private plugin: TaskRolesPlugin;
-    private taskCacheService: TaskCacheService;
 
-    constructor(plugin: TaskRolesPlugin, taskCacheService: TaskCacheService) {
+    constructor(plugin: TaskRolesPlugin) {
         this.plugin = plugin;
-        this.taskCacheService = taskCacheService;
     }
 
     buildTaskQueryFromFilters(filters: ViewFilters): string {
@@ -715,22 +712,9 @@ export class TaskQueryService {
         });
     }
 
-    private getUniquePeople(): string[] {
-        const allTasks = this.taskCacheService.getAllTasks();
-        const people = new Set<string>();
-
-        for (const task of allTasks) {
-            if (task.roleAssignments && task.roleAssignments.length > 0) {
-                for (const roleAssignment of task.roleAssignments) {
-                    for (const assignee of roleAssignment.assignees) {
-                        people.add(assignee);
-                    }
-                }
-            } else {
-                people.add('none-set');
-            }
-        }
-
-        return Array.from(people);
+    private async getUniquePeople(): Promise<string[]> {
+        // Since we're using task queries, we'll get people from the contact directory
+        // This is more efficient than scanning all tasks
+        return await this.plugin.taskRolesService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
     }
 } 

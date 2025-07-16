@@ -1,7 +1,6 @@
 import { WorkspaceLeaf } from 'obsidian';
 import { TaskRolesViewBase } from './task-roles-view-base';
-import { TaskData, ViewFilters, ViewLayout } from '../types';
-import { TaskCacheService } from '../services/task-cache.service';
+import { ViewFilters, ViewLayout } from '../types';
 import { ViewConfigurationService } from '../services/view-configuration.service';
 import { TaskQueryService } from '../services/task-query.service';
 import { TaskRolesSaveViewModal } from '../modals/save-view-modal';
@@ -23,10 +22,10 @@ export class TaskRolesView extends TaskRolesViewBase {
     private taskCardComponent: TaskCardComponent;
     private viewHeaderComponent: ViewHeaderComponent;
 
-    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin, taskCacheService: TaskCacheService) {
-        super(leaf, plugin, taskCacheService);
+    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin) {
+        super(leaf, plugin);
         this.viewConfigService = new ViewConfigurationService(this.app, this.plugin);
-        this.taskQueryService = new TaskQueryService(this.plugin, this.taskCacheService);
+        this.taskQueryService = new TaskQueryService(this.plugin);
 
         // Initialize components
         this.initializeComponents();
@@ -41,13 +40,11 @@ export class TaskRolesView extends TaskRolesViewBase {
         );
         this.taskCardComponent = new TaskCardComponent(
             this.plugin,
-            this.taskCacheService,
             this.app
         );
         this.viewHeaderComponent = new ViewHeaderComponent(
             this.plugin,
             this.viewConfigService,
-            this.taskCacheService,
             this.currentLayout,
             this.currentViewName,
             this.updateLayout.bind(this),
@@ -56,15 +53,6 @@ export class TaskRolesView extends TaskRolesViewBase {
         );
     }
 
-    protected render(): void {
-        this.viewContainerEl = this.contentEl;
-        this.viewContainerEl.empty();
-        this.viewContainerEl.addClass('task-roles-view');
-
-        this.renderHeader();
-        this.renderFilters();
-        this.renderContent();
-    }
 
     protected async renderAsync(): Promise<void> {
         this.viewContainerEl = this.contentEl;
@@ -93,9 +81,6 @@ export class TaskRolesView extends TaskRolesViewBase {
         await this.renderCompactFilters();
     }
 
-    private renderFilters(): void {
-        this.renderCompactFilters();
-    }
 
     private async renderCompactFilters(): Promise<void> {
         // Store original filters for cancel functionality
@@ -113,12 +98,12 @@ export class TaskRolesView extends TaskRolesViewBase {
     }
 
     // Override updateFilters to respect Auto Apply setting
-    protected updateFilters(newFilters: Partial<ViewFilters>): void {
+    protected async updateFilters(newFilters: Partial<ViewFilters>): Promise<void> {
         this.currentFilters = { ...this.currentFilters, ...newFilters };
 
         // Only auto-render if Auto Apply is enabled
         if (this.plugin.settings.autoApplyFilters) {
-            this.applyFiltersAndClose();
+            await this.applyFiltersAndClose();
         }
     }
 
@@ -138,32 +123,10 @@ export class TaskRolesView extends TaskRolesViewBase {
     }
 
 
-    private renderContent(): void {
-        this.viewContentEl = this.viewContainerEl.createDiv('task-roles-content');
-
-        // Check if task queries are enabled
-        if (!this.plugin.settings.useTaskQueries) {
-            // Get filtered and organized tasks
-            const allTasks = this.taskCacheService.getAllTasks();
-            const filteredTasks = this.applyFilters(allTasks);
-            const columns = this.organizeTasksByLayout(filteredTasks);
-
-            // Render columns
-            const columnsContainer = this.viewContentEl.createDiv('task-roles-columns');
-
-            for (const column of columns) {
-                this.renderColumn(columnsContainer, column);
-            }
-        }
-    }
 
     private async renderContentAsync(): Promise<void> {
         this.viewContentEl = this.viewContainerEl.createDiv('task-roles-content');
-
-        // Check if task queries are enabled
-        if (this.plugin.settings.useTaskQueries) {
-            await this.renderContentFromTaskQueries();
-        }
+        await this.renderContentFromTaskQueries();
     }
 
     private async renderContentFromTaskQueries(): Promise<void> {
@@ -179,25 +142,6 @@ export class TaskRolesView extends TaskRolesViewBase {
         }
     }
 
-    private renderColumn(container: HTMLElement, column: any): void {
-        const columnEl = container.createDiv('task-roles-column');
-
-        // Column header
-        const headerEl = columnEl.createDiv('task-roles-column-header');
-        headerEl.createSpan('task-roles-column-title').setText(column.title);
-        headerEl.createSpan('task-roles-column-count').setText(`(${column.tasks.length})`);
-
-        // Column content
-        const contentEl = columnEl.createDiv('task-roles-column-content');
-
-        for (const task of column.tasks) {
-            this.renderTaskCard(contentEl, task);
-        }
-    }
-
-    private renderTaskCard(container: HTMLElement, task: TaskData): void {
-        this.taskCardComponent.render(container, task, this);
-    }
 
     private showSaveViewDialog(): void {
         new TaskRolesSaveViewModal(
@@ -206,7 +150,7 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentLayout,
             this.currentFilters,
             this.currentSort,
-            () => this.render() // Refresh to show new saved view in dropdown
+            () => this.renderAsync() // Refresh to show new saved view in dropdown
         ).open();
     }
 
@@ -217,21 +161,13 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentFilters = config.filters;
             this.currentSort = config.sortBy;
             this.currentViewName = config.name;
-            if (this.plugin.settings.useTaskQueries) {
-                this.renderAsync();
-            } else {
-                this.render();
-            }
+            this.renderAsync();
         }
     }
 
     // Override the base class updateLayout method to handle async rendering
-    protected updateLayout(newLayout: ViewLayout): void {
+    protected async updateLayout(newLayout: ViewLayout): Promise<void> {
         this.currentLayout = newLayout;
-        if (this.plugin.settings.useTaskQueries) {
-            this.renderAsync();
-        } else {
-            this.render();
-        }
+        await this.renderAsync();
     }
 } 

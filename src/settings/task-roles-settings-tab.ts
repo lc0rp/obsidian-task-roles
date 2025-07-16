@@ -177,16 +177,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                 }));
 
         // Task queries toggle
-        new Setting(containerEl)
-            .setName('Use task queries for content')
-            .setDesc('Experimental: Use task query-based approach for rendering content instead of traditional filtering')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.useTaskQueries)
-                .onChange(async (value) => {
-                    this.plugin.settings.useTaskQueries = value;
-                    await this.plugin.saveSettings();
-                }));
-
         // Task display mode setting
         new Setting(containerEl)
             .setName('Task display mode')
@@ -197,17 +187,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.taskDisplayMode)
                 .onChange(async (value: 'minimal' | 'detailed') => {
                     this.plugin.settings.taskDisplayMode = value;
-                    await this.plugin.saveSettings();
-                }));
-
-        // Disable task caching toggle
-        new Setting(containerEl)
-            .setName('Disable task caching')
-            .setDesc('Turn off task caching to reduce memory usage (may impact performance)')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.disableTaskCaching)
-                .onChange(async (value) => {
-                    this.plugin.settings.disableTaskCaching = value;
                     await this.plugin.saveSettings();
                 }));
 
