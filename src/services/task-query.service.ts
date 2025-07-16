@@ -17,23 +17,49 @@ export class TaskQueryService {
 
         // Convert role filters to query syntax
         if (filters.roles && filters.roles.length > 0) {
-            if (filters.roles.length === 1) {
-                const roleId = filters.roles[0];
-                if (roleId === 'none-set') {
-                    queryLines.push('no-role');
-                } else {
-                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
-                    queryLines.push(role ? `role:${role.name}` : `role:${roleId}`);
-                }
-            } else {
-                const roleQueries = filters.roles.map(roleId => {
+            // Skip filtering if "All" is selected (no filter needed)
+            const hasAll = filters.roles.includes('all');
+            if (!hasAll) {
+                const visibleRoles = this.plugin.getVisibleRoles();
+                
+                if (filters.roles.length === 1) {
+                    const roleId = filters.roles[0];
                     if (roleId === 'none-set') {
-                        return 'no-role';
+                        // Use the same pattern as buildColumnQueries for "No Role"
+                        const noRoleConditions = visibleRoles.map(role => `description does not include ${role.icon}`);
+                        queryLines.push(...noRoleConditions);
+                    } else {
+                        // Use description includes pattern like buildColumnQueries
+                        const role = visibleRoles.find(r => r.id === roleId);
+                        if (role) {
+                            queryLines.push(`description includes ${role.icon}`);
+                        }
                     }
-                    const role = this.plugin.getVisibleRoles().find(r => r.id === roleId);
-                    return role ? `role:${role.name}` : `role:${roleId}`;
-                });
-                queryLines.push(`(${roleQueries.join(' OR ')})`);
+                } else {
+                    // Handle multiple role selections
+                    const roleQueries: string[] = [];
+                    const hasNoneSet = filters.roles.includes('none-set');
+                    
+                    // Add conditions for specific roles
+                    const specificRoles = filters.roles.filter(roleId => roleId !== 'none-set');
+                    for (const roleId of specificRoles) {
+                        const role = visibleRoles.find(r => r.id === roleId);
+                        if (role) {
+                            roleQueries.push(`description includes ${role.icon}`);
+                        }
+                    }
+                    
+                    // Add "none-set" condition if selected
+                    if (hasNoneSet) {
+                        const noRoleConditions = visibleRoles.map(role => `description does not include ${role.icon}`);
+                        // For "none-set", we need ALL conditions to be true (AND logic)
+                        roleQueries.push(`(${noRoleConditions.join(' AND ')})`);
+                    }
+                    
+                    if (roleQueries.length > 0) {
+                        queryLines.push(`(${roleQueries.join(' OR ')})`);
+                    }
+                }
             }
         }
 

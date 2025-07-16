@@ -32,7 +32,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(role:Driver OR role:Approver)');
+        expect(query).toBe('(description includes 🚗 OR description includes ✅)');
     });
 
     it('should handle "none-set" role filter', () => {
@@ -46,7 +46,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('no-role');
+        expect(query).toBe('description does not include 🚗\ndescription does not include ✅');
     });
 
     it('should build query from people filters', () => {
@@ -132,7 +132,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('role:Driver\nassignee:john\nnot done\npriority is high\n#urgent');
+        expect(query).toBe('description includes 🚗\nassignee:john\nnot done\nfilter by function task.status.type !== \'IN_PROGRESS\'\n(priority is high)\n#urgent');
     });
 
     it('should return empty string for no filters', () => {
@@ -160,7 +160,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('role:unknown-role');
+        expect(query).toBe('');
     });
 
     it('should handle mixed role types', () => {
@@ -174,7 +174,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(role:Driver OR no-role OR role:unknown-role)');
+        expect(query).toBe('(description includes 🚗 OR (description does not include 🚗 AND description does not include ✅))');
     });
 
     it('should handle todo+done combination with other filters to avoid Boolean combination error', () => {
@@ -189,6 +189,34 @@ describe('TaskQueryService', () => {
 
         const query = service.buildTaskQueryFromFilters(filters);
         // Should only include role filter, not status filter to avoid Boolean combination error
-        expect(query).toBe('role:Driver');
+        expect(query).toBe('description includes 🚗\nfilter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
+    });
+
+    it('should handle "all" role filter by skipping role filtering', () => {
+        const filters: ViewFilters = {
+            roles: ['all'],
+            people: ['john'],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('assignee:john');
+    });
+
+    it('should handle mixed "all" with other roles by skipping role filtering', () => {
+        const filters: ViewFilters = {
+            roles: ['driver', 'all'],
+            people: [],
+            companies: [],
+            statuses: [],
+            tags: [],
+            priority: []
+        };
+
+        const query = service.buildTaskQueryFromFilters(filters);
+        expect(query).toBe('');
     });
 });
