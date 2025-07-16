@@ -60,7 +60,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(assignee:john OR assignee:jane)');
+        expect(query).toBe('(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)) OR ((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*jane/)))');
     });
 
     it('should build query from company filters', () => {
@@ -74,7 +74,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('(assignee:acme OR assignee:corp)');
+        expect(query).toBe('(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/)) OR ((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/)))');
     });
 
     it('should build query from status filters', () => {
@@ -201,7 +201,7 @@ describe('TaskQueryService', () => {
         };
 
         const query = service.buildTaskQueryFromFilters(filters);
-        expect(query).toBe('assignee:john');
+        expect(query).toBe('(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)))');
     });
 
     it('should handle mixed "all" with other roles by skipping role filtering', () => {
