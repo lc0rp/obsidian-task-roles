@@ -60,6 +60,7 @@ export interface TaskDates {
     created?: Date;
     cancelled?: Date;
     happens?: Date;
+    completed?: Date;
 }
 
 export enum TaskStatus {
@@ -130,7 +131,8 @@ export const TASK_DATE_ICONS: Record<keyof TaskDates, string> = {
     start: '🟢',
     created: '🗓️',
     cancelled: '🚫',
-    happens: '🔄'
+    happens: '🔄',
+    completed: '✅'
 };
 
 export interface SortOption {

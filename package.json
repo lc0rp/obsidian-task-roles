@@ -29,6 +29,7 @@
         "c8": "^10.1.2",
         "esbuild": "^0.25.6",
         "eslint": "^8.57.1",
+        "jsdom": "^26.1.0",
         "markdownlint-cli": "^0.45.0",
         "obsidian": "^1.8.7",
         "tslib": "2.4.0",

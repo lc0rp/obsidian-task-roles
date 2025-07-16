@@ -100,19 +100,59 @@ export class CompactFiltersComponent {
         setIcon(clearIcon, 'x');
         clearButton.style.display = 'none'; // Initially hidden
 
+        // Create tooltip for showing full list
+        const tooltip = inputWrapper.createDiv('assignee-tooltip');
+        tooltip.style.display = 'none';
+
         // Display selected assignees
         const updateAssigneesDisplay = () => {
             const selectedAssignees = [
                 ...(this.currentFilters.people || []),
                 ...(this.currentFilters.companies || [])
             ];
-            assigneesInput.value = selectedAssignees.length > 0
-                ? selectedAssignees.join(', ')
-                : '';
+            
+            if (selectedAssignees.length === 0) {
+                assigneesInput.value = '';
+                tooltip.style.display = 'none';
+            } else if (selectedAssignees.length <= 3) {
+                // Show full list for 3 or fewer assignees
+                assigneesInput.value = selectedAssignees.join(', ');
+                tooltip.style.display = 'none';
+            } else {
+                // Show count for more than 3 assignees
+                assigneesInput.value = `${selectedAssignees.length} selected`;
+                tooltip.innerHTML = selectedAssignees.join(', ');
+                tooltip.style.display = 'block';
+            }
             
             // Show/hide clear button based on whether there are selected assignees
             clearButton.style.display = selectedAssignees.length > 0 ? 'block' : 'none';
         };
+
+        // Add hover events for tooltip
+        let hoverTimeout: number | null = null;
+        
+        inputWrapper.addEventListener('mouseenter', () => {
+            const selectedAssignees = [
+                ...(this.currentFilters.people || []),
+                ...(this.currentFilters.companies || [])
+            ];
+            
+            if (selectedAssignees.length > 3) {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
+                hoverTimeout = window.setTimeout(() => {
+                    tooltip.style.display = 'block';
+                }, 500);
+            }
+        });
+        
+        inputWrapper.addEventListener('mouseleave', () => {
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+            tooltip.style.display = 'none';
+        });
 
         updateAssigneesDisplay();
 
