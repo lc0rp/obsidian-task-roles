@@ -33,7 +33,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('done');
+            expect(query).toBe('done\nfilter by function task.status.type !== \'CANCELLED\'');
         });
 
         it('should generate correct query for single todo status', () => {
@@ -42,7 +42,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('not done');
+            expect(query).toBe('not done\nfilter by function task.status.type !== \'IN_PROGRESS\'');
         });
 
         it('should generate correct query for single in-progress status', () => {
@@ -71,9 +71,8 @@ describe('TaskQueryService Status Filtering Bug', () => {
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            // When both todo and done are selected, no status filter is added
-            // as this would match all tasks - avoids Boolean combination error
-            expect(query).toBe('');
+            // When both todo and done are selected, filter out in-progress and cancelled
+            expect(query).toBe('filter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
         });
 
         it('should handle done + in-progress combination correctly', () => {
@@ -125,7 +124,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
             const lines = query.split('\n');
-            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('(description includes 🚗)');
             expect(lines).toContain('done');
         });
 
@@ -137,7 +136,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
             const lines = query.split('\n');
-            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('(description includes 🚗)');
             expect(lines).toContain('filter by function (task.status.type === \'DONE\' || task.status.type === \'IN_PROGRESS\')');
         });
     });
@@ -162,7 +161,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('done');
+            expect(query).toBe('done\nfilter by function task.status.type !== \'CANCELLED\'');
             
             // Also test that this works in a filter function context
             const mixedFilters: ViewFilters = {
@@ -187,7 +186,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             // Find the DONE column and verify it's properly formatted
             const doneColumn = columns.find(col => col.title === 'Done');
             expect(doneColumn).toBeDefined();
-            expect(doneColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'DONE\'');
+            expect(doneColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'DONE\'');
         });
     });
 
@@ -266,8 +265,8 @@ describe('TaskQueryService Status Filtering Bug', () => {
             const todoColumn = columns.find(col => col.title === 'To Do');
             const doneColumn = columns.find(col => col.title === 'Done');
             
-            expect(todoColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'TODO\'');
-            expect(doneColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'DONE\'');
+            expect(todoColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'TODO\'');
+            expect(doneColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'DONE\'');
         });
     });
 
