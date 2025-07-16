@@ -29,18 +29,13 @@ export abstract class TaskRolesViewBase extends ItemView {
     }
 
     async onOpen(): Promise<void> {
-        if (this.plugin.settings.useTaskQueries) {
-            await this.renderAsync();
-        } else {
-            this.render();
-        }
+        await this.renderAsync();
     }
 
     async onClose(): Promise<void> {
         // Cleanup if needed
     }
 
-    protected abstract render(): void;
     protected abstract renderAsync(): Promise<void>;
 
     // Filtering methods
@@ -415,32 +410,17 @@ export abstract class TaskRolesViewBase extends ItemView {
     }
 
     // Filter update methods
-    protected updateFilters(newFilters: Partial<ViewFilters>): void {
-        this.currentFilters = { ...this.currentFilters, ...newFilters };
-        this.render();
-    }
-
-    protected async updateFiltersAsync(newFilters: Partial<ViewFilters>): Promise<void> {
+    protected async updateFilters(newFilters: Partial<ViewFilters>): Promise<void> {
         this.currentFilters = { ...this.currentFilters, ...newFilters };
         return this.renderAsync();
     }
 
-    protected updateLayout(newLayout: ViewLayout): void {
-        this.currentLayout = newLayout;
-        this.render();
-    }
-
-    protected async updateLayoutAsync(newLayout: ViewLayout): Promise<void> {
+    protected async updateLayout(newLayout: ViewLayout): Promise<void> {
         this.currentLayout = newLayout;
         return this.renderAsync();
     }
 
-    protected updateSort(newSort: SortOption): void {
-        this.currentSort = newSort;
-        this.render();
-    }
-
-    protected async updateSortAsync(newSort: SortOption): Promise<void> {
+    protected async updateSort(newSort: SortOption): Promise<void> {
         this.currentSort = newSort;
         return this.renderAsync();
     }

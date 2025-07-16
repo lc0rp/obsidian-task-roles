@@ -207,7 +207,6 @@ unhidden roles will be parsed and displayed.
 - **Enable debug logging**: Log additional information to the console
 - **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
   Tasks plugin is installed)
-- **Use task queries for content**: Experimental query-based approach for rendering content
 - **Disable task caching**: Turn off task caching to reduce memory usage (may impact performance)
 - **Assign or Update Roles**:
   - Hide default roles (prevents them from appearing in future dialogs)

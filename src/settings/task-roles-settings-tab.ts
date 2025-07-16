@@ -177,16 +177,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                 }));
 
         // Task queries toggle
-        new Setting(containerEl)
-            .setName('Use task queries for content')
-            .setDesc('Experimental: Use task query-based approach for rendering content instead of traditional filtering')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.useTaskQueries)
-                .onChange(async (value) => {
-                    this.plugin.settings.useTaskQueries = value;
-                    await this.plugin.saveSettings();
-                }));
-
         // Task display mode setting
         new Setting(containerEl)
             .setName('Task display mode')

@@ -354,7 +354,7 @@ export class TaskCacheService {
                     dates: {
                         created: task.dates.created?.toISOString(),
                         due: task.dates.due?.toISOString(),
-                        completed: task.dates.completed?.toISOString(),
+                        done: task.dates.done?.toISOString(),
                         scheduled: task.dates.scheduled?.toISOString()
                     }
                 }))
@@ -382,7 +382,7 @@ export class TaskCacheService {
                         dates: {
                             created: taskData.dates.created ? new Date(taskData.dates.created) : undefined,
                             due: taskData.dates.due ? new Date(taskData.dates.due) : undefined,
-                            completed: taskData.dates.completed ? new Date(taskData.dates.completed) : undefined,
+                            done: taskData.dates.done ? new Date(taskData.dates.done) : undefined,
                             scheduled: taskData.dates.scheduled ? new Date(taskData.dates.scheduled) : undefined
                         }
                     };
@@ -435,7 +435,7 @@ export class TaskCacheService {
                 task.status = newStatus;
                 task.modifiedDate = new Date();
                 if (newStatus === TaskStatus.DONE) {
-                    task.dates.completed = new Date();
+                    task.dates.done = new Date();
                 }
             }
         } catch (error) {

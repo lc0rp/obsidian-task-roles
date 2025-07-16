@@ -108,9 +108,9 @@ export class TaskCardComponent {
             scheduledEl.setText(`${TASK_DATE_ICONS.scheduled} ${this.formatDate(task.dates.scheduled)}`);
         }
 
-        if (task.dates.completed) {
+        if (task.dates.done) {
             const completedEl = metadataEl.createSpan('task-roles-card-completed-date');
-            completedEl.setText(`${TASK_DATE_ICONS.completed} ${this.formatDate(task.dates.completed)}`);
+            completedEl.setText(`${TASK_DATE_ICONS.done} ${this.formatDate(task.dates.done)}`);
         }
 
         // Priority indicator

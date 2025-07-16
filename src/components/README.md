@@ -42,7 +42,7 @@ Renders the top header section of the view. Includes:
 
 ### TaskQueryService (`../services/task-query.service.ts`)
 
-Handles task query building and rendering when `useTaskQueries` setting is enabled. Includes:
+Handles task query building and rendering for the Task Center view. Includes:
 
 - Filter-to-query conversion
 - Column query building based on layout
