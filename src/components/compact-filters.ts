@@ -575,7 +575,7 @@ export class CompactFiltersComponent {
         setIcon(resetFiltersIcon, 'rotate-ccw');
         resetFiltersBtn.title = 'Reset filters';
         resetFiltersBtn.onclick = async () => {
-            this.updateFiltersCallback({});
+            this.clearAllFilters();
         };
 
         // Cancel button
@@ -586,7 +586,7 @@ export class CompactFiltersComponent {
         cancelFiltersBtn.style.display = this.plugin.settings.autoApplyFilters ? 'none' : 'block';
         cancelFiltersBtn.onclick = () => {
             // Clear all filters
-            this.updateFiltersCallback({});
+            this.clearAllFilters();
         };
 
         // Apply Filters button
@@ -717,4 +717,29 @@ export class CompactFiltersComponent {
             }, { mode: 'readonly', keepOpen: true }).open();
         });
     }
-} 
+
+    private clearAllFilters(): void {
+        // Create a new empty filters object with all properties explicitly set to clear values
+        const emptyFilters: ViewFilters = {
+            roles: [],
+            people: [],
+            companies: [],
+            statuses: [],
+            priorities: [],
+            tags: [],
+            dateRange: undefined,
+            dateType: undefined,
+            textSearch: '',
+        };
+        
+        // Update the current filters to the empty state
+        this.currentFilters = emptyFilters;
+        
+        // Call the update callback with the empty filters
+        this.updateFiltersCallback(emptyFilters);
+        
+        // Force re-render of the filters component to show cleared state
+        // This will trigger the view to re-render the filters if auto-apply is enabled
+        // If auto-apply is disabled, the user will need to click Apply to see the changes in the task list
+    }
+}       

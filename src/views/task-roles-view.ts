@@ -114,7 +114,24 @@ export class TaskRolesView extends TaskRolesViewBase {
 
     // Override updateFilters to respect Auto Apply setting
     protected updateFilters(newFilters: Partial<ViewFilters>): void {
-        this.currentFilters = { ...this.currentFilters, ...newFilters };
+        // Check if this is a complete filter reset (all properties defined)
+        const isCompleteReset = newFilters.textSearch !== undefined && 
+                              newFilters.roles !== undefined &&
+                              newFilters.people !== undefined &&
+                              newFilters.companies !== undefined &&
+                              newFilters.statuses !== undefined &&
+                              newFilters.priorities !== undefined &&
+                              newFilters.tags !== undefined &&
+                              newFilters.dateRange !== undefined &&
+                              newFilters.dateType !== undefined;
+
+        if (isCompleteReset) {
+            // Complete replacement for reset/clear operations
+            this.currentFilters = newFilters as ViewFilters;
+        } else {
+            // Partial merge for individual filter updates
+            this.currentFilters = { ...this.currentFilters, ...newFilters };
+        }
 
         // Only auto-render if Auto Apply is enabled
         if (this.plugin.settings.autoApplyFilters) {

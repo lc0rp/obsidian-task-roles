@@ -1,4 +1,3 @@
-import { CANCELLED } from "dns";
 
 export interface TaskRolesPluginSettings {
     contactSymbol: string;
