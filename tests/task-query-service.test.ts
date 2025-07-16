@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TaskQueryService } from '../src/services/task-query.service';
 import { TaskCacheService } from '../src/services/task-cache.service';
-import { ViewFilters, ViewLayout } from '../src/types';
+import { TaskStatus, ViewFilters, ViewLayout } from '../src/types';
 import type TaskRolesPlugin from '../src/main';
 
 // Mock the plugin and dependencies
@@ -29,25 +29,25 @@ describe('TaskQueryService Status Filtering Bug', () => {
     describe('Single Status Filter', () => {
         it('should generate correct query for single done status', () => {
             const filters: ViewFilters = {
-                statuses: ['done']
+                statuses: [TaskStatus.DONE]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('done');
+            expect(query).toBe('done\nfilter by function task.status.type !== \'CANCELLED\'');
         });
 
         it('should generate correct query for single todo status', () => {
             const filters: ViewFilters = {
-                statuses: ['todo']
+                statuses: [TaskStatus.TODO]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('not done');
+            expect(query).toBe('not done\nfilter by function task.status.type !== \'IN_PROGRESS\'');
         });
 
         it('should generate correct query for single in-progress status', () => {
             const filters: ViewFilters = {
-                statuses: ['in-progress']
+                statuses: [TaskStatus.IN_PROGRESS]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -56,7 +56,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
         it('should generate correct query for single cancelled status', () => {
             const filters: ViewFilters = {
-                statuses: ['cancelled']
+                statuses: [TaskStatus.CANCELLED]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -67,18 +67,17 @@ describe('TaskQueryService Status Filtering Bug', () => {
     describe('Multiple Status Filter Bug', () => {
         it('should handle done + todo combination correctly', () => {
             const filters: ViewFilters = {
-                statuses: ['done', 'todo']
+                statuses: [TaskStatus.DONE, TaskStatus.TODO]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            // When both todo and done are selected, no status filter is added
-            // as this would match all tasks - avoids Boolean combination error
-            expect(query).toBe('');
+            // When both todo and done are selected, filter out in-progress and cancelled
+            expect(query).toBe('filter by function task.status.type !== \'IN_PROGRESS\'\nfilter by function task.status.type !== \'CANCELLED\'');
         });
 
         it('should handle done + in-progress combination correctly', () => {
             const filters: ViewFilters = {
-                statuses: ['done', 'in-progress']
+                statuses: [TaskStatus.DONE, TaskStatus.IN_PROGRESS]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -88,7 +87,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
         it('should handle done + cancelled combination correctly', () => {
             const filters: ViewFilters = {
-                statuses: ['done', 'cancelled']
+                statuses: [TaskStatus.DONE, TaskStatus.CANCELLED]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -98,7 +97,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
         it('should handle todo + in-progress combination correctly', () => {
             const filters: ViewFilters = {
-                statuses: ['todo', 'in-progress']
+                statuses: [TaskStatus.TODO, TaskStatus.IN_PROGRESS]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -107,7 +106,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
 
         it('should handle all status combinations correctly', () => {
             const filters: ViewFilters = {
-                statuses: ['todo', 'in-progress', 'done', 'cancelled']
+                statuses: [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE, TaskStatus.CANCELLED]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -119,25 +118,25 @@ describe('TaskQueryService Status Filtering Bug', () => {
     describe('Status Filter with Other Filters', () => {
         it('should handle done status with role filter', () => {
             const filters: ViewFilters = {
-                statuses: ['done'],
+                statuses: [TaskStatus.DONE],
                 roles: ['driver']
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
             const lines = query.split('\n');
-            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('(description includes 🚗)');
             expect(lines).toContain('done');
         });
 
         it('should handle multiple statuses with role filter', () => {
             const filters: ViewFilters = {
-                statuses: ['done', 'in-progress'],
+                statuses: [TaskStatus.DONE, TaskStatus.IN_PROGRESS],
                 roles: ['driver']
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
             const lines = query.split('\n');
-            expect(lines).toContain('role:Driver');
+            expect(lines).toContain('(description includes 🚗)');
             expect(lines).toContain('filter by function (task.status.type === \'DONE\' || task.status.type === \'IN_PROGRESS\')');
         });
     });
@@ -145,7 +144,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
     describe('Fixed - Consistent Status Handling', () => {
         it('should use consistent status.type for all statuses', () => {
             const filters: ViewFilters = {
-                statuses: ['done', 'in-progress', 'todo', 'cancelled']
+                statuses: [TaskStatus.DONE, TaskStatus.IN_PROGRESS, TaskStatus.TODO, TaskStatus.CANCELLED]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
@@ -158,15 +157,15 @@ describe('TaskQueryService Status Filtering Bug', () => {
         it('should handle DONE filter in status column layout without errors', () => {
             // This tests the specific scenario where DONE status column combines with other filters
             const filters: ViewFilters = {
-                statuses: ['done']
+                statuses: [TaskStatus.DONE]
             };
 
             const query = taskQueryService.buildTaskQueryFromFilters(filters);
-            expect(query).toBe('done');
+            expect(query).toBe('done\nfilter by function task.status.type !== \'CANCELLED\'');
             
             // Also test that this works in a filter function context
             const mixedFilters: ViewFilters = {
-                statuses: ['done', 'cancelled']
+                statuses: [TaskStatus.DONE, TaskStatus.CANCELLED]
             };
             
             const mixedQuery = taskQueryService.buildTaskQueryFromFilters(mixedFilters);
@@ -187,7 +186,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             // Find the DONE column and verify it's properly formatted
             const doneColumn = columns.find(col => col.title === 'Done');
             expect(doneColumn).toBeDefined();
-            expect(doneColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'DONE\'');
+            expect(doneColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'DONE\'');
         });
     });
 
@@ -217,7 +216,7 @@ describe('TaskQueryService Status Filtering Bug', () => {
             const todoColumn = columns.find(col => col.title === 'To Do');
             expect(todoColumn).toBeDefined();
             
-            // TODO column should use task.status.type === 'TODO' to exclude in-progress items
+            // TODO column should use task.status.type === [TaskStatus.TODO] to exclude in-progress items
             // Currently it uses 'not done' which would include in-progress items
             expect(todoColumn!.query).toBe('filter by function task.status.type === \'TODO\'');
         });
@@ -266,8 +265,8 @@ describe('TaskQueryService Status Filtering Bug', () => {
             const todoColumn = columns.find(col => col.title === 'To Do');
             const doneColumn = columns.find(col => col.title === 'Done');
             
-            expect(todoColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'TODO\'');
-            expect(doneColumn!.query).toBe('role:Driver\nfilter by function task.status.type === \'DONE\'');
+            expect(todoColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'TODO\'');
+            expect(doneColumn!.query).toBe('(description includes 🚗)\nfilter by function task.status.type === \'DONE\'');
         });
     });
 

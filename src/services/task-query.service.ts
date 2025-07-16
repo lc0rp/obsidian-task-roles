@@ -65,20 +65,50 @@ export class TaskQueryService {
 
         // Convert people filters to query syntax
         if (filters.people && filters.people.length > 0) {
-            if (filters.people.length === 1) {
-                queryLines.push(`assignee:${filters.people[0]}`);
-            } else {
-                const peopleQueries = filters.people.map(person => `assignee:${person}`);
+            const visibleRoles = this.plugin.getVisibleRoles();
+            const peopleQueries: string[] = [];
+            
+            for (const person of filters.people) {
+                const personRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*${person.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    personRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this person with OR
+                if (personRoleQueries.length > 0) {
+                    peopleQueries.push(`(${personRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (peopleQueries.length > 0) {
                 queryLines.push(`(${peopleQueries.join(' OR ')})`);
             }
         }
 
         // Convert company filters to query syntax
         if (filters.companies && filters.companies.length > 0) {
-            if (filters.companies.length === 1) {
-                queryLines.push(`assignee:${filters.companies[0]}`);
-            } else {
-                const companyQueries = filters.companies.map(company => `assignee:${company}`);
+            const visibleRoles = this.plugin.getVisibleRoles();
+            const companyQueries: string[] = [];
+            
+            for (const company of filters.companies) {
+                const companyRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*\\+${company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    companyRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this company with OR
+                if (companyRoleQueries.length > 0) {
+                    companyQueries.push(`(${companyRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (companyQueries.length > 0) {
                 queryLines.push(`(${companyQueries.join(' OR ')})`);
             }
         }

@@ -1,4 +1,3 @@
-
 export interface TaskRolesPluginSettings {
     contactSymbol: string;
     companySymbol: string;
