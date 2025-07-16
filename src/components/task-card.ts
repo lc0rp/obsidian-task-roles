@@ -1,20 +1,16 @@
 import { setIcon, MarkdownRenderer, MarkdownView, TFile, Notice } from 'obsidian';
 import { TaskData, TaskStatus, TaskPriority, TASK_DATE_ICONS } from '../types';
-import { TaskCacheService } from '../services/task-cache.service';
 import type TaskRolesPlugin from '../main';
 
 export class TaskCardComponent {
     private plugin: TaskRolesPlugin;
-    private taskCacheService: TaskCacheService;
     private app: any;
 
     constructor(
         plugin: TaskRolesPlugin,
-        taskCacheService: TaskCacheService,
         app: any
     ) {
         this.plugin = plugin;
-        this.taskCacheService = taskCacheService;
         this.app = app;
     }
 
@@ -31,7 +27,7 @@ export class TaskCardComponent {
         checkboxEl.checked = task.status === TaskStatus.DONE;
         checkboxEl.onchange = async () => {
             const newStatus = checkboxEl.checked ? TaskStatus.DONE : TaskStatus.TODO;
-            await this.taskCacheService.updateTaskStatus(task.id, newStatus);
+            await this.updateTaskStatus(task, newStatus);
             // Note: Parent component should handle re-rendering
         };
 
@@ -141,6 +137,33 @@ export class TaskCardComponent {
                 return 'task-status-cancelled';
             default:
                 return 'task-status-unknown';
+        }
+    }
+
+    private async updateTaskStatus(task: TaskData, newStatus: TaskStatus): Promise<void> {
+        try {
+            const file = this.app.vault.getAbstractFileByPath(task.filePath);
+            if (!(file instanceof TFile)) return;
+
+            const fileContent = await this.app.vault.read(file);
+            const lines = fileContent.split('\n');
+            
+            if (task.lineNumber >= 0 && task.lineNumber < lines.length) {
+                let line = lines[task.lineNumber];
+                
+                // Update the checkbox based on the new status
+                if (newStatus === TaskStatus.DONE) {
+                    line = line.replace(/- \[ \]/, '- [x]');
+                } else {
+                    line = line.replace(/- \[x\]/, '- [ ]');
+                }
+                
+                lines[task.lineNumber] = line;
+                await this.app.vault.modify(file, lines.join('\n'));
+            }
+        } catch (error) {
+            console.error('Error updating task status:', error);
+            new Notice('Failed to update task status');
         }
     }
 

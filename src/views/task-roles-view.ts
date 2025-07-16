@@ -1,7 +1,6 @@
 import { WorkspaceLeaf } from 'obsidian';
 import { TaskRolesViewBase } from './task-roles-view-base';
 import { ViewFilters, ViewLayout } from '../types';
-import { TaskCacheService } from '../services/task-cache.service';
 import { ViewConfigurationService } from '../services/view-configuration.service';
 import { TaskQueryService } from '../services/task-query.service';
 import { TaskRolesSaveViewModal } from '../modals/save-view-modal';
@@ -23,10 +22,10 @@ export class TaskRolesView extends TaskRolesViewBase {
     private taskCardComponent: TaskCardComponent;
     private viewHeaderComponent: ViewHeaderComponent;
 
-    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin, taskCacheService: TaskCacheService) {
-        super(leaf, plugin, taskCacheService);
+    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin) {
+        super(leaf, plugin);
         this.viewConfigService = new ViewConfigurationService(this.app, this.plugin);
-        this.taskQueryService = new TaskQueryService(this.plugin, this.taskCacheService);
+        this.taskQueryService = new TaskQueryService(this.plugin);
 
         // Initialize components
         this.initializeComponents();
@@ -41,13 +40,11 @@ export class TaskRolesView extends TaskRolesViewBase {
         );
         this.taskCardComponent = new TaskCardComponent(
             this.plugin,
-            this.taskCacheService,
             this.app
         );
         this.viewHeaderComponent = new ViewHeaderComponent(
             this.plugin,
             this.viewConfigService,
-            this.taskCacheService,
             this.currentLayout,
             this.currentViewName,
             this.updateLayout.bind(this),

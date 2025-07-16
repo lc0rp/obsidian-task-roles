@@ -190,17 +190,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        // Disable task caching toggle
-        new Setting(containerEl)
-            .setName('Disable task caching')
-            .setDesc('Turn off task caching to reduce memory usage (may impact performance)')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.disableTaskCaching)
-                .onChange(async (value) => {
-                    this.plugin.settings.disableTaskCaching = value;
-                    await this.plugin.saveSettings();
-                }));
-
         // Role management
         containerEl.createEl('h3', { text: 'Role management' });
 

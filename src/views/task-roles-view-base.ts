@@ -1,19 +1,16 @@
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import { TaskData, ViewFilters, ViewLayout, ViewColumn, TaskStatus, TaskPriority, DateType, SortOption } from '../types';
-import { TaskCacheService } from '../services/task-cache.service';
 import type TaskRolesPlugin from '../main';
 
 export abstract class TaskRolesViewBase extends ItemView {
     protected plugin: TaskRolesPlugin;
-    protected taskCacheService: TaskCacheService;
     protected currentFilters: ViewFilters = {};
     protected currentLayout: ViewLayout = ViewLayout.STATUS;
     protected currentSort: SortOption = { field: 'urgency', direction: 'desc' };
 
-    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin, taskCacheService: TaskCacheService) {
+    constructor(leaf: WorkspaceLeaf, plugin: TaskRolesPlugin) {
         super(leaf);
         this.plugin = plugin;
-        this.taskCacheService = taskCacheService;
     }
 
     getViewType(): string {
