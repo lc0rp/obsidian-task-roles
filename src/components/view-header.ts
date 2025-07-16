@@ -1,13 +1,11 @@
 import { setIcon } from 'obsidian';
 import { ViewLayout } from '../types';
 import { ViewConfigurationService } from '../services/view-configuration.service';
-import { TaskCacheService } from '../services/task-cache.service';
 import type TaskRolesPlugin from '../main';
 
 export class ViewHeaderComponent {
     private plugin: TaskRolesPlugin;
     private viewConfigService: ViewConfigurationService;
-    private taskCacheService: TaskCacheService;
     private currentLayout: ViewLayout;
     private currentViewName: string | null = null;
     private updateLayoutCallback: (layout: ViewLayout) => void;
@@ -17,7 +15,6 @@ export class ViewHeaderComponent {
     constructor(
         plugin: TaskRolesPlugin,
         viewConfigService: ViewConfigurationService,
-        taskCacheService: TaskCacheService,
         currentLayout: ViewLayout,
         currentViewName: string | null,
         updateLayoutCallback: (layout: ViewLayout) => void,
@@ -26,7 +23,6 @@ export class ViewHeaderComponent {
     ) {
         this.plugin = plugin;
         this.viewConfigService = viewConfigService;
-        this.taskCacheService = taskCacheService;
         this.currentLayout = currentLayout;
         this.currentViewName = currentViewName;
         this.updateLayoutCallback = updateLayoutCallback;
@@ -114,12 +110,6 @@ export class ViewHeaderComponent {
         // Divider before refresh button
         controlsEl.createDiv('task-roles-controls-divider');
 
-        // Refresh button (moved to last position)
-        const refreshBtn = controlsEl.createEl('button', { cls: 'task-roles-refresh-btn' });
-        setIcon(refreshBtn, 'refresh-cw');
-        refreshBtn.setAttribute('aria-label', 'Rebuild cache');
-        refreshBtn.setAttribute('title', 'Rebuild cache');
-        refreshBtn.onclick = () => this.taskCacheService.refreshCache();
     }
 
     updateCurrentViewName(viewName: string | null): void {

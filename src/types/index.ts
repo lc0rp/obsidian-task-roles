@@ -7,8 +7,6 @@ export interface TaskRolesPluginSettings {
     hiddenDefaultRoles: string[];
     savedViews: ViewConfiguration[];
     autoApplyFilters: boolean;
-    useTaskQueries: boolean;
-    disableTaskCaching: boolean;
     taskDisplayMode: 'minimal' | 'detailed';
     debug: boolean;
     compatMode: boolean;
@@ -162,8 +160,6 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
     hiddenDefaultRoles: [],
     savedViews: [],
     autoApplyFilters: true,
-    useTaskQueries: false,
-    disableTaskCaching: false,
     taskDisplayMode: 'detailed',
     debug: false,
     compatMode: false,

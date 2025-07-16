@@ -117,11 +117,11 @@ Clicking a task card opens a detailed side panel showing:
 - **Configuration Autocomplete**: Type existing configuration names to overwrite
 - **Configuration Display**: Shows currently loaded configuration name in header
 
-#### **Real-Time Task Cache**
+#### **Real-Time Task Processing**
 
-The Task Center uses an intelligent background task cache that:
+The Task Center uses task queries to process tasks in real-time:
 
-- Automatically scans all markdown files for tasks
+- Automatically scans all markdown files for tasks using task queries
 - Updates in real-time when files are modified, created, or deleted
 - Parses comprehensive task metadata including:
   - Roles and assignees
@@ -130,9 +130,6 @@ The Task Center uses an intelligent background task cache that:
   - Status (including custom indicators like 🚧 for in-progress, ❌ for cancelled)
   - Tags
   - File metadata
-- Stores cache data in `.obsidian/task-roles-cache.json`
-- Manual refresh available via refresh button or command
-- **Can be disabled** in settings to reduce memory usage (may impact performance)
 
 ## Usage
 
@@ -207,8 +204,6 @@ unhidden roles will be parsed and displayed.
 - **Enable debug logging**: Log additional information to the console
 - **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
   Tasks plugin is installed)
-- **Use task queries for content**: Experimental query-based approach for rendering content
-- **Disable task caching**: Turn off task caching to reduce memory usage (may impact performance)
 - **Assign or Update Roles**:
   - Hide default roles (prevents them from appearing in future dialogs)
   - Add, edit, and delete custom roles
@@ -276,7 +271,7 @@ The plugin follows a modular architecture with clear separation of concerns:
 
 - **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
 - **Types** (`types/`) - TypeScript interfaces and constants for task data models
-- **Services** (`services/`) - Business logic including task caching, role & assignee processing, and view configuration
+- **Services** (`services/`) - Business logic including task query processing, role & assignee processing, and view configuration
 - **Components** (`components/`) - Reusable UI widgets including the task roles icon
 - **Editor** (`editor/`) - CodeMirror extensions and auto-suggestions
 - **Modals** (`modals/`) - Dialog windows for role & assignee editing, and view saving
@@ -287,7 +282,7 @@ The plugin follows a modular architecture with clear separation of concerns:
 
 **Core Services:**
 
-- **TaskCacheService** - Real-time task scanning, parsing, and caching
+- **TaskQueryService** - Task query building and real-time task processing
 - **TaskRolesService** - Role & assignee parsing, formatting, and file operations
 - **ViewConfigurationService** - Saved view management
 
