@@ -81,12 +81,24 @@ export class CompactFiltersComponent {
         assigneesGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
         const assigneesIcon = assigneesGroup.createEl('span', { cls: 'compact-filter-icon' });
         setIcon(assigneesIcon, 'users');
-        const assigneesInput = assigneesGroup.createEl('input', {
+        
+        // Create a wrapper for the input and clear button
+        const inputWrapper = assigneesGroup.createDiv('compact-filter-input-wrapper');
+        const assigneesInput = inputWrapper.createEl('input', {
             type: 'text',
             placeholder: 'Select assignees',
             cls: 'compact-filter-input compact-filter-assignees'
         });
         assigneesInput.readOnly = true;
+        
+        // Create clear button
+        const clearButton = inputWrapper.createEl('button', {
+            cls: 'compact-filter-clear-btn',
+            title: 'Clear assignees'
+        });
+        const clearIcon = clearButton.createEl('span', { cls: 'compact-filter-clear-icon' });
+        setIcon(clearIcon, 'x');
+        clearButton.style.display = 'none'; // Initially hidden
 
         // Display selected assignees
         const updateAssigneesDisplay = () => {
@@ -97,12 +109,22 @@ export class CompactFiltersComponent {
             assigneesInput.value = selectedAssignees.length > 0
                 ? selectedAssignees.join(', ')
                 : '';
+            
+            // Show/hide clear button based on whether there are selected assignees
+            clearButton.style.display = selectedAssignees.length > 0 ? 'block' : 'none';
         };
 
         updateAssigneesDisplay();
 
         assigneesInput.onclick = () => {
             this.showAssigneeSelector(updateAssigneesDisplay);
+        };
+
+        // Clear button click handler
+        clearButton.onclick = (e) => {
+            e.stopPropagation();
+            this.updateFiltersCallback({ people: [], companies: [] });
+            updateAssigneesDisplay();
         };
 
         return updateAssigneesDisplay;
