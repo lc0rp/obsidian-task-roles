@@ -50,9 +50,8 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 **Services Layer (`src/services/`)**
 
 - `TaskRolesService` - Core role and assignee parsing, formatting, and file operations
-- `TaskCacheService` - Real-time task scanning, parsing, and caching with file system watchers
+- `TaskQueryService` - Task query building and real-time task processing
 - `ViewConfigurationService` - Persistent view configuration management
-- `TaskQueryService` - Query-based task rendering for experimental features
 
 **UI Components (`src/components/`)**
 
@@ -84,15 +83,15 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 
 1. **Task Detection**: CodeMirror extension scans for task patterns and adds interactive icons
 2. **Role Parsing**: TaskRolesService parses existing role assignments from task content
-3. **Caching**: TaskCacheService maintains real-time cache of all tasks with file watchers
-4. **View Rendering**: Task Center uses cached data with filtering and layout management
+3. **Task Processing**: TaskQueryService uses task queries for real-time task processing
+4. **View Rendering**: Task Center uses task queries with filtering and layout management
 5. **Persistence**: Changes are written back to markdown files using dataview inline format
 
 ### Key Design Patterns
 
 **Service-Oriented Architecture**: Clear separation between data services, UI components, and editor integration
 
-**Real-Time Caching**: Background task scanning with file system watchers for performance
+**Real-Time Processing**: Task queries for real-time task processing and updates
 
 **Component-Based UI**: Modular, reusable UI components for consistent interface
 
@@ -102,7 +101,7 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 
 ### Task Data Model
 
-Tasks are parsed and cached with comprehensive metadata:
+Tasks are processed with comprehensive metadata:
 
 - Role assignments using DACI methodology
 - Status tracking (To Do, In Progress, Done, Cancelled)
@@ -214,12 +213,11 @@ The esbuild configuration (`esbuild.config.mjs`) handles:
 - Assignees use `@` prefix for contacts, `+` for companies
 - Special `@me` contact for self-reference
 
-### Cache Management
+### Task Processing
 
-- Real-time file system watchers for cache updates
-- Configurable cache disabling for memory optimization
-- JSON persistence in `.obsidian/task-roles-cache.json`
-- Automatic cache refresh on file changes
+- Real-time task queries for immediate updates
+- Direct file system operations for task modifications
+- Automatic refresh when files change through task queries
 
 ### Settings Architecture
 
@@ -230,8 +228,8 @@ The esbuild configuration (`esbuild.config.mjs`) handles:
 
 ### Performance Considerations
 
-- Efficient task scanning with regex-based parsing
-- Cached assignee lookups for directory scanning
+- Efficient task queries for real-time processing
+- Direct file system operations for task modifications
 - Optimized CodeMirror decorations for large documents
 - Configurable features to reduce memory usage
 

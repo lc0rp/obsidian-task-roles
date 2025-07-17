@@ -217,4 +217,111 @@ describe('TaskQueryService', () => {
         const query = service.buildTaskQueryFromFilters(filters);
         expect(query).toBe('');
     });
+
+    describe('Cross Product Filtering', () => {
+        it('should use cross product when both roles and people filters are present', () => {
+            const filters: ViewFilters = {
+                roles: ['driver', 'approver'],
+                people: ['Luke', 'Jane'],
+                companies: [],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should create (role1::assignee1) OR (role1::assignee2) OR (role2::assignee1) OR (role2::assignee2)
+            expect(query).toBe('((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Jane/))');
+        });
+
+        it('should use cross product when both roles and companies filters are present', () => {
+            const filters: ViewFilters = {
+                roles: ['driver'],
+                people: [],
+                companies: ['Acme', 'Corp'],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should create (role1::company1) OR (role1::company2)
+            expect(query).toBe('((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Corp/))');
+        });
+
+        it('should use cross product when roles, people, and companies are all present', () => {
+            const filters: ViewFilters = {
+                roles: ['driver'],
+                people: ['Luke'],
+                companies: ['Acme'],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should create (role1::person1) OR (role1::company1)
+            expect(query).toBe('((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/))');
+        });
+
+        it('should exclude "none-set" role from cross product when other roles are present', () => {
+            const filters: ViewFilters = {
+                roles: ['driver', 'none-set'],
+                people: ['Luke'],
+                companies: [],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should only create cross product for actual roles, not "none-set"
+            expect(query).toBe('(description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)');
+        });
+
+        it('should return no tasks when only "none-set" role is crossed with assignees', () => {
+            const filters: ViewFilters = {
+                roles: ['none-set'],
+                people: ['Luke'],
+                companies: [],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should return a condition that matches no tasks
+            expect(query).toBe('(description regex matches /NEVER_MATCH_ANYTHING/)');
+        });
+
+        it('should handle "all" role with assignees by not filtering roles', () => {
+            const filters: ViewFilters = {
+                roles: ['all'],
+                people: ['Luke'],
+                companies: [],
+                statuses: [],
+                tags: [],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should create assignee patterns for all visible roles (same as current behavior)
+            expect(query).toBe('(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)))');
+        });
+
+        it('should handle cross product with other filter types', () => {
+            const filters: ViewFilters = {
+                roles: ['driver'],
+                people: ['Luke'],
+                companies: [],
+                statuses: [TaskStatus.TODO],
+                tags: ['urgent'],
+                priorities: []
+            };
+
+            const query = service.buildTaskQueryFromFilters(filters);
+            // Should include cross product AND other filters
+            expect(query).toBe('(description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)\nnot done\nfilter by function task.status.type !== \'IN_PROGRESS\'\n#urgent');
+        });
+    });
 });

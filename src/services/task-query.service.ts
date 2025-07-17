@@ -1,116 +1,31 @@
 import { MarkdownRenderer, setIcon } from 'obsidian';
 import { ViewFilters, ViewLayout, TaskStatus } from '../types';
-import { TaskCacheService } from './task-cache.service';
 import type TaskRolesPlugin from '../main';
 
 export class TaskQueryService {
     private plugin: TaskRolesPlugin;
-    private taskCacheService: TaskCacheService;
 
-    constructor(plugin: TaskRolesPlugin, taskCacheService: TaskCacheService) {
+    constructor(plugin: TaskRolesPlugin) {
         this.plugin = plugin;
-        this.taskCacheService = taskCacheService;
     }
 
     buildTaskQueryFromFilters(filters: ViewFilters): string {
         const queryLines: string[] = [];
 
-        // Convert role filters to query syntax
-        if (filters.roles && filters.roles.length > 0) {
-            // Skip filtering if "All" is selected (no filter needed)
-            const hasAll = filters.roles.includes('all');
-            if (!hasAll) {
-                const visibleRoles = this.plugin.getVisibleRoles();
-                
-                if (filters.roles.length === 1) {
-                    const roleId = filters.roles[0];
-                    if (roleId === 'none-set') {
-                        // Use the same pattern as buildColumnQueries for "No Role"
-                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
-                        queryLines.push(`(${noRoleConditions.join(' AND ')})`);
-                    } else {
-                        // Use description includes pattern like buildColumnQueries
-                        const role = visibleRoles.find(r => r.id === roleId);
-                        if (role) {
-                            queryLines.push(`(description includes ${role.icon})`);
-                        }
-                    }
-                } else {
-                    // Handle multiple role selections
-                    const roleQueries: string[] = [];
-                    const hasNoneSet = filters.roles.includes('none-set');
-                    
-                    // Add conditions for specific roles
-                    const specificRoles = filters.roles.filter(roleId => roleId !== 'none-set');
-                    for (const roleId of specificRoles) {
-                        const role = visibleRoles.find(r => r.id === roleId);
-                        if (role) {
-                            roleQueries.push(`(description includes ${role.icon})`);
-                        }
-                    }
-                    
-                    // Add "none-set" condition if selected
-                    if (hasNoneSet) {
-                        const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
-                        // For "none-set", we need ALL conditions to be true (AND logic)
-                        roleQueries.push(`(${noRoleConditions.join(' AND ')})`);
-                    }
-                    
-                    if (roleQueries.length > 0) {
-                        queryLines.push(`(${roleQueries.join(' OR ')})`);
-                    }
-                }
-            }
-        }
-
-        // Convert people filters to query syntax
-        if (filters.people && filters.people.length > 0) {
-            const visibleRoles = this.plugin.getVisibleRoles();
-            const peopleQueries: string[] = [];
-            
-            for (const person of filters.people) {
-                const personRoleQueries: string[] = [];
-                
-                // Generate a regex pattern for each role icon
-                for (const role of visibleRoles) {
-                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*${person.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
-                    personRoleQueries.push(`(description regex matches ${regexPattern})`);
-                }
-                
-                // Combine all role queries for this person with OR
-                if (personRoleQueries.length > 0) {
-                    peopleQueries.push(`(${personRoleQueries.join(' OR ')})`);
-                }
-            }
-            
-            if (peopleQueries.length > 0) {
-                queryLines.push(`(${peopleQueries.join(' OR ')})`);
-            }
-        }
-
-        // Convert company filters to query syntax
-        if (filters.companies && filters.companies.length > 0) {
-            const visibleRoles = this.plugin.getVisibleRoles();
-            const companyQueries: string[] = [];
-            
-            for (const company of filters.companies) {
-                const companyRoleQueries: string[] = [];
-                
-                // Generate a regex pattern for each role icon
-                for (const role of visibleRoles) {
-                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*\\+${company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
-                    companyRoleQueries.push(`(description regex matches ${regexPattern})`);
-                }
-                
-                // Combine all role queries for this company with OR
-                if (companyRoleQueries.length > 0) {
-                    companyQueries.push(`(${companyRoleQueries.join(' OR ')})`);
-                }
-            }
-            
-            if (companyQueries.length > 0) {
-                queryLines.push(`(${companyQueries.join(' OR ')})`);
-            }
+        // Check if we need to use cross product logic for roles + assignees
+        const hasRoles = filters.roles && filters.roles.length > 0;
+        const hasPeople = filters.people && filters.people.length > 0;
+        const hasCompanies = filters.companies && filters.companies.length > 0;
+        const hasAssignees = hasPeople || hasCompanies;
+        const hasAll = hasRoles && filters.roles!.includes('all');
+        
+        if (hasRoles && hasAssignees && !hasAll) {
+            // Use cross product logic when both roles and assignees are present
+            this.buildCrossProductQuery(filters, queryLines);
+        } else {
+            // Use separate logic for roles and assignees
+            this.buildRoleQuery(filters, queryLines);
+            this.buildAssigneeQuery(filters, queryLines);
         }
 
         // Convert status filters to query syntax
@@ -715,22 +630,158 @@ export class TaskQueryService {
         });
     }
 
-    private getUniquePeople(): string[] {
-        const allTasks = this.taskCacheService.getAllTasks();
-        const people = new Set<string>();
+    private async getUniquePeople(): Promise<string[]> {
+        // Since we're using task queries, we'll get people from the contact directory
+        // This is more efficient than scanning all tasks
+        return await this.plugin.taskRolesService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
+    }
 
-        for (const task of allTasks) {
-            if (task.roleAssignments && task.roleAssignments.length > 0) {
-                for (const roleAssignment of task.roleAssignments) {
-                    for (const assignee of roleAssignment.assignees) {
-                        people.add(assignee);
-                    }
+    private buildCrossProductQuery(filters: ViewFilters, queryLines: string[]): void {
+        const visibleRoles = this.plugin.getVisibleRoles();
+        const crossProductQueries: string[] = [];
+        
+        // Get roles, excluding "none-set" from cross product
+        const rolesForCrossProduct = filters.roles?.filter(roleId => roleId !== 'none-set') || [];
+        
+        // Handle "none-set" special case
+        if (filters.roles?.includes('none-set')) {
+            if (rolesForCrossProduct.length === 0) {
+                // Only "none-set" role with assignees = no results
+                queryLines.push('(description regex matches /NEVER_MATCH_ANYTHING/)');
+                return;
+            }
+            // If there are other roles, "none-set" is excluded from cross product
+        }
+        
+        // Build cross product for each role with each assignee
+        for (const roleId of rolesForCrossProduct) {
+            const role = visibleRoles.find(r => r.id === roleId);
+            if (!role) continue;
+            
+            // Add people for this role
+            if (filters.people && filters.people.length > 0) {
+                for (const person of filters.people) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*${person.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    crossProductQueries.push(`(description regex matches ${regexPattern})`);
                 }
+            }
+            
+            // Add companies for this role
+            if (filters.companies && filters.companies.length > 0) {
+                for (const company of filters.companies) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*\\+${company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    crossProductQueries.push(`(description regex matches ${regexPattern})`);
+                }
+            }
+        }
+        
+        if (crossProductQueries.length > 0) {
+            if (crossProductQueries.length === 1) {
+                queryLines.push(crossProductQueries[0]);
             } else {
-                people.add('none-set');
+                queryLines.push(`(${crossProductQueries.join(' OR ')})`);
+            }
+        }
+    }
+
+    private buildRoleQuery(filters: ViewFilters, queryLines: string[]): void {
+        if (!filters.roles || filters.roles.length === 0) return;
+        
+        // Skip filtering if "All" is selected (no filter needed)
+        const hasAll = filters.roles.includes('all');
+        if (hasAll) return;
+        
+        const visibleRoles = this.plugin.getVisibleRoles();
+        
+        if (filters.roles.length === 1) {
+            const roleId = filters.roles[0];
+            if (roleId === 'none-set') {
+                // Use the same pattern as buildColumnQueries for "No Role"
+                const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
+                queryLines.push(`(${noRoleConditions.join(' AND ')})`);
+            } else {
+                // Use description includes pattern like buildColumnQueries
+                const role = visibleRoles.find(r => r.id === roleId);
+                if (role) {
+                    queryLines.push(`(description includes ${role.icon})`);
+                }
+            }
+        } else {
+            // Handle multiple role selections
+            const roleQueries: string[] = [];
+            const hasNoneSet = filters.roles.includes('none-set');
+            
+            // Add conditions for specific roles
+            const specificRoles = filters.roles.filter(roleId => roleId !== 'none-set');
+            for (const roleId of specificRoles) {
+                const role = visibleRoles.find(r => r.id === roleId);
+                if (role) {
+                    roleQueries.push(`(description includes ${role.icon})`);
+                }
+            }
+            
+            // Add "none-set" condition if selected
+            if (hasNoneSet) {
+                const noRoleConditions = visibleRoles.map(role => `(description does not include ${role.icon})`);
+                // For "none-set", we need ALL conditions to be true (AND logic)
+                roleQueries.push(`(${noRoleConditions.join(' AND ')})`);
+            }
+            
+            if (roleQueries.length > 0) {
+                queryLines.push(`(${roleQueries.join(' OR ')})`);
+            }
+        }
+    }
+
+    private buildAssigneeQuery(filters: ViewFilters, queryLines: string[]): void {
+        const visibleRoles = this.plugin.getVisibleRoles();
+        
+        // Convert people filters to query syntax
+        if (filters.people && filters.people.length > 0) {
+            const peopleQueries: string[] = [];
+            
+            for (const person of filters.people) {
+                const personRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*${person.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    personRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this person with OR
+                if (personRoleQueries.length > 0) {
+                    peopleQueries.push(`(${personRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (peopleQueries.length > 0) {
+                queryLines.push(`(${peopleQueries.join(' OR ')})`);
             }
         }
 
-        return Array.from(people);
+        // Convert company filters to query syntax
+        if (filters.companies && filters.companies.length > 0) {
+            const companyQueries: string[] = [];
+            
+            for (const company of filters.companies) {
+                const companyRoleQueries: string[] = [];
+                
+                // Generate a regex pattern for each role icon
+                for (const role of visibleRoles) {
+                    const regexPattern = `/${role.icon}::(?:(?!\\s+\\[[^\\]]+::).)*\\+${company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`;
+                    companyRoleQueries.push(`(description regex matches ${regexPattern})`);
+                }
+                
+                // Combine all role queries for this company with OR
+                if (companyRoleQueries.length > 0) {
+                    companyQueries.push(`(${companyRoleQueries.join(' OR ')})`);
+                }
+            }
+            
+            if (companyQueries.length > 0) {
+                queryLines.push(`(${companyQueries.join(' OR ')})`);
+            }
+        }
     }
 } 
