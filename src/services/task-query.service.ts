@@ -711,10 +711,4 @@ export class TaskQueryService {
             }
         });
     }
-
-    private async getUniquePeople(): Promise<string[]> {
-        // Since we're using task queries, we'll get people from the contact directory
-        // This is more efficient than scanning all tasks
-        return await this.plugin.taskRolesService.getContactsAndCompanies(this.plugin.settings.contactSymbol);
-    }
 } 
