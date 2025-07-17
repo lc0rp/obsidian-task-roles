@@ -36,7 +36,8 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.plugin,
             this.currentFilters,
             this.updateFilters.bind(this),
-            this.register.bind(this)
+            this.register.bind(this),
+            this.resetFilters.bind(this)
         );
         this.taskCardComponent = new TaskCardComponent(
             this.plugin,
@@ -91,7 +92,8 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.plugin,
             this.currentFilters,
             this.updateFilters.bind(this),
-            this.register.bind(this)
+            this.register.bind(this),
+            this.resetFilters.bind(this)
         );
 
         await this.compactFiltersComponent.render(this.viewContainerEl);
@@ -111,6 +113,11 @@ export class TaskRolesView extends TaskRolesViewBase {
         // Force re-render with current filters
         await this.renderAsync();
 
+    }
+
+    private async resetFilters(): Promise<void> {
+        this.currentFilters = {};
+        await this.renderAsync();
     }
 
     private async cancelFiltersAndClose(): Promise<void> {
@@ -170,4 +177,4 @@ export class TaskRolesView extends TaskRolesViewBase {
         this.currentLayout = newLayout;
         await this.renderAsync();
     }
-} 
+}

@@ -23,12 +23,12 @@ export interface Role {
     order: number;
 }
 
-export interface RoleAssignment {
+export interface TaskRoleAssignment {
     roleId: string;
     assignees: string[];
 }
 
-export interface ParsedRoleAssignment {
+export interface ParsedTaskRoleAssignment {
     role: Role;
     assignees: string[];
 }
@@ -44,7 +44,7 @@ export interface TaskData {
     status: TaskStatus;
     priority: TaskPriority;
     tags: string[];
-    roleAssignments: ParsedRoleAssignment[];
+    roleAssignments: ParsedTaskRoleAssignment[];
     dates: TaskDates;
     createdDate: Date;
     modifiedDate: Date;
@@ -58,6 +58,7 @@ export interface TaskDates {
     created?: Date;
     cancelled?: Date;
     happens?: Date;
+    completed?: Date;
 }
 
 export enum TaskStatus {
@@ -128,7 +129,8 @@ export const TASK_DATE_ICONS: Record<keyof TaskDates, string> = {
     start: '🟢',
     created: '🗓️',
     cancelled: '🚫',
-    happens: '🔄'
+    happens: '🔄',
+    completed: '✅'
 };
 
 export interface SortOption {
