@@ -101,6 +101,11 @@ export class ContactCompanyPickerModal extends FuzzySuggestModal<string> {
     }
 
     onChooseItem(item: string): void {
+        // Check if input is empty and user pressed Enter - close modal
+        if (!this.currentQuery.trim() && this.options.keepOpen) {
+            super.close();
+            return;
+        }
 
         if (this.noResults) {
             // user pressed ↵ with no matches – create something new
@@ -136,6 +141,9 @@ export class ContactCompanyPickerModal extends FuzzySuggestModal<string> {
 
         const query = this.currentQuery.toLowerCase().replace(/\s+/g, ' ').trim();
         if (!query) {
+            if (this.options.keepOpen) {
+                this.emptyStateText = 'All done? Enter to close.';
+            }
             return;
         }
 
@@ -167,7 +175,7 @@ export class ContactCompanyPickerModal extends FuzzySuggestModal<string> {
 
     close(): void {
         if (this.options.keepOpen && this.disableClose) {
-            this.emptyStateText = 'Make another selection. All done? ESC or X twice to close.';
+            this.emptyStateText = 'Make another selection. All done? Enter to close.';
             this.disableClose = false; // Reset the disableClose flag, so the modal can be closed, as long as the user doesn't make another selection
             return;  // swallow the auto-close
         }
