@@ -3,25 +3,44 @@ import { ViewFilters, TaskStatus, TaskPriority, DateType } from '../types';
 import type TaskRolesPlugin from '../main';
 
 export class CompactFiltersComponent {
+    /**
+     * Compact filters component for task roles view.
+     */
     private plugin: TaskRolesPlugin;
     private currentFilters: ViewFilters;
     private updateFiltersCallback: (filters: Partial<ViewFilters>) => void;
     private registerCallback: (cleanup: () => void) => void;
+    private resetFiltersCallback: () => void;
+    private displayUpdateFunctions: (() => void)[] = [];
 
     constructor(
         plugin: TaskRolesPlugin,
         currentFilters: ViewFilters,
         updateFiltersCallback: (filters: Partial<ViewFilters>) => void,
-        registerCallback: (cleanup: () => void) => void
+        registerCallback: (cleanup: () => void) => void,
+        resetFiltersCallback: () => void,
     ) {
         this.plugin = plugin;
         this.currentFilters = currentFilters;
         this.updateFiltersCallback = updateFiltersCallback;
         this.registerCallback = registerCallback;
+        this.resetFiltersCallback = resetFiltersCallback;
+    }
+
+    updateFilters(newFilters: ViewFilters): void {
+        this.currentFilters = newFilters;
+        this.updateAllDisplays();
+    }
+
+    private updateAllDisplays(): void {
+        this.displayUpdateFunctions.forEach(updateFn => updateFn());
     }
 
     async render(container: HTMLElement): Promise<void> {
         const filtersEl = container.createDiv('task-roles-compact-filters');
+
+        // Clear any existing display update functions
+        this.displayUpdateFunctions = [];
 
         // Store references to all dropdowns for closing them when clicking outside
         const allDropdowns: HTMLElement[] = [];
@@ -36,10 +55,12 @@ export class CompactFiltersComponent {
         const filtersRow = filtersEl.createDiv('task-roles-compact-filters-row');
 
         // Search input
-        this.renderSearchInput(filtersRow);
+        const searchInputUpdate = this.renderSearchInput(filtersRow);
+        this.displayUpdateFunctions.push(searchInputUpdate);
 
         // Assignees filter
-        this.renderAssigneesFilter(filtersRow);
+        const assigneesDisplayUpdate = this.renderAssigneesFilter(filtersRow);
+        this.displayUpdateFunctions.push(assigneesDisplayUpdate);
 
         // Roles filter
         this.renderRolesFilter(filtersRow, addWhiteArrow, allDropdowns);
@@ -51,7 +72,8 @@ export class CompactFiltersComponent {
         this.renderPriorityFilter(filtersRow, addWhiteArrow, allDropdowns);
 
         // Date filter
-        this.renderDateFilter(filtersRow, addWhiteArrow);
+        const dateFilterUpdate = this.renderDateFilter(filtersRow, addWhiteArrow);
+        this.displayUpdateFunctions.push(dateFilterUpdate);
 
         // Filter actions
         this.renderFilterActions(filtersRow);
@@ -60,7 +82,7 @@ export class CompactFiltersComponent {
         this.setupGlobalClickHandler(allDropdowns);
     }
 
-    private renderSearchInput(container: HTMLElement): void {
+    private renderSearchInput(container: HTMLElement): () => void {
         const searchGroup = container.createDiv('compact-filter-group');
         searchGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
         const searchIcon = searchGroup.createEl('span', { cls: 'compact-filter-icon' });
@@ -73,6 +95,11 @@ export class CompactFiltersComponent {
         searchInput.value = this.currentFilters.textSearch || '';
         searchInput.oninput = () => {
             this.updateFiltersCallback({ textSearch: searchInput.value });
+        };
+
+        // Return display update function
+        return () => {
+            searchInput.value = this.currentFilters.textSearch || '';
         };
     }
 
@@ -545,7 +572,7 @@ export class CompactFiltersComponent {
         });
     }
 
-    private renderDateFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void): void {
+    private renderDateFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void): () => void {
         const dateGroup = container.createDiv('compact-filter-group');
         dateGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
         const dateIcon = dateGroup.createEl('span', { cls: 'compact-filter-icon' });
@@ -560,18 +587,14 @@ export class CompactFiltersComponent {
             { value: DateType.DUE, label: 'Due' },
             { value: DateType.DONE, label: 'Done' },
             { value: DateType.SCHEDULED, label: 'Scheduled' },
-            { value: DateType.START, label: 'Start' },  
+            { value: DateType.START, label: 'Start' },
             { value: DateType.CREATED, label: 'Created' },
             { value: DateType.CANCELLED, label: 'Cancelled' },
             { value: DateType.HAPPENS, label: 'Happens' }
         ];
 
         for (const dateType of dateTypes) {
-            const option = dateTypeSelect.createEl('option', { value: dateType.value });
-            option.setText(dateType.label);
-            if (dateType.value === this.currentFilters.dateType) {
-                option.selected = true;
-            }
+            dateTypeSelect.createEl('option', { value: dateType.value, text: dateType.label });
         }
 
         dateTypeSelect.onchange = () => {
@@ -584,13 +607,13 @@ export class CompactFiltersComponent {
             cls: 'compact-filter-date',
             title: 'From date'
         });
-        fromInput.value = this.currentFilters.dateRange?.from?.toISOString().split('T')[0] || '';
         fromInput.onchange = () => {
             const from = fromInput.value ? new Date(fromInput.value) : undefined;
             this.updateFiltersCallback({
                 dateRange: {
-                    ...this.currentFilters.dateRange,
-                    from
+                    from,
+                    to: this.currentFilters.dateRange?.to,
+                    includeNotSet: this.currentFilters.dateRange?.includeNotSet || false
                 }
             });
         };
@@ -600,13 +623,13 @@ export class CompactFiltersComponent {
             cls: 'compact-filter-date',
             title: 'To date'
         });
-        toInput.value = this.currentFilters.dateRange?.to?.toISOString().split('T')[0] || '';
         toInput.onchange = () => {
             const to = toInput.value ? new Date(toInput.value) : undefined;
             this.updateFiltersCallback({
                 dateRange: {
-                    ...this.currentFilters.dateRange,
-                    to
+                    from: this.currentFilters.dateRange?.from,
+                    to,
+                    includeNotSet: this.currentFilters.dateRange?.includeNotSet || false
                 }
             });
         };
@@ -614,11 +637,11 @@ export class CompactFiltersComponent {
         // Include not set checkbox
         const includeNotSetLabel = dateContainer.createEl('label', { cls: 'compact-date-checkbox' });
         const includeNotSetCheckbox = includeNotSetLabel.createEl('input', { type: 'checkbox' });
-        includeNotSetCheckbox.checked = this.currentFilters.dateRange?.includeNotSet || false;
         includeNotSetCheckbox.onchange = () => {
             this.updateFiltersCallback({
                 dateRange: {
-                    ...this.currentFilters.dateRange,
+                    from: this.currentFilters.dateRange?.from,
+                    to: this.currentFilters.dateRange?.to,
                     includeNotSet: includeNotSetCheckbox.checked
                 }
             });
@@ -626,6 +649,17 @@ export class CompactFiltersComponent {
         const noDatesIcon = includeNotSetLabel.createEl('span');
         setIcon(noDatesIcon, 'calendar-x');
         includeNotSetLabel.title = 'Include tasks without dates';
+
+        const updateDisplay = () => {
+            dateTypeSelect.value = this.currentFilters.dateType || DateType.DUE;
+            fromInput.value = this.currentFilters.dateRange?.from?.toISOString().split('T')[0] || '';
+            toInput.value = this.currentFilters.dateRange?.to?.toISOString().split('T')[0] || '';
+            includeNotSetCheckbox.checked = this.currentFilters.dateRange?.includeNotSet || false;
+        };
+
+        updateDisplay();
+
+        return updateDisplay;
     }
 
     private renderFilterActions(container: HTMLElement): void {
@@ -637,7 +671,7 @@ export class CompactFiltersComponent {
         setIcon(resetFiltersIcon, 'rotate-ccw');
         resetFiltersBtn.title = 'Reset filters';
         resetFiltersBtn.onclick = async () => {
-            this.updateFiltersCallback({});
+            this.resetFiltersCallback();
         };
 
         // Cancel button
@@ -779,4 +813,4 @@ export class CompactFiltersComponent {
             }, { mode: 'readonly', keepOpen: true }).open();
         });
     }
-} 
+}
