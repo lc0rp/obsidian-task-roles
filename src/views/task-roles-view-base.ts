@@ -36,7 +36,7 @@ export abstract class TaskRolesViewBase extends ItemView {
     protected abstract renderAsync(): Promise<void>;
 
     // Filtering methods
-    protected applyFilters(tasks: TaskData[]): TaskData[] {
+    protected applyFiltersOld(tasks: TaskData[]): TaskData[] {
         return tasks.filter(task => {
             // Role filter
             if (this.currentFilters.roles && this.currentFilters.roles.length > 0) {

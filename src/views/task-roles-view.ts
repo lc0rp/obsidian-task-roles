@@ -37,7 +37,8 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentFilters,
             this.updateFilters.bind(this),
             this.register.bind(this),
-            this.resetFilters.bind(this)
+            this.resetFilters.bind(this),
+            this.applyFilters.bind(this)
         );
         this.taskCardComponent = new TaskCardComponent(
             this.plugin,
@@ -53,7 +54,6 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.loadSavedView.bind(this)
         );
     }
-
 
     protected async renderAsync(): Promise<void> {
         this.viewContainerEl = this.contentEl;
@@ -75,15 +75,6 @@ export class TaskRolesView extends TaskRolesViewBase {
     }
 
     private async renderFiltersAsync(): Promise<void> {
-        await this.renderCompactFiltersAsync();
-    }
-
-    private async renderCompactFiltersAsync(): Promise<void> {
-        await this.renderCompactFilters();
-    }
-
-
-    private async renderCompactFilters(): Promise<void> {
         // Store original filters for cancel functionality
         this.originalFilters = { ...this.currentFilters };
 
@@ -93,7 +84,8 @@ export class TaskRolesView extends TaskRolesViewBase {
             this.currentFilters,
             this.updateFilters.bind(this),
             this.register.bind(this),
-            this.resetFilters.bind(this)
+            this.resetFilters.bind(this),
+            this.applyFilters.bind(this)
         );
 
         await this.compactFiltersComponent.render(this.viewContainerEl);
@@ -105,14 +97,13 @@ export class TaskRolesView extends TaskRolesViewBase {
 
         // Only auto-render if Auto Apply is enabled
         if (this.plugin.settings.autoApplyFilters) {
-            await this.applyFiltersAndClose();
+            await this.applyFilters();
         }
     }
 
-    private async applyFiltersAndClose(): Promise<void> {
+    private async applyFilters(): Promise<void> {
         // Force re-render with current filters
         await this.renderAsync();
-
     }
 
     private async resetFilters(): Promise<void> {
@@ -128,8 +119,6 @@ export class TaskRolesView extends TaskRolesViewBase {
         await this.renderAsync();
 
     }
-
-
 
     private async renderContentAsync(): Promise<void> {
         this.viewContentEl = this.viewContainerEl.createDiv('task-roles-content');

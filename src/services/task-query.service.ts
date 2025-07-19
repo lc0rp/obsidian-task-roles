@@ -169,7 +169,7 @@ export class TaskQueryService {
 
         // Convert text search to query syntax
         if (filters.textSearch && filters.textSearch.trim()) {
-            queryLines.push(`"${filters.textSearch.trim()}"`);
+            queryLines.push(`description includes ${filters.textSearch.trim()}`);
         }
 
         return queryLines.join('\n');

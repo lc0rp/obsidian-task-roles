@@ -1,6 +1,12 @@
 import { setIcon } from 'obsidian';
 import { ViewFilters, TaskStatus, TaskPriority, DateType } from '../types';
 import type TaskRolesPlugin from '../main';
+import { RolesFilter } from './filters/roles-filter';
+import { StatusFilter } from './filters/status-filter';
+import { PriorityFilter } from './filters/priority-filter';
+import { AssigneesFilter } from './filters/assignees-filter';
+import { DateFilter } from './filters/date-filter';
+import { SearchFilter } from './filters/search-filter'; // New import
 
 export class CompactFiltersComponent {
     /**
@@ -11,6 +17,7 @@ export class CompactFiltersComponent {
     private updateFiltersCallback: (filters: Partial<ViewFilters>) => void;
     private registerCallback: (cleanup: () => void) => void;
     private resetFiltersCallback: () => void;
+    private applyFiltersCallback: () => void;
     private displayUpdateFunctions: (() => void)[] = [];
 
     constructor(
@@ -19,12 +26,14 @@ export class CompactFiltersComponent {
         updateFiltersCallback: (filters: Partial<ViewFilters>) => void,
         registerCallback: (cleanup: () => void) => void,
         resetFiltersCallback: () => void,
+        applyFiltersCallback: () => void
     ) {
         this.plugin = plugin;
         this.currentFilters = currentFilters;
         this.updateFiltersCallback = updateFiltersCallback;
         this.registerCallback = registerCallback;
         this.resetFiltersCallback = resetFiltersCallback;
+        this.applyFiltersCallback = applyFiltersCallback;
     }
 
     updateFilters(newFilters: ViewFilters): void {
@@ -54,26 +63,60 @@ export class CompactFiltersComponent {
         // Create horizontal filter row
         const filtersRow = filtersEl.createDiv('task-roles-compact-filters-row');
 
-        // Search input
-        const searchInputUpdate = this.renderSearchInput(filtersRow);
-        this.displayUpdateFunctions.push(searchInputUpdate);
+        // Search filter - NEW IMPLEMENTATION
+        const searchFilter = new SearchFilter(
+            this.plugin,
+            this.currentFilters,
+            (filters) => { this.updateFiltersCallback({ textSearch: filters.textSearch }); }
+        );
+        const searchFilterUpdate = searchFilter.render(filtersRow);
+        this.displayUpdateFunctions.push(searchFilterUpdate);
 
         // Assignees filter
-        const assigneesDisplayUpdate = this.renderAssigneesFilter(filtersRow);
-        this.displayUpdateFunctions.push(assigneesDisplayUpdate);
+        const newAssigneeFilter = new AssigneesFilter(
+            this.plugin,
+            {
+                people: this.currentFilters.people || [],
+                companies: this.currentFilters.companies || []
+            },
+            {
+                updateFilters: (filters) => { this.updateFiltersCallback(filters); },
+            }
+        );
+        newAssigneeFilter.render(filtersRow);
 
         // Roles filter
-        this.renderRolesFilter(filtersRow, addWhiteArrow, allDropdowns);
+        const rolesFilter = new RolesFilter(
+            this.plugin,
+            this.currentFilters.roles || [],
+            (roles) => { this.updateFiltersCallback({ roles }); }
+        );
+        rolesFilter.render(filtersRow);
 
-        // Status filter
-        this.renderStatusFilter(filtersRow, addWhiteArrow, allDropdowns);
+        // Status filter - NEW IMPLEMENTATION
+        const statusFilter = new StatusFilter(
+            this.plugin,
+            this.currentFilters.statuses || [],
+            (statuses) => { this.updateFiltersCallback({ statuses }); }
+        );
+        statusFilter.render(filtersRow);
 
         // Priority filter
-        this.renderPriorityFilter(filtersRow, addWhiteArrow, allDropdowns);
+        const priorityFilter = new PriorityFilter(
+            this.plugin,
+            this.currentFilters.priorities || [],
+            (priorities) => { this.updateFiltersCallback({ priorities }); }
+        );
+        priorityFilter.render(filtersRow);
 
         // Date filter
-        const dateFilterUpdate = this.renderDateFilter(filtersRow, addWhiteArrow);
-        this.displayUpdateFunctions.push(dateFilterUpdate);
+        const dateFilterNew = new DateFilter(
+            this.plugin,
+            this.currentFilters,
+            (filters) => { this.updateFiltersCallback(filters); }
+        );
+        const dateFilterUpdateNew = dateFilterNew.render(filtersRow);
+        this.displayUpdateFunctions.push(dateFilterUpdateNew);
 
         // Filter actions
         this.renderFilterActions(filtersRow);
@@ -94,572 +137,17 @@ export class CompactFiltersComponent {
         });
         searchInput.value = this.currentFilters.textSearch || '';
         searchInput.oninput = () => {
-            this.updateFiltersCallback({ textSearch: searchInput.value });
+            if (this.plugin.settings.autoApplyFilters) {
+                this.updateFiltersCallback({ textSearch: searchInput.value });
+            } else {
+                this.currentFilters.textSearch = searchInput.value;
+            }
         };
 
         // Return display update function
         return () => {
             searchInput.value = this.currentFilters.textSearch || '';
         };
-    }
-
-    private renderAssigneesFilter(container: HTMLElement): () => void {
-        const assigneesGroup = container.createDiv('compact-filter-group');
-        assigneesGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
-        const assigneesIcon = assigneesGroup.createEl('span', { cls: 'compact-filter-icon' });
-        setIcon(assigneesIcon, 'users');
-        
-        // Create a wrapper for the input and clear button
-        const inputWrapper = assigneesGroup.createDiv('compact-filter-input-wrapper');
-        const assigneesInput = inputWrapper.createEl('input', {
-            type: 'text',
-            placeholder: 'Select assignees',
-            cls: 'compact-filter-input compact-filter-assignees'
-        });
-        assigneesInput.readOnly = true;
-        
-        // Create clear button
-        const clearButton = inputWrapper.createEl('button', {
-            cls: 'compact-filter-clear-btn',
-            title: 'Clear assignees'
-        });
-        const clearIcon = clearButton.createEl('span', { cls: 'compact-filter-clear-icon' });
-        setIcon(clearIcon, 'x');
-        clearButton.style.display = 'none'; // Initially hidden
-
-        // Create tooltip for showing full list
-        const tooltip = inputWrapper.createDiv('assignee-tooltip');
-        tooltip.style.display = 'none';
-
-        // Display selected assignees
-        const updateAssigneesDisplay = () => {
-            const selectedAssignees = [
-                ...(this.currentFilters.people || []),
-                ...(this.currentFilters.companies || [])
-            ];
-            
-            if (selectedAssignees.length === 0) {
-                assigneesInput.value = '';
-                tooltip.style.display = 'none';
-            } else if (selectedAssignees.length <= 3) {
-                // Show full list for 3 or fewer assignees
-                assigneesInput.value = selectedAssignees.join(', ');
-                tooltip.style.display = 'none';
-            } else {
-                // Show count for more than 3 assignees
-                assigneesInput.value = `${selectedAssignees.length} selected`;
-                tooltip.innerHTML = selectedAssignees.join(', ');
-                tooltip.style.display = 'block';
-            }
-            
-            // Show/hide clear button based on whether there are selected assignees
-            clearButton.style.display = selectedAssignees.length > 0 ? 'block' : 'none';
-        };
-
-        // Add hover events for tooltip
-        let hoverTimeout: number | null = null;
-        
-        inputWrapper.addEventListener('mouseenter', () => {
-            const selectedAssignees = [
-                ...(this.currentFilters.people || []),
-                ...(this.currentFilters.companies || [])
-            ];
-            
-            if (selectedAssignees.length > 3) {
-                if (hoverTimeout) clearTimeout(hoverTimeout);
-                hoverTimeout = window.setTimeout(() => {
-                    tooltip.style.display = 'block';
-                }, 500);
-            }
-        });
-        
-        inputWrapper.addEventListener('mouseleave', () => {
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-            tooltip.style.display = 'none';
-        });
-
-        updateAssigneesDisplay();
-
-        assigneesInput.onclick = () => {
-            this.showAssigneeSelector(updateAssigneesDisplay);
-        };
-
-        // Clear button click handler
-        clearButton.onclick = (e) => {
-            e.stopPropagation();
-            this.updateFiltersCallback({ people: [], companies: [] });
-            updateAssigneesDisplay();
-        };
-
-        return updateAssigneesDisplay;
-    }
-
-    private renderRolesFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void, allDropdowns: HTMLElement[]): void {
-        const rolesGroup = container.createDiv('compact-filter-group');
-        rolesGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
-        const rolesIcon = rolesGroup.createEl('span', { cls: 'compact-filter-icon' });
-        setIcon(rolesIcon, 'axe');
-
-        const rolesDropdownContainer = rolesGroup.createDiv('compact-multiselect-container');
-        const rolesDisplay = rolesDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
-        addWhiteArrow(rolesDisplay);
-        const rolesDropdown = rolesDropdownContainer.createDiv('compact-multiselect-dropdown');
-        rolesDropdown.style.display = 'none';
-        allDropdowns.push(rolesDropdown);
-
-        const visibleRoles = this.plugin.getVisibleRoles();
-        const totalRoles = visibleRoles.length + 1; // +1 for "None" option
-
-        // Update roles display text
-        const updateRolesDisplay = () => {
-            const selectedRoles = this.currentFilters.roles || [];
-            if (selectedRoles.length === 0) {
-                rolesDisplay.setText('All Roles');
-            } else if (selectedRoles.length === totalRoles) {
-                rolesDisplay.setText('All Roles');
-            } else {
-                rolesDisplay.setText(`${selectedRoles.length} of ${totalRoles} Roles`);
-            }
-        };
-
-        // Store original roles for cancel functionality
-        let originalRoles = [...(this.currentFilters.roles || [])];
-        let tempRoles = [...originalRoles];
-
-        // Toggle dropdown
-        rolesDisplay.onclick = (e) => {
-            e.stopPropagation();
-            const isVisible = rolesDropdown.style.display !== 'none';
-            if (!isVisible) {
-                originalRoles = [...(this.currentFilters.roles || [])];
-                tempRoles = [...originalRoles];
-            }
-            rolesDropdown.style.display = isVisible ? 'none' : 'block';
-        };
-
-        this.setupRolesDropdownContent(rolesDropdown, visibleRoles, totalRoles, tempRoles, originalRoles, updateRolesDisplay);
-        updateRolesDisplay();
-    }
-
-    private setupRolesDropdownContent(
-        dropdown: HTMLElement,
-        visibleRoles: any[],
-        totalRoles: number,
-        tempRoles: string[],
-        originalRoles: string[],
-        updateDisplay: () => void
-    ): void {
-        const optionsContainer = dropdown.createDiv('compact-multiselect-options');
-
-        // Add "All Roles" option first
-        const allRolesLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-        const allRolesCheckbox = allRolesLabel.createEl('input', { type: 'checkbox' });
-        allRolesCheckbox.checked = tempRoles.length === totalRoles;
-        allRolesLabel.createSpan().setText('All Roles');
-
-        // Add "None" option for roles
-        const noneRoleLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-        const noneRoleCheckbox = noneRoleLabel.createEl('input', { type: 'checkbox' });
-        noneRoleCheckbox.checked = tempRoles.includes('none-set');
-        noneRoleLabel.createSpan().setText('None');
-
-        // Add visible roles
-        const roleCheckboxes: { checkbox: HTMLInputElement; id: string }[] = [
-            { checkbox: noneRoleCheckbox, id: 'none-set' }
-        ];
-
-        for (const role of visibleRoles) {
-            const roleLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-            const roleCheckbox = roleLabel.createEl('input', { type: 'checkbox' });
-            roleCheckbox.checked = tempRoles.includes(role.id);
-            roleLabel.createSpan().setText(`${role.icon} ${role.name}`);
-            roleCheckboxes.push({ checkbox: roleCheckbox, id: role.id });
-        }
-
-        // Update all checkboxes state
-        const updateRoleCheckboxes = () => {
-            allRolesCheckbox.checked = tempRoles.length === totalRoles;
-            roleCheckboxes.forEach(({ checkbox, id }) => {
-                checkbox.checked = tempRoles.includes(id);
-            });
-        };
-
-        // All Roles checkbox handler
-        allRolesCheckbox.onchange = (e) => {
-            e.stopPropagation();
-            if (allRolesCheckbox.checked) {
-                tempRoles.length = 0;
-                tempRoles.push('none-set', ...visibleRoles.map(r => r.id));
-            } else {
-                tempRoles.length = 0;
-            }
-            updateRoleCheckboxes();
-        };
-
-        // Individual role checkbox handlers
-        roleCheckboxes.forEach(({ checkbox, id }) => {
-            checkbox.onchange = (e) => {
-                e.stopPropagation();
-                if (checkbox.checked) {
-                    if (!tempRoles.includes(id)) {
-                        tempRoles.push(id);
-                    }
-                } else {
-                    const index = tempRoles.indexOf(id);
-                    if (index > -1) {
-                        tempRoles.splice(index, 1);
-                    }
-                }
-                updateRoleCheckboxes();
-            };
-        });
-
-        // Action buttons
-        this.setupMultiselectActions(dropdown, tempRoles, originalRoles, updateRoleCheckboxes, () => {
-            this.updateFiltersCallback({ roles: tempRoles });
-            updateDisplay();
-        });
-    }
-
-    private renderStatusFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void, allDropdowns: HTMLElement[]): void {
-        const statusGroup = container.createDiv('compact-filter-group');
-        statusGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
-        const statusIcon = statusGroup.createEl('span', { cls: 'compact-filter-icon' });
-        setIcon(statusIcon, 'check-circle');
-
-        const statusDropdownContainer = statusGroup.createDiv('compact-multiselect-container');
-        const statusDisplay = statusDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
-        addWhiteArrow(statusDisplay);
-        const statusDropdown = statusDropdownContainer.createDiv('compact-multiselect-dropdown');
-        statusDropdown.style.display = 'none';
-        allDropdowns.push(statusDropdown);
-
-        const statuses = [
-            { value: TaskStatus.TODO, label: 'To Do' },
-            { value: TaskStatus.IN_PROGRESS, label: 'In Progress' },
-            { value: TaskStatus.DONE, label: 'Done' },
-            { value: TaskStatus.CANCELLED, label: 'Cancelled' }
-        ];
-
-        // Store original statuses for cancel functionality
-        let originalStatuses: TaskStatus[] = [...(this.currentFilters.statuses || [])];
-        let tempStatuses: TaskStatus[] = [...originalStatuses];
-
-        // Update status display text
-        const updateStatusDisplay = () => {
-            const selectedStatuses = this.currentFilters.statuses || [];
-            if (selectedStatuses.length === 0) {
-                statusDisplay.setText('All Statuses');
-            } else if (selectedStatuses.length === statuses.length) {
-                statusDisplay.setText('All Statuses');
-            } else {
-                statusDisplay.setText(`${selectedStatuses.length} of ${statuses.length} Statuses`);
-            }
-        };
-
-        // Toggle dropdown
-        statusDisplay.onclick = (e) => {
-            e.stopPropagation();
-            const isVisible = statusDropdown.style.display !== 'none';
-            if (!isVisible) {
-                originalStatuses = [...(this.currentFilters.statuses || [])];
-                tempStatuses = [...originalStatuses];
-            }
-            statusDropdown.style.display = isVisible ? 'none' : 'block';
-        };
-
-        this.setupStatusDropdownContent(statusDropdown, statuses, tempStatuses, originalStatuses, updateStatusDisplay);
-        updateStatusDisplay();
-    }
-
-    private setupStatusDropdownContent(
-        dropdown: HTMLElement,
-        statuses: any[],
-        tempStatuses: TaskStatus[],
-        originalStatuses: TaskStatus[],
-        updateDisplay: () => void
-    ): void {
-        const optionsContainer = dropdown.createDiv('compact-multiselect-options');
-
-        // Add "All Statuses" option first
-        const allStatusLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-        const allStatusCheckbox = allStatusLabel.createEl('input', { type: 'checkbox' });
-        allStatusCheckbox.checked = tempStatuses.length === statuses.length;
-        allStatusLabel.createSpan().setText('All Statuses');
-
-        // Add status options
-        const statusCheckboxes: { checkbox: HTMLInputElement; value: TaskStatus }[] = [];
-
-        for (const status of statuses) {
-            const statusLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-            const statusCheckbox = statusLabel.createEl('input', { type: 'checkbox' });
-            statusCheckbox.checked = tempStatuses.includes(status.value);
-            statusLabel.createSpan().setText(status.label);
-            statusCheckboxes.push({ checkbox: statusCheckbox, value: status.value });
-        }
-
-        // Update all checkboxes state
-        const updateStatusCheckboxes = () => {
-            allStatusCheckbox.checked = tempStatuses.length === statuses.length;
-            statusCheckboxes.forEach(({ checkbox, value }) => {
-                checkbox.checked = tempStatuses.includes(value);
-            });
-        };
-
-        // All Status checkbox handler
-        allStatusCheckbox.onchange = (e) => {
-            e.stopPropagation();
-            if (allStatusCheckbox.checked) {
-                tempStatuses.length = 0;
-                tempStatuses.push(...statuses.map(s => s.value));
-            } else {
-                tempStatuses.length = 0;
-            }
-            updateStatusCheckboxes();
-        };
-
-        // Individual status checkbox handlers
-        statusCheckboxes.forEach(({ checkbox, value }) => {
-            checkbox.onchange = (e) => {
-                e.stopPropagation();
-                if (checkbox.checked) {
-                    if (!tempStatuses.includes(value)) {
-                        tempStatuses.push(value);
-                    }
-                } else {
-                    const index = tempStatuses.indexOf(value);
-                    if (index > -1) {
-                        tempStatuses.splice(index, 1);
-                    }
-                }
-                updateStatusCheckboxes();
-            };
-        });
-
-        // Action buttons
-        this.setupMultiselectActions(dropdown, tempStatuses, originalStatuses, updateStatusCheckboxes, () => {
-            this.updateFiltersCallback({ statuses: tempStatuses });
-            updateDisplay();
-        });
-    }
-
-    private renderPriorityFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void, allDropdowns: HTMLElement[]): void {
-        const priorityGroup = container.createDiv('compact-filter-group');
-        priorityGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
-        const priorityIcon = priorityGroup.createEl('span', { cls: 'compact-filter-icon' });
-        setIcon(priorityIcon, 'flag');
-
-        const priorityDropdownContainer = priorityGroup.createDiv('compact-multiselect-container');
-        const priorityDisplay = priorityDropdownContainer.createEl('button', { cls: 'compact-multiselect-display' });
-        addWhiteArrow(priorityDisplay);
-        const priorityDropdown = priorityDropdownContainer.createDiv('compact-multiselect-dropdown');
-        priorityDropdown.style.display = 'none';
-        allDropdowns.push(priorityDropdown);
-
-        const priorities = [
-            { value: TaskPriority.HIGHEST, label: 'Urgent' },
-            { value: TaskPriority.HIGH, label: 'High' },
-            { value: TaskPriority.MEDIUM, label: 'Medium' },
-            { value: TaskPriority.NONE, label: 'Normal' },
-            { value: TaskPriority.LOW, label: 'Low' },
-            { value: TaskPriority.LOWEST, label: 'Lowest' }
-        ];
-        const totalPriorities = priorities.length;
-
-        // Store original priorities for cancel functionality
-        let originalPriorities: TaskPriority[] = [...(this.currentFilters.priorities || [])];
-        let tempPriorities: TaskPriority[] = [...originalPriorities];
-
-        // Update priority display text
-        const updatePriorityDisplay = () => {
-            const selectedPriorities = this.currentFilters.priorities || [];
-            if (selectedPriorities.length === 0) {
-                priorityDisplay.setText('All Priorities');
-            } else if (selectedPriorities.length === totalPriorities) {
-                priorityDisplay.setText('All Priorities');
-            } else {
-                priorityDisplay.setText(`${selectedPriorities.length} of ${totalPriorities} Priorities`);
-            }
-        };
-
-        // Toggle dropdown
-        priorityDisplay.onclick = (e) => {
-            e.stopPropagation();
-            const isVisible = priorityDropdown.style.display !== 'none';
-            if (!isVisible) {
-                originalPriorities = [...(this.currentFilters.priorities || [])];
-                tempPriorities = [...originalPriorities];
-            }
-            priorityDropdown.style.display = isVisible ? 'none' : 'block';
-        };
-
-        this.setupPriorityDropdownContent(priorityDropdown, priorities, totalPriorities, tempPriorities, originalPriorities, updatePriorityDisplay);
-        updatePriorityDisplay();
-    }
-
-    private setupPriorityDropdownContent(
-        dropdown: HTMLElement,
-        priorities: any[],
-        totalPriorities: number,
-        tempPriorities: TaskPriority[],
-        originalPriorities: TaskPriority[],
-        updateDisplay: () => void
-    ): void {
-        const optionsContainer = dropdown.createDiv('compact-multiselect-options');
-
-        // Add "All Priorities" option first
-        const allPrioritiesLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-        const allPrioritiesCheckbox = allPrioritiesLabel.createEl('input', { type: 'checkbox' });
-        allPrioritiesCheckbox.checked = tempPriorities.length === totalPriorities;
-        allPrioritiesLabel.createSpan().setText('All Priorities');
-
-        // Add priority options
-        const priorityCheckboxes: { checkbox: HTMLInputElement; value: TaskPriority }[] = [];
-
-        for (const priority of priorities) {
-            const priorityLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
-            const priorityCheckbox = priorityLabel.createEl('input', { type: 'checkbox' });
-            priorityCheckbox.checked = tempPriorities.includes(priority.value);
-            priorityLabel.createSpan().setText(priority.label);
-            priorityCheckboxes.push({ checkbox: priorityCheckbox, value: priority.value });
-        }
-
-        // Update all checkboxes state
-        const updatePriorityCheckboxes = () => {
-            allPrioritiesCheckbox.checked = tempPriorities.length === totalPriorities;
-            priorityCheckboxes.forEach(({ checkbox, value }) => {
-                checkbox.checked = tempPriorities.includes(value);
-            });
-        };
-
-        // All Priorities checkbox handler
-        allPrioritiesCheckbox.onchange = (e) => {
-            e.stopPropagation();
-            if (allPrioritiesCheckbox.checked) {
-                tempPriorities.length = 0;
-                tempPriorities.push(...priorities.map(p => p.value));
-            } else {
-                tempPriorities.length = 0;
-            }
-            updatePriorityCheckboxes();
-        };
-
-        // Individual priority checkbox handlers
-        priorityCheckboxes.forEach(({ checkbox, value }) => {
-            checkbox.onchange = (e) => {
-                e.stopPropagation();
-                if (checkbox.checked) {
-                    if (!tempPriorities.includes(value)) {
-                        tempPriorities.push(value);
-                    }
-                } else {
-                    const index = tempPriorities.indexOf(value);
-                    if (index > -1) {
-                        tempPriorities.splice(index, 1);
-                    }
-                }
-                updatePriorityCheckboxes();
-            };
-        });
-
-        // Action buttons
-        this.setupMultiselectActions(dropdown, tempPriorities, originalPriorities, updatePriorityCheckboxes, () => {
-            this.updateFiltersCallback({ priorities: tempPriorities });
-            updateDisplay();
-        });
-    }
-
-    private renderDateFilter(container: HTMLElement, addWhiteArrow: (element: HTMLElement) => void): () => void {
-        const dateGroup = container.createDiv('compact-filter-group');
-        dateGroup.createEl('label', { text: '', cls: 'compact-filter-label' });
-        const dateIcon = dateGroup.createEl('span', { cls: 'compact-filter-icon' });
-        setIcon(dateIcon, 'calendar');
-
-        const dateContainer = dateGroup.createDiv('compact-date-container');
-
-        // Date type select
-        const dateTypeSelect = dateContainer.createEl('select', { cls: 'compact-filter-select compact-date-type' });
-        addWhiteArrow(dateTypeSelect);
-        const dateTypes = [
-            { value: DateType.DUE, label: 'Due' },
-            { value: DateType.DONE, label: 'Done' },
-            { value: DateType.SCHEDULED, label: 'Scheduled' },
-            { value: DateType.START, label: 'Start' },
-            { value: DateType.CREATED, label: 'Created' },
-            { value: DateType.CANCELLED, label: 'Cancelled' },
-            { value: DateType.HAPPENS, label: 'Happens' }
-        ];
-
-        for (const dateType of dateTypes) {
-            dateTypeSelect.createEl('option', { value: dateType.value, text: dateType.label });
-        }
-
-        dateTypeSelect.onchange = () => {
-            this.updateFiltersCallback({ dateType: dateTypeSelect.value as DateType });
-        };
-
-        // Date range inputs
-        const fromInput = dateContainer.createEl('input', {
-            type: 'date',
-            cls: 'compact-filter-date',
-            title: 'From date'
-        });
-        fromInput.onchange = () => {
-            const from = fromInput.value ? new Date(fromInput.value) : undefined;
-            this.updateFiltersCallback({
-                dateRange: {
-                    from,
-                    to: this.currentFilters.dateRange?.to,
-                    includeNotSet: this.currentFilters.dateRange?.includeNotSet || false
-                }
-            });
-        };
-
-        const toInput = dateContainer.createEl('input', {
-            type: 'date',
-            cls: 'compact-filter-date',
-            title: 'To date'
-        });
-        toInput.onchange = () => {
-            const to = toInput.value ? new Date(toInput.value) : undefined;
-            this.updateFiltersCallback({
-                dateRange: {
-                    from: this.currentFilters.dateRange?.from,
-                    to,
-                    includeNotSet: this.currentFilters.dateRange?.includeNotSet || false
-                }
-            });
-        };
-
-        // Include not set checkbox
-        const includeNotSetLabel = dateContainer.createEl('label', { cls: 'compact-date-checkbox' });
-        const includeNotSetCheckbox = includeNotSetLabel.createEl('input', { type: 'checkbox' });
-        includeNotSetCheckbox.onchange = () => {
-            this.updateFiltersCallback({
-                dateRange: {
-                    from: this.currentFilters.dateRange?.from,
-                    to: this.currentFilters.dateRange?.to,
-                    includeNotSet: includeNotSetCheckbox.checked
-                }
-            });
-        };
-        const noDatesIcon = includeNotSetLabel.createEl('span');
-        setIcon(noDatesIcon, 'calendar-x');
-        includeNotSetLabel.title = 'Include tasks without dates';
-
-        const updateDisplay = () => {
-            dateTypeSelect.value = this.currentFilters.dateType || DateType.DUE;
-            fromInput.value = this.currentFilters.dateRange?.from?.toISOString().split('T')[0] || '';
-            toInput.value = this.currentFilters.dateRange?.to?.toISOString().split('T')[0] || '';
-            includeNotSetCheckbox.checked = this.currentFilters.dateRange?.includeNotSet || false;
-        };
-
-        updateDisplay();
-
-        return updateDisplay;
     }
 
     private renderFilterActions(container: HTMLElement): void {
@@ -674,17 +162,6 @@ export class CompactFiltersComponent {
             this.resetFiltersCallback();
         };
 
-        // Cancel button
-        const cancelFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-cancel' });
-        const cancelFiltersIcon = cancelFiltersBtn.createEl('span');
-        setIcon(cancelFiltersIcon, 'x-circle');
-        cancelFiltersBtn.title = 'Cancel';
-        cancelFiltersBtn.style.display = this.plugin.settings.autoApplyFilters ? 'none' : 'block';
-        cancelFiltersBtn.onclick = () => {
-            // Clear all filters
-            this.updateFiltersCallback({});
-        };
-
         // Apply Filters button
         const applyFiltersBtn = actionsGroup.createEl('button', { cls: 'compact-filter-btn compact-filter-apply' });
         const applyFiltersIcon = applyFiltersBtn.createEl('span');
@@ -694,6 +171,7 @@ export class CompactFiltersComponent {
         applyFiltersBtn.onclick = () => {
             // Apply current filters
             this.updateFiltersCallback(this.currentFilters);
+            this.applyFiltersCallback();
         };
 
         // Auto Apply toggle
@@ -707,7 +185,6 @@ export class CompactFiltersComponent {
             // Show/hide buttons based on Auto Apply setting
             const shouldHide = autoApplyCheckbox.checked;
             applyFiltersBtn.style.display = shouldHide ? 'none' : 'block';
-            cancelFiltersBtn.style.display = shouldHide ? 'none' : 'block';
 
             // If Auto Apply is enabled, apply filters immediately
             if (autoApplyCheckbox.checked) {
@@ -784,33 +261,6 @@ export class CompactFiltersComponent {
         // Store cleanup function for when view is destroyed
         this.registerCallback(() => {
             document.removeEventListener('click', handleOutsideClick);
-        });
-    }
-
-    private showAssigneeSelector(updateCallback: () => void): void {
-        import('../modals/contact-company-picker-modal').then(({ ContactCompanyPickerModal }) => {
-            new ContactCompanyPickerModal(this.plugin.app, this.plugin, (selectedAssignee: string) => {
-                // Determine if it's a person or company based on the symbol
-                const isPerson = selectedAssignee.startsWith(this.plugin.settings.contactSymbol);
-                const isCompany = selectedAssignee.startsWith(this.plugin.settings.companySymbol);
-
-                if (isPerson) {
-                    const currentPeople = this.currentFilters.people || [];
-                    const newPeople = currentPeople.includes(selectedAssignee)
-                        ? currentPeople.filter(p => p !== selectedAssignee)
-                        : [...currentPeople, selectedAssignee];
-                    this.updateFiltersCallback({ people: newPeople });
-                } else if (isCompany) {
-                    const currentCompanies = this.currentFilters.companies || [];
-                    const newCompanies = currentCompanies.includes(selectedAssignee)
-                        ? currentCompanies.filter(c => c !== selectedAssignee)
-                        : [...currentCompanies, selectedAssignee];
-                    this.updateFiltersCallback({ companies: newCompanies });
-                }
-
-                // Update the display
-                updateCallback();
-            }, { mode: 'readonly', keepOpen: true }).open();
         });
     }
 }
