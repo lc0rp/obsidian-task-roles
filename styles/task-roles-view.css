@@ -736,7 +736,7 @@
     flex-shrink: 0;
     background-color: var(--background-secondary);
     border-radius: 8px;
-    padding: 16px;
+    padding: 0;
     border: 1px solid var(--background-modifier-border);
     display: flex;
     flex-direction: column;
@@ -748,15 +748,15 @@
 .task-roles-column.task-query-column {
     min-width: 260px;
     max-width: 300px;
-    padding: 12px;
+    padding: 0;
 }
 
 .task-roles-column-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    margin-bottom: 0;
+    padding: 0px 16px 0px 16px;
     border-bottom: 1px solid var(--background-modifier-border);
 }
 
@@ -777,7 +777,7 @@
 .task-roles-column-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
     flex: 1;
     overflow-y: auto;
     min-height: 0;
@@ -813,12 +813,13 @@
 
 /* Enhanced Task Card Styling - Based on Tasks Plugin Style */
 .task-query-display .task-list-item {
-    margin: 0 0 8px 0 !important;
+    margin: 0 !important;
     padding: 12px !important;
     background: var(--background-primary) !important;
-    border: 1px solid var(--background-modifier-border) !important;
-    border-radius: 6px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    border: none !important;
+    border-bottom: 1px solid var(--background-modifier-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     transition: all 0.2s ease !important;
     position: relative !important;
     list-style: none !important;
@@ -828,16 +829,16 @@
 
 .task-query-display .task-list-item:hover {
     background: var(--background-modifier-hover) !important;
-    border-color: var(--interactive-accent) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    border-bottom-color: var(--interactive-accent) !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 /* Task content layout */
 .task-query-display .task-list-item .task {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 6px !important;
     width: 100% !important;
 }
 
@@ -850,16 +851,18 @@
     transform: scale(1.0) !important;
 }
 
-/* Task content wrapper - offset for checkbox */
+/* Task content wrapper - positioned below checkbox and priority with better typography */
 .task-query-display .task-list-item .task-description,
 .task-query-display .task-list-item > p {
-    margin-left: 20px !important;
+    margin-left: 0 !important;
+    margin-top: 22px !important;
     margin-bottom: 0 !important;
-    line-height: 1.3 !important;
-    font-size: 13px !important;
+    line-height: 1.4 !important;
+    font-size: 12.5px !important;
     color: var(--text-normal) !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
+    font-weight: 400 !important;
 }
 
 /* Priority-based styling classes */
@@ -883,13 +886,14 @@
     background: linear-gradient(90deg, rgba(76, 175, 80, 0.05) 0%, var(--background-primary) 20%) !important;
 }
 
-/* Task metadata styling - dates, assignees, tags */
+/* Task metadata styling - dates, assignees, tags with better spacing */
 .task-query-display .task-list-item .task-metadata {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 4px !important;
-    margin-top: 6px !important;
-    margin-left: 20px !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    align-items: center !important;
 }
 
 .task-query-display .task-list-item .task-tag,
@@ -897,18 +901,44 @@
 .task-query-display .task-list-item .task-assignee {
     display: inline-flex !important;
     align-items: center !important;
-    padding: 2px 6px !important;
-    border-radius: 12px !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
+    padding: 2px 5px !important;
+    border-radius: 6px !important;
+    font-size: 10px !important;
+    font-weight: 400 !important;
     white-space: nowrap !important;
+    line-height: 1.2 !important;
 }
 
-/* Date styling */
+/* Date styling - smaller and more subtle with icons */
 .task-query-display .task-list-item .task-date {
-    background: var(--background-secondary) !important;
+    background: var(--background-modifier-border) !important;
     color: var(--text-muted) !important;
-    border: 1px solid var(--background-modifier-border) !important;
+    border: none !important;
+    opacity: 0.8 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+/* Date type icons */
+.task-query-display .task-list-item .task-date[data-date-type="due"]::before {
+    content: '📅' !important;
+    font-size: 8px !important;
+}
+
+.task-query-display .task-list-item .task-date[data-date-type="scheduled"]::before {
+    content: '⏰' !important;
+    font-size: 8px !important;
+}
+
+.task-query-display .task-list-item .task-date[data-date-type="completed"]::before {
+    content: '✅' !important;
+    font-size: 8px !important;
+}
+
+.task-query-display .task-list-item .task-date[data-date-type="created"]::before {
+    content: '📝' !important;
+    font-size: 8px !important;
 }
 
 .task-query-display .task-list-item .task-date.overdue {
@@ -917,30 +947,34 @@
     border-color: var(--text-error) !important;
 }
 
-/* Role and assignee styling */
+/* Role and assignee styling - more subtle */
 .task-query-display .task-list-item .task-role {
     background: var(--interactive-accent) !important;
     color: var(--text-on-accent) !important;
-    border: 1px solid var(--interactive-accent) !important;
-    font-weight: 600 !important;
+    border: none !important;
+    font-weight: 500 !important;
+    opacity: 0.9 !important;
 }
 
 .task-query-display .task-list-item .task-assignee {
     background: var(--color-cyan) !important;
     color: var(--text-on-accent) !important;
-    border: 1px solid var(--color-cyan) !important;
+    border: none !important;
+    opacity: 0.9 !important;
 }
 
 .task-query-display .task-list-item .task-assignee.company {
     background: var(--color-purple) !important;
-    border-color: var(--color-purple) !important;
+    border: none !important;
+    opacity: 0.9 !important;
 }
 
-/* Tag styling */
+/* Tag styling - more subtle */
 .task-query-display .task-list-item .task-tag {
     background: var(--tag-background) !important;
     color: var(--tag-color) !important;
-    border: 1px solid var(--tag-border-color) !important;
+    border: none !important;
+    opacity: 0.8 !important;
 }
 
 /* Progressive disclosure classes */
@@ -956,17 +990,23 @@
     display: flex !important;
 }
 
-/* Priority badges */
+/* Priority badges - icon-based with subtle styling */
 .task-query-display .task-list-item .task-priority {
     position: absolute !important;
     top: 12px !important;
     right: 12px !important;
-    padding: 3px 8px !important;
-    border-radius: 12px !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
+    padding: 3px !important;
+    border-radius: 50% !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0 !important;
+    opacity: 0.7 !important;
+    width: 16px !important;
+    height: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .task-query-display .task-list-item.priority-urgent .task-priority {
@@ -974,9 +1014,21 @@
     color: var(--text-on-accent) !important;
 }
 
+.task-query-display .task-list-item.priority-urgent .task-priority::after {
+    content: '!' !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
 .task-query-display .task-list-item.priority-high .task-priority {
     background: var(--color-orange) !important;
     color: var(--text-on-accent) !important;
+}
+
+.task-query-display .task-list-item.priority-high .task-priority::after {
+    content: 'H' !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
 }
 
 .task-query-display .task-list-item.priority-medium .task-priority {
@@ -984,9 +1036,21 @@
     color: var(--text-on-accent) !important;
 }
 
+.task-query-display .task-list-item.priority-medium .task-priority::after {
+    content: 'M' !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
+}
+
 .task-query-display .task-list-item.priority-low .task-priority {
     background: var(--color-green) !important;
     color: var(--text-on-accent) !important;
+}
+
+.task-query-display .task-list-item.priority-low .task-priority::after {
+    content: 'L' !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
 }
 
 /* Ensure task blocks within columns are constrained */
@@ -1019,7 +1083,7 @@ ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency,
 }
 
 .task-roles-column .task-list-item {
-    margin-bottom: 4px;
+    margin-bottom: 0;
 }
 
 /* Ensure code blocks containing tasks are constrained */
