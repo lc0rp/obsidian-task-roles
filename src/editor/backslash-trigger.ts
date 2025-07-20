@@ -1,57 +1,99 @@
 import { ViewPlugin } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
-import { App, MarkdownView } from 'obsidian';
-import { TaskRolesPluginSettings, Role } from '../types';
-import { TaskUtils } from '../utils/task-regex';
+import { App, MarkdownView } from "obsidian";
+import { TaskRolesPluginSettings, Role } from "../types";
+import { TaskUtils } from "../utils/task-regex";
 
 export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
-    return ViewPlugin.fromClass(class {
-        constructor(readonly view: EditorView) {
-            this.onKey = this.onKey.bind(this);
-            view.dom.addEventListener("keydown", this.onKey, true); // capture phase
-        }
+	return ViewPlugin.fromClass(
+		class {
+			private currentPopup: HTMLElement | null = null;
 
-        onKey(e: KeyboardEvent) {
-            if (e.key !== "\\") return;
-            e.stopPropagation();          // keep Tasks quiet
-            e.preventDefault();
+			constructor(readonly view: EditorView) {
+				this.onKey = this.onKey.bind(this);
+				view.dom.addEventListener("keydown", this.onKey, true); // capture phase
+			}
 
-            // Get the current cursor position and create a simple role selector
-            this.openRoleSelector();
-        }
+			onKey(e: KeyboardEvent) {
+				if (e.key !== "\\") return;
+				
+				// If a popup is already open, close it and propagate the backslash normally
+				if (this.currentPopup) {
+					this.closePopup();
+					return;
+				}
+				
+				e.stopPropagation(); // keep Tasks quiet
+				e.preventDefault();
 
-        private openRoleSelector() {
-            // Get the active markdown view
-            const activeView = app.workspace.getActiveViewOfType(MarkdownView);
-            if (!activeView) return;
+				// Get the current cursor position and create a simple role selector
+				this.openRoleSelector();
+			}
 
-            const editor = activeView.editor;
-            const cursor = editor.getCursor();
+			private openRoleSelector() {
+				// Get the active markdown view
+				const activeView =
+					app.workspace.getActiveViewOfType(MarkdownView);
+				if (!activeView) return;
 
-            // Check if we're in a task code block
-            const isInTaskBlock = this.isInTaskCodeBlock(editor, cursor.line);
+				const editor = activeView.editor;
+				const cursor = editor.getCursor();
 
-            // Get visible roles
-            const visibleRoles = settings.roles.filter(role =>
-                !role.isDefault || !settings.hiddenDefaultRoles.includes(role.id)
-            );
+				// Check if we're in a task code block
+				const isInTaskBlock = this.isInTaskCodeBlock(
+					editor,
+					cursor.line
+				);
 
-            // Get the current line to check for existing roles
-            const line = editor.getLine(cursor.line);
-            const existingRoleIds = TaskUtils.getExistingRoles(line, visibleRoles);
+				// Get visible roles
+				const visibleRoles = settings.roles.filter(
+					(role) =>
+						!role.isDefault ||
+						!settings.hiddenDefaultRoles.includes(role.id)
+				);
 
-            // Filter out roles that are already present on the line
-            const availableRoles = visibleRoles.filter(role => !existingRoleIds.includes(role.id));
+				// Get the current line to check for existing roles
+				const line = editor.getLine(cursor.line);
+				const existingRoleIds = TaskUtils.getExistingRoles(
+					line,
+					visibleRoles
+				);
 
-            // Create a simple popup with role options
-            this.showRolePopup(availableRoles, editor, cursor, isInTaskBlock);
-        }
+				// Filter out roles that are already present on the line
+				const availableRoles = visibleRoles.filter(
+					(role) => !existingRoleIds.includes(role.id)
+				);
 
-        private showRolePopup(roles: Role[], editor: any, cursor: any, isInTaskBlock: boolean) {
-            // Create popup container
-            const popup = document.createElement('div');
-            popup.className = 'backslash-trigger-popup';
-            popup.style.cssText = `
+				// Create a simple popup with role options
+				this.showRolePopup(
+					availableRoles,
+					editor,
+					cursor,
+					isInTaskBlock
+				);
+			}
+
+			private closePopup() {
+				if (this.currentPopup) {
+					this.currentPopup.remove();
+					this.currentPopup = null;
+				}
+			}
+
+			private showRolePopup(
+				roles: Role[],
+				editor: any,
+				cursor: any,
+				isInTaskBlock: boolean
+			) {
+				// Close any existing popup
+				this.closePopup();
+
+				// Create popup container
+				const popup = document.createElement("div");
+				this.currentPopup = popup;
+				popup.className = "backslash-trigger-popup";
+				popup.style.cssText = `
         position: fixed;
         background: var(--background-primary);
         border: 1px solid var(--background-modifier-border);
@@ -63,11 +105,11 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
         min-width: 200px;
       `;
 
-            // Add role options
-            roles.forEach((role, index) => {
-                const option = document.createElement('div');
-                option.className = 'backslash-trigger-option';
-                option.style.cssText = `
+				// Add role options
+				roles.forEach((role, index) => {
+					const option = document.createElement("div");
+					option.className = "backslash-trigger-option";
+					option.style.cssText = `
           padding: 8px 12px;
           cursor: pointer;
           display: flex;
@@ -75,122 +117,158 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
           gap: 8px;
         `;
 
-                option.innerHTML = `<span>${role.icon}</span> <span>${role.name}</span>`;
+					option.innerHTML = `<span>${role.icon}</span> <span>${role.name}</span>`;
 
-                if (index === 0) {
-                    option.style.backgroundColor = 'var(--background-modifier-hover)';
-                    option.classList.add('selected');
-                }
+					if (index === 0) {
+						option.style.backgroundColor =
+							"var(--background-modifier-hover)";
+						option.classList.add("selected");
+					}
 
-                option.addEventListener('click', () => {
-                    this.selectRole(role, editor, cursor, isInTaskBlock);
-                    popup.remove();
-                });
+					option.addEventListener("click", () => {
+						this.selectRole(role, editor, cursor, isInTaskBlock);
+						this.closePopup();
+					});
 
-                popup.appendChild(option);
-            });
+					popup.appendChild(option);
+				});
 
-            // Position popup near cursor
-            const coords = editor.coordsAtPos(cursor);
-            if (coords) {
-                popup.style.left = coords.left + 'px';
-                popup.style.top = (coords.bottom + 5) + 'px';
-            }
+				// Position popup near cursor
+				const coords = editor.coordsAtPos(cursor);
+				if (coords) {
+					popup.style.left = coords.left + "px";
+					popup.style.top = coords.bottom + 5 + "px";
+				}
 
-            document.body.appendChild(popup);
+				document.body.appendChild(popup);
 
-            // Handle keyboard navigation
-            let selectedIndex = 0;
-            const options = popup.querySelectorAll('.backslash-trigger-option');
+				// Handle keyboard navigation
+				let selectedIndex = 0;
+				const options = popup.querySelectorAll(
+					".backslash-trigger-option"
+				);
 
-            const keyHandler = (e: KeyboardEvent) => {
-                if (e.key === 'Escape' || e.key === '\\') {
-                    e.preventDefault();
-                    popup.remove();
-                    document.removeEventListener('keydown', keyHandler);
-                    editor.replaceRange('\\', cursor);
-                    editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    options[selectedIndex].classList.remove('selected');
-                    (options[selectedIndex] as HTMLElement).style.backgroundColor = '';
-                    selectedIndex = (selectedIndex + 1) % options.length;
-                    options[selectedIndex].classList.add('selected');
-                    (options[selectedIndex] as HTMLElement).style.backgroundColor = 'var(--background-modifier-hover)';
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    options[selectedIndex].classList.remove('selected');
-                    (options[selectedIndex] as HTMLElement).style.backgroundColor = '';
-                    selectedIndex = (selectedIndex - 1 + options.length) % options.length;
-                    options[selectedIndex].classList.add('selected');
-                    (options[selectedIndex] as HTMLElement).style.backgroundColor = 'var(--background-modifier-hover)';
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const selectedRole = roles[selectedIndex];
-                    this.selectRole(selectedRole, editor, cursor, isInTaskBlock);
-                    popup.remove();
-                    document.removeEventListener('keydown', keyHandler);
-                }
-            };
+				const keyHandler = (e: KeyboardEvent) => {
+					if (e.key === "Escape" || e.key === "\\") {
+						e.preventDefault();
+						this.closePopup();
+						document.removeEventListener("keydown", keyHandler);
+						editor.replaceRange("\\", cursor);
+						editor.setCursor({
+							line: cursor.line,
+							ch: cursor.ch + 1,
+						});
+					} else if (e.key === "ArrowDown") {
+						e.preventDefault();
+						options[selectedIndex].classList.remove("selected");
+						(
+							options[selectedIndex] as HTMLElement
+						).style.backgroundColor = "";
+						selectedIndex = (selectedIndex + 1) % options.length;
+						options[selectedIndex].classList.add("selected");
+						(
+							options[selectedIndex] as HTMLElement
+						).style.backgroundColor =
+							"var(--background-modifier-hover)";
+					} else if (e.key === "ArrowUp") {
+						e.preventDefault();
+						options[selectedIndex].classList.remove("selected");
+						(
+							options[selectedIndex] as HTMLElement
+						).style.backgroundColor = "";
+						selectedIndex =
+							(selectedIndex - 1 + options.length) %
+							options.length;
+						options[selectedIndex].classList.add("selected");
+						(
+							options[selectedIndex] as HTMLElement
+						).style.backgroundColor =
+							"var(--background-modifier-hover)";
+					} else if (e.key === "Enter") {
+						e.preventDefault();
+						const selectedRole = roles[selectedIndex];
+						this.selectRole(
+							selectedRole,
+							editor,
+							cursor,
+							isInTaskBlock
+						);
+						this.closePopup();
+						document.removeEventListener("keydown", keyHandler);
+					}
+				};
 
-            document.addEventListener('keydown', keyHandler);
+				document.addEventListener("keydown", keyHandler);
 
-            // Close popup on click outside
-            const clickHandler = (e: MouseEvent) => {
-                if (!popup.contains(e.target as Node)) {
-                    popup.remove();
-                    document.removeEventListener('click', clickHandler);
-                    document.removeEventListener('keydown', keyHandler);
-                }
-            };
+				// Close popup on click outside
+				const clickHandler = (e: MouseEvent) => {
+					if (!popup.contains(e.target as Node)) {
+						this.closePopup();
+						document.removeEventListener("click", clickHandler);
+						document.removeEventListener("keydown", keyHandler);
+					}
+				};
 
-            setTimeout(() => {
-                document.addEventListener('click', clickHandler);
-            }, 0);
-        }
+				setTimeout(() => {
+					document.addEventListener("click", clickHandler);
+				}, 0);
+			}
 
-        private selectRole(role: Role, editor: any, cursor: any, isInTaskBlock: boolean) {
-            const replacement = isInTaskBlock ? `${role.icon} = ` : `[${role.icon}:: ]`;
+			private selectRole(
+				role: Role,
+				editor: any,
+				cursor: any,
+				isInTaskBlock: boolean
+			) {
+				const replacement = isInTaskBlock
+					? `${role.icon} = `
+					: `[${role.icon}:: ]`;
 
-            // Replace the backslash with the role
-            const startPos = { line: cursor.line, ch: cursor.ch - 1 };
-            editor.replaceRange(replacement, startPos, cursor);
+				// Replace the backslash with the role
+				const startPos = { line: cursor.line, ch: cursor.ch - 1 };
+				editor.replaceRange(replacement, startPos, cursor);
 
-            // Position cursor
-            const cursorPos = {
-                line: cursor.line,
-                ch: cursor.ch - 1 + replacement.length - (isInTaskBlock ? 0 : 1)
-            };
-            editor.setCursor(cursorPos);
-        }
+				// Position cursor
+				const cursorPos = {
+					line: cursor.line,
+					ch:
+						cursor.ch -
+						1 +
+						replacement.length -
+						(isInTaskBlock ? 0 : 1),
+				};
+				editor.setCursor(cursorPos);
+			}
 
-        private isInTaskCodeBlock(editor: any, line: number): boolean {
-            // Simple implementation - check for task code blocks
-            let inside = false;
-            let lang = '';
+			private isInTaskCodeBlock(editor: any, line: number): boolean {
+				// Simple implementation - check for task code blocks
+				let inside = false;
+				let lang = "";
 
-            for (let i = 0; i <= line; i++) {
-                const text = editor.getLine(i).trim();
-                const match = text.match(/^```([\w-]*)/);
+				for (let i = 0; i <= line; i++) {
+					const text = editor.getLine(i).trim();
+					const match = text.match(/^```([\w-]*)/);
 
-                if (match) {
-                    const currentLang = (match[1] || '').toLowerCase();
+					if (match) {
+						const currentLang = (match[1] || "").toLowerCase();
 
-                    if (!inside) {
-                        inside = true;
-                        lang = currentLang;
-                    } else {
-                        inside = false;
-                        lang = '';
-                    }
-                }
-            }
+						if (!inside) {
+							inside = true;
+							lang = currentLang;
+						} else {
+							inside = false;
+							lang = "";
+						}
+					}
+				}
 
-            return inside && (lang === 'tasks' || lang === 'dataview');
-        }
+				return inside && (lang === "tasks" || lang === "dataview");
+			}
 
-        destroy() {
-            this.view.dom.removeEventListener("keydown", this.onKey, true);
-        }
-    });
-} 
+			destroy() {
+				this.closePopup();
+				this.view.dom.removeEventListener("keydown", this.onKey, true);
+			}
+		}
+	);
+}
