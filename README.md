@@ -1,331 +1,160 @@
-# Task Roles
+# Task Roles 🗂️
 
-Track who owns a task, who needs to be informed about it, who to follow up with, and more.
+_Assign DACI-style roles (“Driver, Approver, Contributor, Informed” or your own) to any markdown task and review them in
+a powerful Task Center._
 
-"Task Roles" lets you assign roles, contacts, and groups (or companies) to tasks using DACI (Driver, Approver, Contributors
-, Informed) methodology.
+[![Latest release](https://img.shields.io/github/v/release/lc0rp/obsidian-task-roles?label=release)](https://github.com/lc0rp/obsidian-task-roles/releases)
+[![Downloads](https://img.shields.io/github/downloads/lc0rp/obsidian-task-roles/total)](https://github.com/lc0rp/obsidian-task-roles/releases)
+[![License](https://img.shields.io/github/license/lc0rp/obsidian-task-roles)](LICENSE.md)
 
-## Features
+---
 
-### 🎯 Quick Role Updates
+I often find myself creating sub-tasks like: _Update legal weekly_, or _Inform Jane about supplier delays_, and wishing
+I could add this context to the main task instead.  Tags become messy quickly; they're too unstructured for me.
 
-- **One-click role update**: A person icon (👤) appears at the end of every task line for instant access
-- **Smart detection**: Icons appear automatically when you start typing task content
-- **Natural workflow**: The cursor stays between the checkbox and icon, so you can type naturally
+So I've built **Task Roles**, an [Obsidian](https://obsidian.md/) plugin, to provide a quick shorthand for adding and
+tracking who’s involved and how, directly within tasks.
 
-### 👥 Contact & Company Management
+If you find this helpful or have ideas to improve it, I'd love to hear from you!
 
-- Link tasks to contacts using `@` prefix (e.g., `@John`)
-- Link tasks to companies using `+` prefix (e.g., `+AcmeCorp`)
-- Auto-complete suggestions from configured directories
-- Special `@me` contact for self-reference
+---
 
-### 🎭 Default Roles, based on DACI methodology
+## ✨ Why you’ll love it
 
-- **Drivers** 🚗: Who is responsible for driving the task forward
-- **Approvers** 👍: Who needs to approve the task
-- **Contributors** 👥: Who will contribute to the task
-- **Informed** 📢: Who needs to be kept informed
-- **Quick shortcuts**: Type `\d`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
-  This also works inside `tasks` or `taskview` query blocks, where the shortcut inserts `🚗 =` style markup.
-- **Smart filtering**: Role suggestions only show roles that aren't already present on the task line
+* **One-click role assignment** – a tiny 👤 icon appears at the end of every task line; click to pick people/companies
+and their role.
+* **Inline shortcuts** – type `\d`, `\a`, `\c`, or `\i` to drop in Driver, Approver, Contributor, Informed fields without
+leaving the keyboard.  
+* **@People & +Companies autocompletion**  – link tasks to contacts (`@Jane`) or organisations (`+AcmeCorp`) pulled from
+folders you specify.
+* **Custom roles & icons** – hide DACI defaults you don’t need or add your own (e.g. `Reviewer 🔍`).  
+* **Task Center dashboard** – filter by status, role, person, due date and more in real time.
 
-### ⚙️ Customizable Roles
+**For a quick demo GIF, see `./media/quick-peek.gif`.**
 
-- Add custom roles with your own icons
-- Hide default roles you don't need
-- Reorder roles by priority
+---
 
-### 📋 Task Center
+## 🚀 Quick Start
 
-The Task Center provides a comprehensive task management interface with advanced filtering, multiple view layouts, and
-real-time task tracking.
+1. **Install the plugin**: See installation instructions below
 
-#### **Opening the Task Center**
+2. Create a task:
 
-1. **Command Palette**: Use "Open Task Center" command
-2. **Ribbon Icon**: Click the users icon in the left ribbon (if enabled)
-3. **Hotkey**: Configure a keyboard shortcut for quick access
+   ```markdown
+   - [ ] Ship Q3 roadmap
+   ```
 
-#### **View Layouts**
+3. Start typing – the 👤 icon pops in. Click it, set yourself as **Driver**, your PM as **Approver**, and watch the inline
+roles appear:
 
-- **Status View**: Organize by task completion status (To Do, In Progress, Done, Cancelled)
-- **Role View**: Group by assigned roles with DACI methodology
-- **Assignees View**: Organize by individual people and companies
-- **Date View**: Organize by date categories (Not Set, Past Due, Today, This Week, Next Week)
+   ```markdown
+   - [ ] Ship Q3 roadmap [👤:: @me] [👍:: @PM]
+   ```
 
-#### **Advanced Filtering**
+Done! Every future task is just as easy.
 
-The Task Center supports comprehensive filtering across multiple criteria:
+## 🪛 Installation
 
-**Entity-Based Filters:**
+**BRAT install**: Until this plugin is published to the Obsidian community, you can install it by using
+ the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin.
 
-- **Roles**: Filter by specific roles or tasks with no role assigned
-- **People**: Filter by individual contacts
-- **Companies**: Filter by organizational entities
-- **Combination filters**: Filter by person+role or company+role combinations
+* Install the BRAT plugin if you haven't already.
+* Open the BRAT settings and add the following URL to the "Beta Plugin List", and click "Add Beta Plugin"
 
-**Content-Based Filters:**
-
-- **Status**: Multi-select filter for task statuses (To Do, In Progress, Done, Cancelled)
-- **Priority**: Filter by task priority levels (Urgent, High, Medium, Low) or tasks with no explicit priority
-- **Tags**: Filter by task tags
-- **Text Search**: Full-text search across task descriptions, file paths, tags, and assignees
-
-**Date-Based Filters:**
-
-- **Date Range**: From-to date selection with "include not set" option
-- **Date Types**: Filter by Created, Due, Completed, or Scheduled dates
-
-#### **Filter Control Options**
-
-The Task Center provides flexible filter control options:
-
-- **Auto Apply Mode** (default): Filter changes apply immediately and close the filter section
-- **Manual Apply Mode**: Experiment with filters before applying:
-  - **Apply Filters**: Apply current filter settings and close section
-  - **Cancel**: Revert all changes and close section (returns to original state when filter section was opened)
-  - **Clear Filters**: Remove all filters and refresh view
-- **Auto Apply Toggle**: Checkbox to switch between immediate and manual filter application
-- **Persistent Settings**: Auto Apply preference is saved and remembered across sessions
-
-#### **Interactive Task Cards**
-
-Task cards display:
-
-- Task description with clickable status checkbox
-- Due date with overdue highlighting
-- Priority indicators
-- Tag display
-- Click to open detailed side panel
-
-#### **Task Details Side Panel**
-
-Clicking a task card opens a detailed side panel showing:
-
-- Full task description
-- File location and line number
-- Current status and priority
-- All assigned roles and assignees
-- Complete date information (created, due, scheduled, completed, modified)
-- Tags
-
-#### **View Configuration Management**
-
-- **Save Configurations**: Save current filter and layout settings with custom names
-- **Load Configurations**: Quickly apply saved view configurations
-- **Configuration Autocomplete**: Type existing configuration names to overwrite
-- **Configuration Display**: Shows currently loaded configuration name in header
-
-#### **Real-Time Task Processing**
-
-The Task Center uses task queries to process tasks in real-time:
-
-- Automatically scans all markdown files for tasks using task queries
-- Updates in real-time when files are modified, created, or deleted
-- Parses comprehensive task metadata including:
-  - Roles and assignees
-  - Dates (due, scheduled, completed, created, modified)
-  - Priority levels (🔴 Urgent, 🟡 High, 🟢 Low, or text indicators)
-  - Status (including custom indicators like 🚧 for in-progress, ❌ for cancelled)
-  - Tags
-  - File metadata
-
-## Usage
-
-### Quick Role Addition and Updates with Icons
-
-1. Create a task: `- [ ] Complete project documentation`
-2. Start typing after the checkbox - a users icon automatically appears at the end
-3. Click the icon to open the role edit dialog
-4. Select roles and assign contacts/companies
-
-### Role Format
-
-When you assign a role to a task, it gets formatted using dataview inline format:
-`[icon:: comma-separated assignees]`
-
-Example: `[🚗:: @John, @Jane] [👍:: @Manager]`
-
-The plugin also supports reading the legacy format for backward compatibility.
-
-### Task Metadata Support
-
-The plugin recognizes and parses various task metadata formats:
-
-**Priority Indicators:**
-
-- 🔴 or `[urgent]` or `!!!` → Urgent priority
-- 🟡 or `[high]` or `!!` → High priority
-- 🟢 or `[low]` → Low priority
-- No indicator → Medium priority (default)
-
-**Status Indicators:**
-
-- `[x]` or `[X]` → Done
-- 🚧 or `[in-progress]` → In Progress
-- ❌ or `[cancelled]` → Cancelled
-- `[ ]` → To Do (default)
-
-**Date Formats:**
-
-- `due: 2024-01-15`
-- `scheduled: 2024-01-15`
-- `completed: 2024-01-15`
-- `📅 2024-01-15`
-- `[due:: 2024-01-15]`
-
-**Tags:**
-
-- Standard Obsidian tags: `#project #urgent`
-
-## Ways to Assign
-
-1. **Click the person icon**: Appears automatically at the end of task lines
-2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
-3. **Keyboard shortcut**: Configurable shortcut to trigger the role edit dialog
-4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
-5. **Role shortcuts**: Type `\` followed by a role shortcut letter (e.g., `\d` for Drivers) - only shows roles not already
-   assigned
-
-## Editing Roles
-
-Select "Assign or Update Roles" on a task that already has roles setup to edit them. Only known,
-unhidden roles will be parsed and displayed.
-
-## Settings
-
-- **Change @ symbol**: Customize contact prefix (affects future data only)
-- **Change + symbol**: Customize company prefix (affects future data only)
-- **Select @ directory**: Choose directory for contacts (affects future data only)
-- **Select + directory**: Choose directory for companies (affects future data only)
-- **Create @me contact**: Button to create the special @me contact if it doesn't exist
-- **Use compact filters**: Display all filters in a single horizontal line instead of the collapsible panel
-- **Enable debug logging**: Log additional information to the console
-- **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
-  Tasks plugin is installed)
-- **Assign or Update Roles**:
-  - Hide default roles (prevents them from appearing in future dialogs)
-  - Add, edit, and delete custom roles
-  - Note: Editing custom roles won't update historical records
-
-## Installation
-
-### From Obsidian Community Plugins
-
-1. Open Obsidian Settings
-2. Go to Community Plugins
-3. Search for "Task Roles"
-4. Install and enable the plugin
-
-### Manual Installation
-
-1. Download the latest release from GitHub
-2. Extract the files to your vault's `.obsidian/plugins/obsidian-task-roles/` folder
-3. Reload Obsidian and enable the plugin in settings
-
-## How It Works
-
-The plugin uses CodeMirror editor extensions to:
-
-- Detect task lines in real-time
-- Add clickable person icons at the end of task lines
-- Maintain cursor position between checkbox and icon
-- Trigger role edit dialogs when icons are clicked
-
-This approach is similar to how TaskNotes implements their functionality, providing a seamless user experience.
-
-## Development
-
-This plugin is built with TypeScript and follows Obsidian's plugin development guidelines.
-
-### Project Structure
-
-```shell
-
-obsidian-task-roles/
-├── docs/                    # Documentation files
-├── src/                     # TypeScript source code
-│   ├── main.ts             # Main plugin entry point
-│   ├── types/              # TypeScript interfaces and constants
-│   ├── services/           # Business logic and data processing
-│   ├── components/         # Reusable UI components and widgets
-│   ├── editor/             # Editor extensions and suggestions
-│   ├── modals/             # Modal dialogs and popups
-│   ├── settings/           # Plugin settings and configuration
-│   ├── ui/                 # UI utilities (reserved for future use)
-│   ├── utils/              # General utilities (reserved for future use)
-│   └── views/              # Task Center view implementation
-├── styles/                 # CSS stylesheets
-│   └── task-roles-view.css # Task Center styles
-├── tests/                  # Test files (future)
-├── media/                  # Media assets (icons, images)
-├── manifest.json           # Plugin manifest
-├── package.json            # Dependencies and scripts
-└── README.md               # This file
+```text
+https://github.com/lc0rp/obsidian-task-roles
 ```
 
-### Architecture
+**Manual install**: Download from the [releases page](https://github.com/lc0rp/obsidian-task-roles/releases), unzip to
+`<your-vault>/.obsidian/plugins/obsidian-task-roles/`, then reload Obsidian.
 
-The plugin follows a modular architecture with clear separation of concerns:
+---
 
-- **Main Plugin** (`main.ts`) - Entry point, command registration, and plugin lifecycle
-- **Types** (`types/`) - TypeScript interfaces and constants for task data models
-- **Services** (`services/`) - Business logic including task query processing, role & assignee processing, and view configuration
-- **Components** (`components/`) - Reusable UI widgets including the task roles icon
-- **Editor** (`editor/`) - CodeMirror extensions and auto-suggestions
-- **Modals** (`modals/`) - Dialog windows for role & assignee editing, and view saving
-- **Views** (`views/`) - Task Center implementation with filtering and layout management
-- **Settings** (`settings/`) - Configuration and preferences
+## 🛠️ Using the Task Center
 
-### Key Components
+Open via **Cmd/Ctrl‑P → “Open Task Center”**, the ribbon icon, or your own hotkey.  
+Switch between four views:
 
-**Core Services:**
+| View | Ideal for |
+|------|-----------|
+| **Status** | Kanban‑style progress (To Do, In Progress, Done, Cancelled) |
+| **Role** | See who’s blocking what |
+| **Assignees** | Everything one person or company is attached to |
+| **Date** | Overdue, Today, This Week, Next Week |
 
-- **TaskQueryService** - Task query building and real-time task processing
-- **TaskRolesService** - Role & assignee parsing, formatting, and file operations
-- **ViewConfigurationService** - Saved view management
+Filters (multi‑select, live‑update) let you combine role + person + status + tag + date for laser‑focused lists.
 
-**UI Components:**
+---
+Settings highlights
 
-- **TaskRolesView** - Main Task Center interface
-- **TaskRolesInlineWidget** - Inline task roles icon for tasks
-- **AssignmentModel** - Role & assignee update dialog
-- **TaskRolesSaveViewModal** - View configuration saving interface
+* **Contact/Company prefix** – swap `@` or `+` for anything else.  
+* **Role manager** – hide defaults, change order, or add custom roles + emoji/icon.  
+* **Compact filters** – turn the Task Center header into a single‑row toolbar.  
+* **Compatibility mode** – auto‑enabled if the Tasks plugin is installed to avoid hotkey clashes.  
 
-**Editor Integration:**
+Full settings reference lives in the in‑app **Settings → Task Roles** tab.
 
-- **TaskRolesExtension** - CodeMirror extension for task decoration
-- **TaskRolesSuggest** - Auto-completion for inline role suggestions
+---
 
-This modular design makes the codebase more maintainable, testable, and extensible for future features.
+## 🤝 Integrations & Compabilility
 
-### Building
+| Tool | Works with |
+|------|------------|
+| **Obsidian Tasks** | Role shortcuts fall back to `\` triggers when Tasks’ own suggestions are active. |
+| **Dataview** | Inline roles are stored as Dataview properties (`[👤:: @Alice]`), so you can query them. |
+| **Symbol Linking** | Align the symbols used for @contacts & +companies. |
+
+---
+
+## 📚 FAQ
+
+1. **Does this change my markdown?**  
+   Only by appending Dataview‑style inline fields (`[👤:: @Alice]`). Remove them and the file is plain markdown again.
+
+2. **What if I rename a contact?**  
+   Use Obsidian’s file‑rename; links update automatically.
+
+3. **Can I disable the 👤 icon?**  
+   Yes – _Settings → Task Roles → Inline widget → Disable_.
+
+More questions? Open a [Discussion](https://github.com/lc0rp/obsidian-task-roles/discussions).
+
+---
+
+## 🏗️ Contributing
 
 ```bash
-npm install
-npm run build
+git clone https://github.com/lc0rp/obsidian-task-roles.git
+cd obsidian-task-roles
+npm i
+npm run dev   # hot‑reloads into your test vault
 ```
 
-### Development Mode
+PRs and issue reports are welcome!
 
-```bash
-npm run dev
-```
+---
 
-## Contributing
+## 🗺️ Roadmap
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+* 🔄 Bulk‑edit roles across multiple tasks
+* 🗓️ Calendar overlay in Task Center  
+* ☁️ Optional remote cache for large vaults
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE.md) – do what you want, just keep the copyright notice.
 
-## Support
+---
 
-If you find this plugin helpful, consider supporting its development:
+### Acknowledgements
 
-- ⭐ Star this repository
-- 🐛 Report bugs and request features
-- 💡 Contribute code improvements
-- ☕ [Buy me a coffee](https://buymeacoffee.com) (if funding URL is configured)
+Built with ❤ on top of the Obsidian API and inspired by team‑task frameworks like DACI and RACI.
+
+Also:
+
+* [Task Notes](https://github.com/callumalpass/tasknotes): Inspired the inline widget. I'd like to add Task Notes
+compatibility soon.
+
+* [Symbol Linking](https://github.com/Ebonsignori/obsidian-at-symbol-linking): Inspired the @contact and +company symbols.
