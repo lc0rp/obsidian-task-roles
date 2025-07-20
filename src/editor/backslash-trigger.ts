@@ -13,6 +13,22 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
 
         onKey(e: KeyboardEvent) {
             if (e.key !== "\\") return;
+
+            // Only trigger inside a task line or task/dataview code block
+            const activeView = app.workspace.getActiveViewOfType(MarkdownView);
+            if (!activeView) return;
+
+            const editor = activeView.editor;
+            const cursor = editor.getCursor();
+            const line = editor.getLine(cursor.line);
+            const isTaskLine = TaskUtils.isTaskCaseInsensitive(line);
+            const isInTaskBlock = this.isInTaskCodeBlock(editor, cursor.line);
+
+            if (!isTaskLine && !isInTaskBlock) {
+                // Let the backslash be inserted normally
+                return;
+            }
+
             e.stopPropagation();          // keep Tasks quiet
             e.preventDefault();
 
