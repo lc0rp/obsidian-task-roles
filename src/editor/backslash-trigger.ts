@@ -104,9 +104,12 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
             const options = popup.querySelectorAll('.backslash-trigger-option');
 
             const keyHandler = (e: KeyboardEvent) => {
-                if (e.key === 'Escape') {
+                if (e.key === 'Escape' || e.key === '\\') {
+                    e.preventDefault();
                     popup.remove();
                     document.removeEventListener('keydown', keyHandler);
+                    editor.replaceRange('\\', cursor);
+                    editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     options[selectedIndex].classList.remove('selected');

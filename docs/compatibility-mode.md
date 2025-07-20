@@ -66,7 +66,7 @@ The `backslashTrigger` function (`src/editor/backslash-trigger.ts`) creates a `V
 - **Keyboard Navigation**:
   - Arrow keys to navigate options
   - Enter to select
-  - Escape to cancel
+  - Escape or `\` to dismiss and insert a literal backslash
 - **Mouse Support**: Click to select roles
 - **Context Awareness**: Detects task code blocks and formats accordingly
 - **Proper Cleanup**: Removes event listeners on destroy
@@ -93,8 +93,9 @@ With compatibility mode enabled:
 
 1. Type `\` in the editor
 2. A popup appears with available roles
-3. Use arrow keys or mouse to select a role
-4. Press Enter or click to insert the role
-5. The role is formatted as `[🚗:: ]` or `🚗 =` depending on context
+3. Press `\` again or hit <kbd>Esc</kbd> to dismiss the popup and insert a single backslash
+4. Use arrow keys or mouse to select a role
+5. Press Enter or click to insert the role
+6. The role is formatted as `[🚗:: ]` or `🚗 =` depending on context
 
 The behavior is identical to the standard mode, just with a different interaction method.
