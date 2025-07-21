@@ -13,7 +13,7 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
 			}
 
 			onKey(e: KeyboardEvent) {
-				if (e.key !== "\\") return;
+				if (e.key !== ":") return;
 
 				// Only trigger inside a task line or task/dataview code block
 				const activeView =
