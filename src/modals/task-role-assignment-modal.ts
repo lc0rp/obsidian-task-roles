@@ -8,6 +8,9 @@ export class TaskRoleAssignmentModal extends Modal {
     editor: Editor;
     roleAssignments: TaskRoleAssignment[] = [];
     existingRoleAssignments: ParsedTaskRoleAssignment[] = [];
+    initialRoleAssignments: TaskRoleAssignment[] = [];
+    hasUnsavedChanges = false;
+    private isClosingForced = false;
 
     constructor(app: App, plugin: TaskRolesPlugin, editor: Editor) {
         super(app);
@@ -28,6 +31,10 @@ export class TaskRoleAssignmentModal extends Modal {
             roleId: pa.role.id,
             assignees: pa.assignees
         }));
+
+        // Store initial state for change detection
+        this.initialRoleAssignments = JSON.parse(JSON.stringify(this.roleAssignments));
+        this.hasUnsavedChanges = false;
 
         contentEl.createEl('h2', { text: 'Assign roles, people or companies' });
 
@@ -160,6 +167,7 @@ export class TaskRoleAssignmentModal extends Modal {
 
         if (!assignedRole.assignees.includes(assignee)) {
             assignedRole.assignees.push(assignee);
+            this.checkForChanges();
         }
     }
 
@@ -167,6 +175,7 @@ export class TaskRoleAssignmentModal extends Modal {
         const assignedRole = this.roleAssignments.find(a => a.roleId === roleId);
         if (assignedRole) {
             assignedRole.assignees = assignedRole.assignees.filter(a => a !== assignee);
+            this.checkForChanges();
         }
     }
 
@@ -209,7 +218,7 @@ export class TaskRoleAssignmentModal extends Modal {
         };
 
         const cancelBtn = buttonDiv.createEl('button', { text: 'Cancel' });
-        cancelBtn.onclick = () => this.close();
+        cancelBtn.onclick = () => this.handleCancel();
 
         // Add help link
         const helpDiv = this.contentEl.createDiv('help-link-container');
@@ -232,5 +241,65 @@ export class TaskRoleAssignmentModal extends Modal {
         );
 
         this.editor.setLine(this.editor.getCursor().line, newLine);
+        this.hasUnsavedChanges = false;
+    }
+
+    checkForChanges() {
+        // Compare current role assignments with initial state
+        const currentState = JSON.stringify(this.roleAssignments);
+        const initialState = JSON.stringify(this.initialRoleAssignments);
+        this.hasUnsavedChanges = currentState !== initialState;
+    }
+
+    handleCancel() {
+        if (this.hasUnsavedChanges) {
+            this.showUnsavedChangesConfirmation();
+        } else {
+            this.close();
+        }
+    }
+
+    showUnsavedChangesConfirmation() {
+        const confirmModal = new Modal(this.app);
+        confirmModal.contentEl.createEl('h3', { text: 'Unsaved Changes' });
+        confirmModal.contentEl.createEl('p', { text: 'You have unsaved changes. What would you like to do?' });
+
+        const buttonContainer = confirmModal.contentEl.createDiv('button-container');
+        
+        const applyBtn = buttonContainer.createEl('button', { text: 'Apply Changes', cls: 'mod-cta' });
+        applyBtn.onclick = () => {
+            confirmModal.close();
+            this.applyRoleAssignments();
+            this.forceClose();
+        };
+
+        const discardBtn = buttonContainer.createEl('button', { text: 'Discard Changes' });
+        discardBtn.onclick = () => {
+            confirmModal.close();
+            this.hasUnsavedChanges = false;
+            this.forceClose();
+        };
+
+        const cancelBtn = buttonContainer.createEl('button', { text: 'Continue Editing' });
+        cancelBtn.onclick = () => {
+            confirmModal.close();
+        };
+
+        confirmModal.open();
+    }
+
+    // Override the close method to handle unsaved changes
+    close() {
+        if (this.hasUnsavedChanges && !this.isClosingForced) {
+            this.showUnsavedChangesConfirmation();
+            return;
+        }
+        super.close();
+    }
+
+    // Force close without confirmation
+    forceClose() {
+        this.isClosingForced = true;
+        super.close();
     }
 }
