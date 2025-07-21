@@ -137,15 +137,35 @@ export const TaskUtils = {
     findRoleCursorPosition(line: string, role: any): { position: number; needsSeparator: boolean } | null {
         const escapedIcon = role.icon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
-        // Check for dataview format: [🚗:: @John]
-        const dataviewPattern = new RegExp(`\\[${escapedIcon}::\\s*([^\\]]*)\\]`, 'g');
-        const dataviewMatch = dataviewPattern.exec(line);
-        if (dataviewMatch) {
-            const assigneesText = dataviewMatch[1].trim();
-            const hasAssignees = assigneesText.length > 0;
-            // Position cursor before the closing bracket
-            const position = dataviewMatch.index + dataviewMatch[0].length - 1;
-            return { position, needsSeparator: hasAssignees };
+        // Check for dataview format: [🚗:: assignees]
+        // We need to handle nested brackets in wikilinks like [[Task Roles Demo/People/Me|@Me]]
+        const roleStartPattern = new RegExp(`\\[${escapedIcon}::\\s*`, 'g');
+        const roleStartMatch = roleStartPattern.exec(line);
+        
+        if (roleStartMatch) {
+            // Find the matching closing bracket, accounting for nested brackets
+            const startPos = roleStartMatch.index;
+            const contentStart = roleStartMatch.index + roleStartMatch[0].length;
+            let bracketCount = 1; // We've seen the opening [
+            let pos = contentStart;
+            
+            // Walk through the string to find the matching closing bracket
+            while (pos < line.length && bracketCount > 0) {
+                if (line[pos] === '[') {
+                    bracketCount++;
+                } else if (line[pos] === ']') {
+                    bracketCount--;
+                }
+                
+                if (bracketCount === 0) {
+                    // Found the closing bracket
+                    const assigneesText = line.substring(contentStart, pos).trim();
+                    const hasAssignees = assigneesText.length > 0;
+                    return { position: pos, needsSeparator: hasAssignees };
+                }
+                
+                pos++;
+            }
         }
 
         // Check for legacy format: 🚗 [[Contacts/John|@John]]
