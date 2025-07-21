@@ -26,7 +26,7 @@ export class RoleSuggest extends EditorSuggest<Role> {
 
         // Check if we're in a task code block or on a task line
         const isInTaskBlock = this.isInTaskBlock(editor, cursor.line);
-        const isTaskLine = TaskUtils.isTaskLine(line);
+        const isTaskLine = TaskUtils.isTaskCaseInsensitive(line);
 
         // Only trigger if we're in a task code block or on a task line
         if (!isInTaskBlock && !isTaskLine) {
@@ -65,6 +65,16 @@ export class RoleSuggest extends EditorSuggest<Role> {
         const line = context.editor.getLine(context.start.line);
         const existingRoleIds = TaskUtils.getExistingRoles(line, roles);
 
+        // Check if the query matches exactly one existing role
+        const matchingExistingRole = roles.find(r => 
+            (r.shortcut ?? '').toLowerCase() === query && existingRoleIds.includes(r.id)
+        );
+
+        if (matchingExistingRole) {
+            // Role already exists and user typed exact shortcut - return it to trigger cursor positioning
+            return [matchingExistingRole];
+        }
+
         // Filter out roles that are already present on the line
         const availableRoles = roles.filter(role => !existingRoleIds.includes(role.id));
 
@@ -82,6 +92,39 @@ export class RoleSuggest extends EditorSuggest<Role> {
 
     selectSuggestion(role: Role): void {
         const { editor, start } = this.context!;
+        const line = editor.getLine(start.line);
+        const existingRoleIds = TaskUtils.getExistingRoles(line, [role]);
+        
+        // Check if this role already exists on the line
+        if (existingRoleIds.includes(role.id)) {
+            // Role already exists, position cursor for adding assignees
+            const cursorInfo = TaskUtils.findRoleCursorPosition(line, role);
+            if (cursorInfo) {
+                // Remove the backslash trigger
+                editor.replaceRange('', start, this.context!.end);
+                
+                // Position cursor at the role
+                let cursorPos = {
+                    line: start.line,
+                    ch: cursorInfo.position - (this.context!.end.ch - start.ch) // Adjust for removed trigger
+                };
+
+                // If there are existing assignees, add separator and space
+                if (cursorInfo.needsSeparator) {
+                    editor.replaceRange(', ', cursorPos, cursorPos);
+                    cursorPos.ch += 2;
+                } else if (cursorInfo.position > 0) {
+                    // Add space if no assignees yet
+                    editor.replaceRange(' ', cursorPos, cursorPos);
+                    cursorPos.ch += 1;
+                }
+
+                editor.setCursor(cursorPos);
+                return;
+            }
+        }
+
+        // Role doesn't exist, create new role assignment
         const inTask = this.isInTaskBlock(editor, start.line);
         const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
         editor.replaceRange(replacement, start, this.context!.end);

@@ -128,5 +128,35 @@ export const TaskUtils = {
         }
 
         return existingRoleIds;
+    },
+
+    /**
+     * Find the cursor position for adding assignees to an existing role
+     * Returns the position where a new assignee should be inserted
+     */
+    findRoleCursorPosition(line: string, role: any): { position: number; needsSeparator: boolean } | null {
+        const escapedIcon = role.icon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        // Check for dataview format: [🚗:: @John]
+        const dataviewPattern = new RegExp(`\\[${escapedIcon}::\\s*([^\\]]*)\\]`, 'g');
+        const dataviewMatch = dataviewPattern.exec(line);
+        if (dataviewMatch) {
+            const assigneesText = dataviewMatch[1].trim();
+            const hasAssignees = assigneesText.length > 0;
+            // Position cursor before the closing bracket
+            const position = dataviewMatch.index + dataviewMatch[0].length - 1;
+            return { position, needsSeparator: hasAssignees };
+        }
+
+        // Check for legacy format: 🚗 [[Contacts/John|@John]]
+        const legacyPattern = new RegExp(`${escapedIcon}\\s+`, 'g');
+        const legacyMatch = legacyPattern.exec(line);
+        if (legacyMatch) {
+            // For legacy format, position cursor after the icon and space
+            const position = legacyMatch.index + legacyMatch[0].length;
+            return { position, needsSeparator: false };
+        }
+
+        return null;
     }
 }; 
