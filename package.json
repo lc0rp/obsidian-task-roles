@@ -1,7 +1,7 @@
 {
     "name": "obsidian-task-roles",
     "version": "0.0.1",
-    "description": "Assign contacts, companies and roles to tasks.",
+    "description": "Assign roles, people and companies to tasks.",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",

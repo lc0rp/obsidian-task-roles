@@ -12,10 +12,10 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	private createMeContactSetting(containerEl: HTMLElement): void {
+	private createMePersonFileSetting(containerEl: HTMLElement): void {
 		const setting = new Setting(containerEl)
-			.setName("Create @me contact")
-			.setDesc("Create a special contact file for yourself");
+			.setName("Create @me person")
+			.setDesc("Create a special person file for yourself");
 
 		// State management for button
 		let button: any;
@@ -35,12 +35,12 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					button.setDisabled(true);
 					button.setButtonText("Creating...");
 
-					await this.plugin.taskRolesService.createMeContact();
+					await this.plugin.taskRolesService.createMePerson();
 
 					// Refresh the settings display to show the new state
 					this.display();
 				} catch (error) {
-					console.error("Failed to create @me contact:", error);
+					console.error("Failed to create @me person:", error);
 					// Reset button state on error
 					button.setDisabled(false);
 					button.setButtonText("Create @me");
@@ -54,7 +54,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 		// Asynchronously check if @me exists and update the setting
 		this.plugin.taskRolesService
-			.meContactExists()
+			.mePersonExists()
 			.then((meExists) => {
 				// Check if component is still mounted (abort controller not aborted)
 				if (this.abortController?.signal.aborted) return;
@@ -70,7 +70,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					// Add DONE pill
 					setting.controlEl.createSpan({
 						text: "DONE",
-						cls: "me-contact-done-pill",
+						cls: "me-person-done-pill",
 					});
 				}
 			})
@@ -78,7 +78,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 				// Check if component is still mounted
 				if (this.abortController?.signal.aborted) return;
 
-				console.error("Failed to check @me contact existence:", error);
+				console.error("Failed to check @me person existence:", error);
 				// Button remains in default enabled state on error
 			});
 	}
@@ -95,29 +95,27 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h3", { text: "Task Roles Settings" });
-
-		// Contact symbol setting
+		// Person symbol setting
 		new Setting(containerEl)
-			.setName("Person or contact prefix")
+			.setName("Person prefix")
 			.setDesc(
-				"Type this symbol to trigger a person or contact search (affects future data only)"
+				"Type this symbol to trigger a person search (affects future data only)"
 			)
 			.addText((text) =>
 				text
 					.setPlaceholder("@")
-					.setValue(this.plugin.settings.contactSymbol)
+					.setValue(this.plugin.settings.personSymbol)
 					.onChange(async (value) => {
-						this.plugin.settings.contactSymbol = value || "@";
+						this.plugin.settings.personSymbol = value || "@";
 						await this.plugin.saveSettings();
 					})
 			);
 
 		// Company symbol setting
 		new Setting(containerEl)
-			.setName("Company or group prefix")
+			.setName("Company prefix")
 			.setDesc(
-				"Type this symbol to initiate a company, organization, or group search (affects future data only)"
+				"Type this symbol to initiate a company search (affects future data only)"
 			)
 			.addText((text) =>
 				text
@@ -129,17 +127,17 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Contact directory setting
+		// Person directory setting
 		new Setting(containerEl)
-			.setName("Contact directory")
-			.setDesc("Directory where contact files are stored")
+			.setName("Person directory")
+			.setDesc("Directory where people note files are stored")
 			.addText((text) =>
 				text
-					.setPlaceholder("Contacts")
-					.setValue(this.plugin.settings.contactDirectory)
+					.setPlaceholder("People")
+					.setValue(this.plugin.settings.personDirectory)
 					.onChange(async (value) => {
-						this.plugin.settings.contactDirectory =
-							value || "Contacts";
+						this.plugin.settings.personDirectory =
+							value || "People";
 						await this.plugin.saveSettings();
 					})
 			);
@@ -147,9 +145,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		// Company directory setting
 		new Setting(containerEl)
 			.setName("Company directory")
-			.setDesc(
-				"Directory where company, group, or organization files are stored"
-			)
+			.setDesc("Directory where company note files are stored")
 			.addText((text) =>
 				text
 					.setPlaceholder("Companies")
@@ -161,8 +157,8 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Create @me contact button
-		this.createMeContactSetting(containerEl);
+		// Create @me person button
+		this.createMePersonFileSetting(containerEl);
 
 		// Debug logging toggle
 		new Setting(containerEl)
@@ -216,6 +212,25 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
+		// Result limit setting
+		new Setting(containerEl)
+			.setName("Task Center: max results per column")
+			.setDesc(
+				"Maximum number of tasks to display in each Task Center column. Defaults to 50. Set this to improve performance if you have a large number of tasks. Note that it may be overridden by Task plugin's global query setting."
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder("50")
+					.setValue(this.plugin.settings.resultLimit.toString())
+					.onChange(async (value) => {
+						const numValue = parseInt(value) || 50;
+						if (numValue > 0) {
+							this.plugin.settings.resultLimit = numValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
+
 		// Default roles
 		containerEl.createEl("h4", { text: "Default roles" });
 		for (const role of DEFAULT_ROLES) {
@@ -261,7 +276,9 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (customRoles.length > 0) {
 			containerEl.createEl("h4", { text: "Custom roles" });
 			for (const role of customRoles) {
-				const shortcutText = role.shortcut ? `\nShortcut: \\${role.shortcut}` : '';
+				const shortcutText = role.shortcut
+					? `\nShortcut: \\${role.shortcut}`
+					: "";
 				const setting = new Setting(containerEl)
 					.setName(`${role.icon} ${role.name}`)
 					.setDesc(`Custom role${shortcutText}`);
@@ -329,7 +346,8 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 					// Check for duplicate shortcut
 					if (shortcut && this.isShortcutInUse(shortcut)) {
-						shortcutInput.style.border = "2px solid var(--text-error)";
+						shortcutInput.style.border =
+							"2px solid var(--text-error)";
 						shortcutInput.focus();
 						return;
 					} else {
@@ -371,8 +389,8 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 	 */
 	private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
 		if (!shortcut) return false;
-		return this.plugin.settings.roles.some(role => 
-			role.shortcut === shortcut && role.id !== excludeRoleId
+		return this.plugin.settings.roles.some(
+			(role) => role.shortcut === shortcut && role.id !== excludeRoleId
 		);
 	}
 

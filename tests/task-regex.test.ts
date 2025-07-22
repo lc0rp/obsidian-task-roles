@@ -19,7 +19,7 @@ describe('TaskUtils.getExistingRoles', () => {
     });
 
     it('should detect legacy format roles', () => {
-        const line = '- [ ] Task with 🚗 [[Contacts/John|@John]] and 👥 [[Contacts/Jane|@Jane]]';
+        const line = '- [ ] Task with 🚗 [[People/John|@John]] and 👥 [[People/Jane|@Jane]]';
         const existingRoles = TaskUtils.getExistingRoles(line, mockRoles);
 
         expect(existingRoles).toContain('drivers');
@@ -28,7 +28,7 @@ describe('TaskUtils.getExistingRoles', () => {
     });
 
     it('should detect mixed format roles', () => {
-        const line = '- [ ] Task with [🚗:: @John] and 👥 [[Contacts/Jane|@Jane]]';
+        const line = '- [ ] Task with [🚗:: @John] and 👥 [[People/Jane|@Jane]]';
         const existingRoles = TaskUtils.getExistingRoles(line, mockRoles);
 
         expect(existingRoles).toContain('drivers');

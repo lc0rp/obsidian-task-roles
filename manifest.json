@@ -3,7 +3,7 @@
     "name": "Task Roles",
     "version": "0.0.1",
     "minAppVersion": "1.6.5",
-    "description": "Assign roles, contacts, and groups (or companies) to tasks.",
+    "description": "Assign roles, people, and companies to tasks.",
     "author": "lc0rp",
     "authorUrl": "https://github.com/lc0rp",
     "isDesktopOnly": false,

@@ -2,7 +2,7 @@
 
 Track who owns a task, who needs to be informed about it, who to follow up with, and more.
 
-"Task Roles" lets you assign roles, contacts, and groups (or companies) to tasks using DACI (Driver, Approver, Contributors
+"Task Roles" lets you assign roles, people, and companies to tasks using DACI (Driver, Approver, Contributors
 , Informed) methodology.
 
 ## Features
@@ -13,12 +13,12 @@ Track who owns a task, who needs to be informed about it, who to follow up with,
 - **Smart detection**: Icons appear automatically when you start typing task content
 - **Natural workflow**: The cursor stays between the checkbox and icon, so you can type naturally
 
-### 👥 Contact & Company Management
+### 👥 Person & Company Management
 
-- Link tasks to contacts using `@` prefix (e.g., `@John`)
+- Link tasks to people using `@` prefix (e.g., `@John`)
 - Link tasks to companies using `+` prefix (e.g., `+AcmeCorp`)
 - Auto-complete suggestions from configured directories
-- Special `@me` contact for self-reference
+- Special `@me` person for self-reference
 
 ### 🎭 Default Roles, based on DACI methodology
 
@@ -61,8 +61,8 @@ The Task Center supports comprehensive filtering across multiple criteria:
 **Entity-Based Filters:**
 
 - **Roles**: Filter by specific roles or tasks with no role assigned
-- **People**: Filter by individual contacts
-- **Companies**: Filter by organizational entities
+- **People**: Filter by individual people
+- **Companies**: Filter by company
 - **Combination filters**: Filter by person+role or company+role combinations
 
 **Content-Based Filters:**
@@ -138,7 +138,7 @@ The Task Center uses task queries to process tasks in real-time:
 1. Create a task: `- [ ] Complete project documentation`
 2. Start typing after the checkbox - a users icon automatically appears at the end
 3. Click the icon to open the role edit dialog
-4. Select roles and assign contacts/companies
+4. Select roles and assign people/companies
 
 ### Role Format
 
@@ -195,11 +195,11 @@ unhidden roles will be parsed and displayed.
 
 ## Settings
 
-- **Change @ symbol**: Customize contact prefix (affects future data only)
+- **Change @ symbol**: Customize person prefix (affects future data only)
 - **Change + symbol**: Customize company prefix (affects future data only)
-- **Select @ directory**: Choose directory for contacts (affects future data only)
+- **Select @ directory**: Choose directory for people (affects future data only)
 - **Select + directory**: Choose directory for companies (affects future data only)
-- **Create @me contact**: Button to create the special @me contact if it doesn't exist
+- **Create @me person**: Button to create the special @me person if it doesn't exist
 - **Use compact filters**: Display all filters in a single horizontal line instead of the collapsible panel
 - **Enable debug logging**: Log additional information to the console
 - **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when

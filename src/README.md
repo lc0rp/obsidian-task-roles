@@ -25,6 +25,6 @@ subdirectories following best practices.
 - `editor/task-roles-extension.ts` - CodeMirror extension for task icons
 - `editor/role-suggest.ts` - Editor autocompletion for role suggestions
 - `modals/task-roles-update-modal.ts` - Main role & assignee update dialog
-- `modals/assignee-selector-modal.ts` - Contact/company selector
+- `modals/assignee-selector-modal.ts` - Person/company selector
 - `modals/role-edit-modal.ts` - Role editing dialog
 - `settings/task-roles-settings-tab.ts` - Plugin settings panel

@@ -72,7 +72,7 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 - `AssignmentModal` - Role assignment and editing interface
 - `SaveViewModal` - View configuration saving interface
 - `RoleEditModal` - Custom role creation and editing
-- `AssigneeSelectorModal` - Contact and company selection interface
+- `AssigneeSelectorModal` - Person and company selection interface
 
 **Views (`src/views/`)**
 
@@ -210,8 +210,8 @@ The esbuild configuration (`esbuild.config.mjs`) handles:
 
 - Uses dataview inline format: `[icon:: assignees]`
 - Supports legacy format for backward compatibility
-- Assignees use `@` prefix for contacts, `+` for companies
-- Special `@me` contact for self-reference
+- Assignees use `@` prefix for people, `+` for companies
+- Special `@me` person for self-reference
 
 ### Task Processing
 

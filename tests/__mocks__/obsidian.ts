@@ -27,6 +27,11 @@ export class Plugin { }
 export class Notice { }
 export class TFile { }
 export class TFolder { }
+export class EditorSuggest {
+    constructor(app: any) {}
+    close() {}
+    open() {}
+}
 export class Modal { 
     constructor(app: any) {}
     open() {}
