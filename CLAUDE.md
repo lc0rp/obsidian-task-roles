@@ -45,7 +45,6 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 - Entry point and plugin lifecycle management
 - Command registration and editor extension setup
 - Service initialization and dependency injection
-- Compatibility mode detection for Tasks plugin integration
 
 **Services Layer (`src/services/`)**
 
@@ -64,7 +63,6 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 
 - `TaskRolesExtension` - CodeMirror 6 extension for task detection and icon decoration
 - `TaskRolesSuggest` - Auto-completion for inline role assignments
-- `RoleSuggest` - Backslash shortcut system for role insertion
 - `BackslashTrigger` - Compatibility mode trigger for Tasks plugin integration
 
 **Modal Dialogs (`src/modals/`)**
@@ -96,8 +94,6 @@ This is an Obsidian plugin built with TypeScript that implements task role assig
 **Component-Based UI**: Modular, reusable UI components for consistent interface
 
 **Settings-Driven Configuration**: Extensive user customization with persistent settings
-
-**Compatibility Mode**: Adaptive behavior based on installed plugins (Tasks plugin detection)
 
 ### Task Data Model
 
@@ -199,7 +195,6 @@ The esbuild configuration (`esbuild.config.mjs`) handles:
 
 ### Compatibility Considerations
 
-- Automatic Tasks plugin detection for compatibility mode
 - Fallback mechanisms for different Obsidian versions
 - CodeMirror version compatibility handling
 - Graceful degradation for unsupported features

@@ -173,27 +173,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Compatibility mode toggle
-		const tasksPlugin = (this.app as any).plugins?.plugins?.[
-			"obsidian-tasks-plugin"
-		];
-		const compatDesc = tasksPlugin
-			? "Use custom backslash trigger instead of built-in editor suggest for role shortcuts (automatically enabled when Tasks plugin is installed)"
-			: "Use custom backslash trigger instead of built-in editor suggest for role shortcuts";
-
-		new Setting(containerEl)
-			.setName("Compatibility mode")
-			.setDesc(compatDesc)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.compatMode)
-					.onChange(async (value) => {
-						this.plugin.settings.compatMode = value;
-						this.plugin.settings.compatModeUserSet = true; // Mark as user-set
-						await this.plugin.saveSettings();
-					})
-			);
-
 		// Task queries toggle
 		// Task display mode setting
 		new Setting(containerEl)
