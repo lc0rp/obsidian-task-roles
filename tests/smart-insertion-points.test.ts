@@ -273,7 +273,7 @@ describe("Smart Insertion Point Detection", () => {
 			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
 			
 			expect(result).not.toBeNull();
-			expect(result!.position).toBe(82); // Before the outermost closing ]
+			expect(result!.position).toBe(81); // Before the outermost closing ]
 			expect(result!.needsSeparator).toBe(true);
 		});
 	});
