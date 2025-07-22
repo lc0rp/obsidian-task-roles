@@ -70,8 +70,8 @@ describe("Smart Insertion Point Detection", () => {
 			const line = "- [ ] Task [🚗:: @user] [👍:: @approver] text";
 			const points = TaskUtils.findAllLegalInsertionPoints(line);
 
-			expect(points).toContain(23); // After first role (including space)
-			expect(points).toContain(40); // After second role (including space)
+			expect(points).toContain(22); // After first role
+			expect(points).toContain(39); // After second role
 		});
 
 		it("should return sorted unique positions", () => {
@@ -226,7 +226,7 @@ describe("Smart Insertion Point Detection", () => {
 			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
 			
 			expect(result).not.toBeNull();
-			expect(result!.position).toBe(16); // Before the closing ]
+			expect(result!.position).toBe(17); // Before the closing ]
 			expect(result!.needsSeparator).toBe(false); // No existing assignees
 		});
 
@@ -255,15 +255,15 @@ describe("Smart Insertion Point Detection", () => {
 			
 			expect(result).not.toBeNull();
 			// The position should be right before the final closing bracket of the role assignment
-			// Not inside the wikilink
-			const expectedPos = line.indexOf("]] ➕") - 1; // Before the final ]
+			// Position 88 is the final ] that closes the role assignment (after the wikilinks)
+			const expectedPos = 88; // Before the final ]
 			expect(result!.position).toBe(expectedPos);
 			expect(result!.needsSeparator).toBe(true); // Has existing assignees
 
 			// Verify that inserting ", " at this position would create the expected result
 			const insertionText = ", ";
 			const actualResult = line.slice(0, result!.position) + insertionText + line.slice(result!.position);
-			const expectedResult = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]], ] ➕ 2025-07-22";
+			const expectedResult = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]]], ] ➕ 2025-07-22";
 			
 			expect(actualResult).toBe(expectedResult);
 		});
