@@ -263,7 +263,7 @@ describe("Smart Insertion Point Detection", () => {
 			// Verify that inserting ", " at this position would create the expected result
 			const insertionText = ", ";
 			const actualResult = line.slice(0, result!.position) + insertionText + line.slice(result!.position);
-			const expectedResult = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]]], ] ➕ 2025-07-22";
+			const expectedResult = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]], ] ➕ 2025-07-22";
 			
 			expect(actualResult).toBe(expectedResult);
 		});
