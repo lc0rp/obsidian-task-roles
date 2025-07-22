@@ -127,12 +127,45 @@ export class RoleSuggest extends EditorSuggest<Role> {
         // Role doesn't exist, create new role assignment
         const inTask = this.isInTaskBlock(editor, start.line);
         const replacement = inTask ? `${role.icon} = ` : `[${role.icon}:: ]`;
-        editor.replaceRange(replacement, start, this.context!.end);
-        const cursorPos = {
-            line: start.line,
-            ch: start.ch + replacement.length
-                - (inTask ? 0 : 1)
-        };
-        editor.setCursor(cursorPos);
+        
+        // Find the nearest legal insertion point for the new role
+        const triggerLength = this.context!.end.ch - start.ch;
+        const currentCursorPos = start.ch + triggerLength; // Where cursor will be after removing trigger
+        const legalInsertionPos = TaskUtils.findNearestLegalInsertionPoint(line, currentCursorPos);
+        
+        // Remove the trigger first
+        editor.replaceRange('', start, this.context!.end);
+        
+        // If we need to move to a different position, do so
+        if (legalInsertionPos !== currentCursorPos - triggerLength) {
+            // Position cursor at legal insertion point
+            const insertPos = {
+                line: start.line,
+                ch: legalInsertionPos
+            };
+            
+            // Insert the role at the legal position
+            editor.replaceRange(replacement, insertPos, insertPos);
+            
+            // Position final cursor
+            const finalCursorPos = {
+                line: start.line,
+                ch: legalInsertionPos + replacement.length - (inTask ? 0 : 1)
+            };
+            editor.setCursor(finalCursorPos);
+        } else {
+            // Insert at current position (it's already legal)
+            const insertPos = {
+                line: start.line,
+                ch: start.ch
+            };
+            
+            editor.replaceRange(replacement, insertPos, insertPos);
+            const cursorPos = {
+                line: start.line,
+                ch: start.ch + replacement.length - (inTask ? 0 : 1)
+            };
+            editor.setCursor(cursorPos);
+        }
     }
 }

@@ -300,16 +300,45 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
 				// Role doesn't exist, create new role assignment
 				const replacement = isInTaskBlock ? `${role.icon} = ` : `[${role.icon}:: ]`;
 
-				// Replace the backslash with the role
+				// Find the nearest legal insertion point for the new role
+				const currentCursorPos = cursor.ch; // Current cursor position
+				const legalInsertionPos = TaskUtils.findNearestLegalInsertionPoint(line, currentCursorPos);
+				
+				// Remove the backslash trigger first
 				const startPos = { line: cursor.line, ch: cursor.ch - 1 };
-				editor.replaceRange(replacement, startPos, cursor);
-
-				// Position cursor
-				const cursorPos = {
-					line: cursor.line,
-					ch: cursor.ch - 1 + replacement.length - (isInTaskBlock ? 0 : 1),
-				};
-				editor.setCursor(cursorPos);
+				editor.replaceRange('', startPos, cursor);
+				
+				// If we need to move to a different position, do so
+				if (legalInsertionPos !== currentCursorPos - 1) {
+					// Position cursor at legal insertion point
+					const insertPos = {
+						line: cursor.line,
+						ch: legalInsertionPos
+					};
+					
+					// Insert the role at the legal position
+					editor.replaceRange(replacement, insertPos, insertPos);
+					
+					// Position final cursor
+					const finalCursorPos = {
+						line: cursor.line,
+						ch: legalInsertionPos + replacement.length - (isInTaskBlock ? 0 : 1)
+					};
+					editor.setCursor(finalCursorPos);
+				} else {
+					// Insert at current position (after removing backslash, it's legal)
+					const insertPos = {
+						line: cursor.line,
+						ch: cursor.ch - 1
+					};
+					
+					editor.replaceRange(replacement, insertPos, insertPos);
+					const cursorPos = {
+						line: cursor.line,
+						ch: cursor.ch - 1 + replacement.length - (isInTaskBlock ? 0 : 1)
+					};
+					editor.setCursor(cursorPos);
+				}
 			}
 
 			private isInTaskCodeBlock(editor: any, line: number): boolean {
