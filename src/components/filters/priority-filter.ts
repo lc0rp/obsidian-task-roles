@@ -1,4 +1,3 @@
-import { setIcon } from 'obsidian';
 import { TaskPriority } from '../../types';
 import { MultiSelectFilterBase, Option } from './multi-select-filter-base';
 
@@ -9,12 +8,12 @@ export class PriorityFilter extends MultiSelectFilterBase<TaskPriority> {
 
 	protected getOptions(): Option<TaskPriority>[] {
 		return [
-			{ value: TaskPriority.HIGHEST, label: 'Urgent' },
-			{ value: TaskPriority.HIGH, label: 'High' },
-			{ value: TaskPriority.MEDIUM, label: 'Medium' },
-			{ value: TaskPriority.NONE, label: 'Normal' },
-			{ value: TaskPriority.LOW, label: 'Low' },
-			{ value: TaskPriority.LOWEST, label: 'Lowest' }
+			{ value: TaskPriority.HIGHEST, label: 'Highest', icon: '🔺' },
+			{ value: TaskPriority.HIGH, label: 'High', icon: '⏫' },
+			{ value: TaskPriority.MEDIUM, label: 'Medium', icon: '🔼' },
+			{ value: TaskPriority.NONE, label: 'Normal', icon: '⚪' },
+			{ value: TaskPriority.LOW, label: 'Low', icon: '🔽' },
+			{ value: TaskPriority.LOWEST, label: 'Lowest', icon: '⏬' }
 		];
 	}
 

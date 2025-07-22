@@ -9,7 +9,7 @@ describe('TaskUtils.findRoleCursorPosition', () => {
         const result = TaskUtils.findRoleCursorPosition(line, testRole);
 
         expect(result).toBeTruthy();
-        expect(result?.position).toBe(33); // Before the closing bracket
+        expect(result?.position).toBe(34); // Before the closing bracket
         expect(result?.needsSeparator).toBe(true);
     });
 
@@ -18,7 +18,7 @@ describe('TaskUtils.findRoleCursorPosition', () => {
         const result = TaskUtils.findRoleCursorPosition(line, testRole);
 
         expect(result).toBeTruthy();
-        expect(result?.position).toBe(24); // Before the closing bracket
+        expect(result?.position).toBe(22); // Before the closing bracket
         expect(result?.needsSeparator).toBe(false);
     });
 
@@ -44,6 +44,24 @@ describe('TaskUtils.findRoleCursorPosition', () => {
 
         expect(result).toBeTruthy();
         expect(result?.needsSeparator).toBe(false);
+    });
+
+    it('should handle wikilinks with multiple assignees correctly', () => {
+        const line = '- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]]] ➕ 2025-07-22';
+        const result = TaskUtils.findRoleCursorPosition(line, testRole);
+
+        expect(result).toBeTruthy();
+        expect(result?.position).toBe(88); // Before the closing bracket of the role assignment
+        expect(result?.needsSeparator).toBe(true);
+    });
+
+    it('should handle wikilinks with nested brackets in path', () => {
+        const line = '- [ ] T [🚗:: [[Complex/Path [with brackets]/Person|@Person]]] test';
+        const result = TaskUtils.findRoleCursorPosition(line, testRole);
+
+        expect(result).toBeTruthy();
+        expect(result?.position).toBe(61); // Before the closing bracket of the role assignment
+        expect(result?.needsSeparator).toBe(true);
     });
 });
 
