@@ -216,9 +216,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Role management
-		containerEl.createEl("h3", { text: "Role management" });
-
 		// Default roles
 		containerEl.createEl("h4", { text: "Default roles" });
 		for (const role of DEFAULT_ROLES) {

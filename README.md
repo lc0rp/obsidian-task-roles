@@ -7,6 +7,9 @@ a powerful Task Center._
 [![Downloads](https://img.shields.io/github/downloads/lc0rp/obsidian-task-roles/total)](https://github.com/lc0rp/obsidian-task-roles/releases)
 [![License](https://img.shields.io/github/license/lc0rp/obsidian-task-roles)](LICENSE.md)
 
+<p align="center">
+   <img src="media/assign-modal.png" alt="Task Roles assignment modal" />
+</p>
 ---
 
 I often find myself creating sub-tasks like: _Update legal weekly_, or _Inform Jane about supplier delays_, and wishing
@@ -30,7 +33,9 @@ folders you specify.
 * **Custom roles & icons** – hide DACI defaults you don’t need or add your own (e.g. `Reviewer 🔍`).  
 * **Task Center dashboard** – filter by status, role, person, due date and more in real time.
 
-**For a quick demo GIF, see `./media/quick-peek.gif`.**
+### Example of a tasklist with roles assigned
+
+![Example of a tasklist with roles assigned](media/tasklist.png)
 
 ---
 
