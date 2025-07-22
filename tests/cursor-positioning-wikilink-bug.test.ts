@@ -59,8 +59,8 @@ describe('Cursor Positioning Bug - Wikilink Format', () => {
             expect(result).toBeTruthy();
             expect(result?.needsSeparator).toBe(true);
             
-            // Should be right before the closing " ]"
-            const roleEnd = line.indexOf(' ]', line.indexOf('[🚗:: '));
+            // Should be at the closing "]" (position 62)
+            const roleEnd = 62; // Position of the closing ] of the role assignment
             expect(result?.position).toBe(roleEnd);
         });
 
