@@ -62,16 +62,16 @@ describe("Smart Insertion Point Detection", () => {
 			const points = TaskUtils.findAllLegalInsertionPoints(line);
 
 			expect(points).toContain(6); // After checkbox
-			expect(points).toContain(22); // After first role
-			expect(points).toContain(38); // After second role
+			expect(points).toContain(23); // After first role
+			expect(points).toContain(39); // After second role
 		});
 
 		it("should handle roles with spaces", () => {
 			const line = "- [ ] Task [🚗:: @user] [👍:: @approver] text";
 			const points = TaskUtils.findAllLegalInsertionPoints(line);
 
-			expect(points).toContain(22); // After first role
-			expect(points).toContain(39); // After second role
+			expect(points).toContain(23); // After first role
+			expect(points).toContain(40); // After second role
 		});
 
 		it("should return sorted unique positions", () => {
@@ -306,7 +306,7 @@ describe("Smart Insertion Point Detection", () => {
 			const nearestPos = TaskUtils.findNearestLegalInsertionPoint(line, cursorPos);
 			
 			// Should prefer the position after the role assignment over the end of line
-			const afterRolePos = 22; // After [🚗:: @user]
+			const afterRolePos = 23; // After [🚗:: @user]
 			expect(nearestPos).toBe(afterRolePos);
 		});
 	});
