@@ -58,7 +58,12 @@ Object.defineProperty(global, 'document', {
                 contains: vi.fn(),
                 click: vi.fn().mockImplementation(() => {
                     const clickHandlers = element._eventHandlers?.click || [];
-                    clickHandlers.forEach((handler: Function) => handler({ type: 'click', target: element }));
+                    clickHandlers.forEach((handler: Function) => handler({ 
+                        type: 'click', 
+                        target: element,
+                        stopPropagation: vi.fn(),
+                        preventDefault: vi.fn()
+                    }));
                 }),
                 querySelector: vi.fn().mockImplementation((selector: string) => {
                     // Simple implementation for class selectors
