@@ -54,17 +54,38 @@ export class RoleEditModal extends Modal {
             const icon = iconInput.value.trim();
             const shortcut = shortcutInput.value.trim();
 
-            if (name && icon) {
-                this.role.name = name;
-                this.role.icon = icon;
-                this.role.shortcut = shortcut || undefined;
-                await this.plugin.saveSettings();
-                this.onSave();
-                this.close();
+            if (!name || !icon) {
+                return;
             }
+
+            // Check for duplicate shortcut (excluding this role)
+            if (shortcut && this.isShortcutInUse(shortcut, this.role.id)) {
+                shortcutInput.style.border = "2px solid var(--text-error)";
+                shortcutInput.focus();
+                return;
+            } else {
+                shortcutInput.style.border = "";
+            }
+
+            this.role.name = name;
+            this.role.icon = icon;
+            this.role.shortcut = shortcut || undefined;
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.close();
         };
 
         const cancelBtn = buttonDiv.createEl('button', { text: 'Cancel' });
         cancelBtn.onclick = () => this.close();
+    }
+
+    /**
+     * Check if a shortcut is already in use by another role
+     */
+    private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
+        if (!shortcut) return false;
+        return this.plugin.settings.roles.some(role => 
+            role.shortcut === shortcut && role.id !== excludeRoleId
+        );
     }
 } 

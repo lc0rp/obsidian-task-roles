@@ -225,7 +225,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName(`${role.icon} ${role.name}`)
 				.setDesc(
-					`Turn this off to hide the '${role.name}' role in future role assignment operations.`
+					`Turn this off to hide the '${role.name}' role in future role assignment operations.\nShortcut: \\${role.shortcut}`
 				)
 				.addToggle((toggle) =>
 					toggle
@@ -264,9 +264,10 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (customRoles.length > 0) {
 			containerEl.createEl("h4", { text: "Custom roles" });
 			for (const role of customRoles) {
+				const shortcutText = role.shortcut ? `\nShortcut: \\${role.shortcut}` : '';
 				const setting = new Setting(containerEl)
 					.setName(`${role.icon} ${role.name}`)
-					.setDesc("Custom role");
+					.setDesc(`Custom role${shortcutText}`);
 
 				setting.addButton((button) =>
 					button.setButtonText("Edit").onClick(() => {
@@ -325,24 +326,35 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					const icon = iconInput.value.trim();
 					const shortcut = shortcutInput.value.trim();
 
-					if (name && icon) {
-						const newRole: Role = {
-							id: name.toLowerCase().replace(/\s+/g, "-"),
-							name,
-							icon,
-							shortcut: shortcut || undefined,
-							isDefault: false,
-							order: this.plugin.settings.roles.length + 1,
-						};
-
-						this.plugin.settings.roles.push(newRole);
-						await this.plugin.saveSettings();
-
-						nameInput.value = "";
-						iconInput.value = "";
-						shortcutInput.value = "";
-						this.display();
+					if (!name || !icon) {
+						return;
 					}
+
+					// Check for duplicate shortcut
+					if (shortcut && this.isShortcutInUse(shortcut)) {
+						shortcutInput.style.border = "2px solid var(--text-error)";
+						shortcutInput.focus();
+						return;
+					} else {
+						shortcutInput.style.border = "";
+					}
+
+					const newRole: Role = {
+						id: name.toLowerCase().replace(/\s+/g, "-"),
+						name,
+						icon,
+						shortcut: shortcut || undefined,
+						isDefault: false,
+						order: this.plugin.settings.roles.length + 1,
+					};
+
+					this.plugin.settings.roles.push(newRole);
+					await this.plugin.saveSettings();
+
+					nameInput.value = "";
+					iconInput.value = "";
+					shortcutInput.value = "";
+					this.display();
 				})
 		);
 
@@ -355,6 +367,16 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		});
 		helpLink.setAttribute("target", "_blank");
 		helpLink.setAttribute("rel", "noopener noreferrer");
+	}
+
+	/**
+	 * Check if a shortcut is already in use by another role
+	 */
+	private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
+		if (!shortcut) return false;
+		return this.plugin.settings.roles.some(role => 
+			role.shortcut === shortcut && role.id !== excludeRoleId
+		);
 	}
 
 	/**

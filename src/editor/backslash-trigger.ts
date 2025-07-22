@@ -13,32 +13,45 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
 			}
 
 			onKey(e: KeyboardEvent) {
-				if (e.key !== ":") return;
-
-				// Only trigger inside a task line or task/dataview code block
-				const activeView =
-					app.workspace.getActiveViewOfType(MarkdownView);
+				const activeView = app.workspace.getActiveViewOfType(MarkdownView);
 				if (!activeView) return;
 
 				const editor = activeView.editor;
 				const cursor = editor.getCursor();
 				const line = editor.getLine(cursor.line);
 				const isTaskLine = TaskUtils.isTaskCaseInsensitive(line);
-				const isInTaskBlock = this.isInTaskCodeBlock(
-					editor,
-					cursor.line
-				);
+				const isInTaskBlock = this.isInTaskCodeBlock(editor, cursor.line);
 
+				// Only trigger inside a task line or task/dataview code block
 				if (!isTaskLine && !isInTaskBlock) {
-					// Let the backslash be inserted normally
 					return;
 				}
 
-				e.stopPropagation(); // keep Tasks quiet
-				e.preventDefault();
+				// Handle colon trigger for popup menu
+				if (e.key === ":") {
+					e.stopPropagation(); // keep Tasks quiet
+					e.preventDefault();
+					this.openRoleSelector();
+					return;
+				}
 
-				// Get the current cursor position and create a simple role selector
-				this.openRoleSelector();
+				// Handle direct role shortcuts (\d, \a, \c, \i)
+				const visibleRoles = settings.roles.filter(
+					(role) =>
+						!role.isDefault ||
+						!settings.hiddenDefaultRoles.includes(role.id)
+				);
+
+				// Check if this key matches a role shortcut and we have a backslash before cursor
+				const beforeCursor = line.substring(0, cursor.ch);
+				if (beforeCursor.endsWith("\\") && this.isRoleShortcutKey(e.key, visibleRoles)) {
+					const role = visibleRoles.find(r => r.shortcut === e.key.toLowerCase());
+					if (role) {
+						e.stopPropagation();
+						e.preventDefault();
+						this.insertRoleDirectly(role, editor, cursor, isInTaskBlock);
+					}
+				}
 			}
 
 			private openRoleSelector() {
@@ -232,6 +245,100 @@ export function backslashTrigger(app: App, settings: TaskRolesPluginSettings) {
 						(isInTaskBlock ? 0 : 1),
 				};
 				editor.setCursor(cursorPos);
+			}
+
+			/**
+			 * Check if the pressed key matches any role shortcut
+			 */
+			private isRoleShortcutKey(key: string, visibleRoles: Role[]): boolean {
+				const lowerKey = key.toLowerCase();
+				return visibleRoles.some(role => role.shortcut === lowerKey);
+			}
+
+			/**
+			 * Insert role directly without showing popup
+			 */
+			private insertRoleDirectly(
+				role: Role,
+				editor: any,
+				cursor: any,
+				isInTaskBlock: boolean
+			) {
+				const line = editor.getLine(cursor.line);
+				const existingRoleIds = TaskUtils.getExistingRoles(line, [role]);
+
+				// Check if this role already exists on the line
+				if (existingRoleIds.includes(role.id)) {
+					// Role already exists, position cursor for adding assignees
+					const cursorInfo = TaskUtils.findRoleCursorPosition(line, role);
+					if (cursorInfo) {
+						// Remove the backslash trigger
+						const startPos = { line: cursor.line, ch: cursor.ch - 1 };
+						editor.replaceRange('', startPos, cursor);
+						
+						// Position cursor at the role
+						let cursorPos = {
+							line: cursor.line,
+							ch: cursorInfo.position - 1 // Adjust for removed backslash
+						};
+
+						// If there are existing assignees, add separator and space
+						if (cursorInfo.needsSeparator) {
+							editor.replaceRange(', ', cursorPos, cursorPos);
+							cursorPos.ch += 2;
+						} else if (cursorInfo.position > 0) {
+							// Add space if no assignees yet
+							editor.replaceRange(' ', cursorPos, cursorPos);
+							cursorPos.ch += 1;
+						}
+
+						editor.setCursor(cursorPos);
+						return;
+					}
+				}
+
+				// Role doesn't exist, create new role assignment
+				const replacement = isInTaskBlock ? `${role.icon} = ` : `[${role.icon}:: ]`;
+
+				// Find the nearest legal insertion point for the new role
+				const currentCursorPos = cursor.ch; // Current cursor position
+				const legalInsertionPos = TaskUtils.findNearestLegalInsertionPoint(line, currentCursorPos);
+				
+				// Remove the backslash trigger first
+				const startPos = { line: cursor.line, ch: cursor.ch - 1 };
+				editor.replaceRange('', startPos, cursor);
+				
+				// If we need to move to a different position, do so
+				if (legalInsertionPos !== currentCursorPos - 1) {
+					// Position cursor at legal insertion point
+					const insertPos = {
+						line: cursor.line,
+						ch: legalInsertionPos
+					};
+					
+					// Insert the role at the legal position
+					editor.replaceRange(replacement, insertPos, insertPos);
+					
+					// Position final cursor
+					const finalCursorPos = {
+						line: cursor.line,
+						ch: legalInsertionPos + replacement.length - (isInTaskBlock ? 0 : 1)
+					};
+					editor.setCursor(finalCursorPos);
+				} else {
+					// Insert at current position (after removing backslash, it's legal)
+					const insertPos = {
+						line: cursor.line,
+						ch: cursor.ch - 1
+					};
+					
+					editor.replaceRange(replacement, insertPos, insertPos);
+					const cursorPos = {
+						line: cursor.line,
+						ch: cursor.ch - 1 + replacement.length - (isInTaskBlock ? 0 : 1)
+					};
+					editor.setCursor(cursorPos);
+				}
 			}
 
 			private isInTaskCodeBlock(editor: any, line: number): boolean {
