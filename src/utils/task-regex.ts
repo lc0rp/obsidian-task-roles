@@ -275,7 +275,8 @@ export const TaskUtils = {
         }
 
         // Find positions after each role assignment using proper bracket matching
-        const roleStartPattern = /\[.+?::\s*/g;
+        // Match role assignments like [🚗:: but not task checkboxes like [ ]
+        const roleStartPattern = /\[[^\s\]]+::\s*/g;
         let roleMatch;
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
             // Find the matching closing bracket for this role
@@ -290,11 +291,8 @@ export const TaskUtils = {
                 }
                 
                 if (bracketCount === 0) {
-                    // Found the closing bracket, add position after it
-                    const afterRolePos = pos + 1;
-                    if (afterRolePos === line.length || line[afterRolePos] === ' ') {
-                        positions.push(afterRolePos);
-                    }
+                    // Found the closing bracket, add position at the closing bracket
+                    positions.push(pos);
                     break;
                 }
                 pos++;
@@ -318,8 +316,8 @@ export const TaskUtils = {
      */
     isInsideRoleAssignment(line: string, position: number): boolean {
         // Use proper bracket matching to find role assignments
-        // Match any character (including emojis) followed by :: 
-        const roleStartPattern = /\[.+?::\s*/g;
+        // Match role assignments like [🚗:: but not task checkboxes like [ ]
+        const roleStartPattern = /\[[^\s\]]+::\s*/g;
         let roleMatch;
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
             const roleStart = roleMatch.index;
@@ -338,8 +336,9 @@ export const TaskUtils = {
                 if (bracketCount === 0) {
                     // Found the closing bracket
                     const roleEnd = pos;
-                    // Position is inside if it's after the start and before or at the end
-                    if (position > roleStart && position <= roleEnd) {
+                    // Position is inside if it's after the start and before the end
+                    // The closing bracket position itself is NOT inside (it's a legal insertion point)
+                    if (position > roleStart && position < roleEnd) {
                         return true;
                     }
                     break;
