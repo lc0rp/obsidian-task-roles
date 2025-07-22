@@ -94,8 +94,7 @@ Settings highlights
 
 * **Person/Company prefix** – swap `@` or `+` for anything else.  
 * **Role manager** – hide defaults, change order, or add custom roles + emoji/icon.  
-* **Compact filters** – turn the Task Center header into a single‑row toolbar.  
-* **Compatibility mode** – auto‑enabled if the Tasks plugin is installed to avoid hotkey clashes.  
+* **Compact filters** – turn the Task Center header into a single‑row toolbar.
 
 Full settings reference lives in the in‑app **Settings → Task Roles** tab.
 

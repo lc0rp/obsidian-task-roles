@@ -202,8 +202,6 @@ unhidden roles will be parsed and displayed.
 - **Create @me person**: Button to create the special @me person if it doesn't exist
 - **Use compact filters**: Display all filters in a single horizontal line instead of the collapsible panel
 - **Enable debug logging**: Log additional information to the console
-- **Compatibility mode**: Use custom backslash trigger instead of built-in editor suggest (automatically enabled when
-  Tasks plugin is installed)
 - **Assign or Update Roles**:
   - Hide default roles (prevents them from appearing in future dialogs)
   - Add, edit, and delete custom roles
