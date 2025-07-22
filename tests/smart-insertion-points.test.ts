@@ -218,6 +218,66 @@ describe("Smart Insertion Point Detection", () => {
 		});
 	});
 
+	describe("findRoleCursorPosition", () => {
+		const mockRole = { id: 'drivers', icon: '🚗', name: 'Drivers' };
+
+		it("should find cursor position for role with no assignees", () => {
+			const line = "- [ ] Task [🚗:: ]";
+			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
+			
+			expect(result).not.toBeNull();
+			expect(result!.position).toBe(16); // Before the closing ]
+			expect(result!.needsSeparator).toBe(false); // No existing assignees
+		});
+
+		it("should find cursor position for role with simple assignees", () => {
+			const line = "- [ ] Task [🚗:: @John]";
+			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
+			
+			expect(result).not.toBeNull();
+			expect(result!.position).toBe(22); // Before the closing ]
+			expect(result!.needsSeparator).toBe(true); // Has existing assignees
+		});
+
+		it("should find cursor position for role with wikilink assignees", () => {
+			const line = "- [ ] Task [🚗:: [[People/John|@John]]]";
+			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
+			
+			expect(result).not.toBeNull();
+			expect(result!.position).toBe(38); // Before the outermost closing ]
+			expect(result!.needsSeparator).toBe(true); // Has existing assignees
+		});
+
+		it("should handle complex wikilinks with multiple assignees - bug reproduction", () => {
+			// This reproduces the exact bug from the issue
+			const line = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]]] ➕ 2025-07-22";
+			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
+			
+			expect(result).not.toBeNull();
+			// The position should be right before the final closing bracket of the role assignment
+			// Not inside the wikilink
+			const expectedPos = line.indexOf("]] ➕") - 1; // Before the final ]
+			expect(result!.position).toBe(expectedPos);
+			expect(result!.needsSeparator).toBe(true); // Has existing assignees
+
+			// Verify that inserting ", " at this position would create the expected result
+			const insertionText = ", ";
+			const actualResult = line.slice(0, result!.position) + insertionText + line.slice(result!.position);
+			const expectedResult = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]], ] ➕ 2025-07-22";
+			
+			expect(actualResult).toBe(expectedResult);
+		});
+
+		it("should handle multiple wikilinks with complex paths", () => {
+			const line = "- [ ] Task [🚗:: [[Path/To/Person1|@User1]], [[Another/Long/Path/Person2|@User2]]]";
+			const result = TaskUtils.findRoleCursorPosition(line, mockRole);
+			
+			expect(result).not.toBeNull();
+			expect(result!.position).toBe(82); // Before the outermost closing ]
+			expect(result!.needsSeparator).toBe(true);
+		});
+	});
+
 	describe("Edge Cases", () => {
 		it("should handle empty lines gracefully", () => {
 			const line = "";

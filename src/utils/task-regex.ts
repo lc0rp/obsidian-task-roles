@@ -143,13 +143,30 @@ export const TaskUtils = {
         const roleStartMatch = roleStartPattern.exec(line);
         
         if (roleStartMatch) {
-            // Find the matching closing bracket, accounting for nested brackets
+            // Find the matching closing bracket, properly handling wikilink double brackets
             const contentStart = roleStartMatch.index + roleStartMatch[0].length;
-            let bracketCount = 1; // We've seen the opening [
+            let bracketCount = 1; // We've seen the opening [ of the role
             let pos = contentStart;
             
             // Walk through the string to find the matching closing bracket
             while (pos < line.length && bracketCount > 0) {
+                // Check for wikilink start [[
+                if (pos < line.length - 1 && line[pos] === '[' && line[pos + 1] === '[') {
+                    // Found wikilink start, increment by 2 for the double bracket
+                    bracketCount += 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Check for wikilink end ]]
+                if (pos < line.length - 1 && line[pos] === ']' && line[pos + 1] === ']') {
+                    // Found wikilink end, decrement by 2 for the double bracket
+                    bracketCount -= 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Handle single brackets (role assignment brackets)
                 if (line[pos] === '[') {
                     bracketCount++;
                 } else if (line[pos] === ']') {
@@ -157,7 +174,7 @@ export const TaskUtils = {
                 }
                 
                 if (bracketCount === 0) {
-                    // Found the closing bracket
+                    // Found the closing bracket of the role assignment
                     const assigneesText = line.substring(contentStart, pos).trim();
                     const hasAssignees = assigneesText.length > 0;
                     return { position: pos, needsSeparator: hasAssignees };
@@ -279,11 +296,28 @@ export const TaskUtils = {
         const roleStartPattern = /\[[^\s\]]+::\s*/g;
         let roleMatch;
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
-            // Find the matching closing bracket for this role
+            // Find the matching closing bracket for this role, properly handling wikilink double brackets
             let bracketCount = 1; // We've seen the opening [
             let pos = roleMatch.index + roleMatch[0].length;
             
             while (pos < line.length && bracketCount > 0) {
+                // Check for wikilink start [[
+                if (pos < line.length - 1 && line[pos] === '[' && line[pos + 1] === '[') {
+                    // Found wikilink start, increment by 2 for the double bracket
+                    bracketCount += 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Check for wikilink end ]]
+                if (pos < line.length - 1 && line[pos] === ']' && line[pos + 1] === ']') {
+                    // Found wikilink end, decrement by 2 for the double bracket
+                    bracketCount -= 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Handle single brackets (role assignment brackets)
                 if (line[pos] === '[') {
                     bracketCount++;
                 } else if (line[pos] === ']') {
@@ -322,11 +356,28 @@ export const TaskUtils = {
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
             const roleStart = roleMatch.index;
             
-            // Find the matching closing bracket for this role
+            // Find the matching closing bracket for this role, properly handling wikilink double brackets
             let bracketCount = 1; // We've seen the opening [
             let pos = roleMatch.index + roleMatch[0].length;
             
             while (pos < line.length && bracketCount > 0) {
+                // Check for wikilink start [[
+                if (pos < line.length - 1 && line[pos] === '[' && line[pos + 1] === '[') {
+                    // Found wikilink start, increment by 2 for the double bracket
+                    bracketCount += 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Check for wikilink end ]]
+                if (pos < line.length - 1 && line[pos] === ']' && line[pos + 1] === ']') {
+                    // Found wikilink end, decrement by 2 for the double bracket
+                    bracketCount -= 2;
+                    pos += 2; // Skip both brackets
+                    continue;
+                }
+                
+                // Handle single brackets (role assignment brackets)
                 if (line[pos] === '[') {
                     bracketCount++;
                 } else if (line[pos] === ']') {
