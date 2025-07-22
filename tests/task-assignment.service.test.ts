@@ -11,7 +11,7 @@ function createService() {
 describe('TaskRolesService', () => {
     it('parseRoleAssignments returns single role', () => {
         const service = createService();
-        const input = '[🚗:: [[Contacts/John|@John]]]';
+        const input = '[🚗:: [[People/John|@John]]]';
         const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
         expect(result).toEqual([
             { role: DEFAULT_ROLES[0], assignees: ['@John'] }
@@ -24,13 +24,13 @@ describe('TaskRolesService', () => {
         const roleAssignments = [{ roleId: 'drivers', assignees: ['@John'] }];
         const result = service.applyRoleAssignmentsToLine(line, roleAssignments, DEFAULT_ROLES);
         expect(result).toBe(
-            '- [ ] Test task [🚗:: [[Contacts/John|@John]]] 🔴 📅 2024-01-01'
+            '- [ ] Test task [🚗:: [[People/John|@John]]] 🔴 📅 2024-01-01'
         );
     });
 
     it('parseRoleAssignments handles multiple roles', () => {
         const service = createService();
-        const input = '[🚗:: [[Contacts/John|@John]]] [👍:: [[Contacts/Jane|@Jane]]]';
+        const input = '[🚗:: [[People/John|@John]]] [👍:: [[People/Jane|@Jane]]]';
         const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
         expect(result).toEqual([
             { role: DEFAULT_ROLES[0], assignees: ['@John'] },
@@ -46,7 +46,7 @@ describe('TaskRolesService', () => {
         ];
         const output = service.formatRoleAssignments(roleAssignments, DEFAULT_ROLES);
         expect(output).toBe(
-            '[🚗:: [[Contacts/John|@John]]] [👍:: [[Contacts/Jane|@Jane]]]'
+            '[🚗:: [[People/John|@John]]] [👍:: [[People/Jane|@Jane]]]'
         );
     });
 
@@ -63,7 +63,7 @@ describe('TaskRolesService', () => {
         const roleAssignments = [{ roleId: 'approvers', assignees: ['@Manager'] }];
         const result = service.applyRoleAssignmentsToLine(line, roleAssignments, DEFAULT_ROLES);
         expect(result).toBe(
-            '- [ ] Task [👍:: [[Contacts/Manager|@Manager]]] 📅 2024-01-01'
+            '- [ ] Task [👍:: [[People/Manager|@Manager]]] 📅 2024-01-01'
         );
     });
 });

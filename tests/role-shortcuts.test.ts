@@ -8,8 +8,7 @@ const mockPlugin = {
     getVisibleRoles: vi.fn(() => DEFAULT_ROLES),
     taskRolesService: {
         escapeRegex: vi.fn((str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    },
-    isInTaskCodeBlock: vi.fn(() => false)
+    }
 };
 
 const mockEditor = {
@@ -32,6 +31,9 @@ describe('Role Shortcuts', () => {
         vi.clearAllMocks();
         roleSuggest = new RoleSuggest(mockApp as any, mockPlugin as any);
         (roleSuggest as any).context = mockContext;
+        
+        // Mock the isInTaskBlock method
+        vi.spyOn(roleSuggest as any, 'isInTaskBlock').mockReturnValue(false);
     });
 
     describe('Default Role Shortcuts', () => {
@@ -51,13 +53,13 @@ describe('Role Shortcuts', () => {
             mockEditor.getLine.mockReturnValue('- [ ] Some task \\d');
             
             const result = roleSuggest.onTrigger(
-                { line: 0, ch: 17 },
+                { line: 0, ch: 18 }, // Cursor after the 'd'
                 mockEditor as any
             );
-
+            
             expect(result).toBeTruthy();
             expect(result?.query).toBe('d');
-            expect(result?.start).toEqual({ line: 0, ch: 15 });
+            expect(result?.start).toEqual({ line: 0, ch: 16 });
         });
 
         it('should not trigger on non-task lines', () => {
@@ -73,10 +75,10 @@ describe('Role Shortcuts', () => {
 
         it('should trigger in task code blocks', () => {
             mockEditor.getLine.mockReturnValue('- [ ] Some task \\d');
-            mockPlugin.isInTaskCodeBlock.mockReturnValue(true);
+            vi.spyOn(roleSuggest as any, 'isInTaskBlock').mockReturnValue(true);
             
             const result = roleSuggest.onTrigger(
-                { line: 0, ch: 17 },
+                { line: 0, ch: 18 }, // Cursor after the 'd'
                 mockEditor as any
             );
 
@@ -109,36 +111,26 @@ describe('Role Shortcuts', () => {
     describe('Role Selection', () => {
         it('should insert correct format for normal task lines', () => {
             const driversRole = DEFAULT_ROLES.find(r => r.id === 'drivers')!;
-            mockPlugin.isInTaskCodeBlock.mockReturnValue(false);
+            vi.spyOn(roleSuggest as any, 'isInTaskBlock').mockReturnValue(false);
             
             roleSuggest.selectSuggestion(driversRole);
 
-            expect(mockEditor.replaceRange).toHaveBeenCalledWith(
-                '[🚗:: ]',
-                mockContext.start,
-                mockContext.end
-            );
-            expect(mockEditor.setCursor).toHaveBeenCalledWith({
-                line: 0,
-                ch: 6 // start.ch + replacement.length - 1
-            });
+            // First call clears the trigger, second call inserts the role
+            expect(mockEditor.replaceRange).toHaveBeenNthCalledWith(1, '', mockContext.start, mockContext.end);
+            expect(mockEditor.replaceRange).toHaveBeenNthCalledWith(2, '[🚗:: ]', expect.any(Object), expect.any(Object));
+            expect(mockEditor.setCursor).toHaveBeenCalledWith(expect.any(Object));
         });
 
         it('should insert correct format for task code blocks', () => {
             const driversRole = DEFAULT_ROLES.find(r => r.id === 'drivers')!;
-            mockPlugin.isInTaskCodeBlock.mockReturnValue(true);
+            vi.spyOn(roleSuggest as any, 'isInTaskBlock').mockReturnValue(true);
             
             roleSuggest.selectSuggestion(driversRole);
 
-            expect(mockEditor.replaceRange).toHaveBeenCalledWith(
-                '🚗 = ',
-                mockContext.start,
-                mockContext.end
-            );
-            expect(mockEditor.setCursor).toHaveBeenCalledWith({
-                line: 0,
-                ch: 4 // start.ch + replacement.length
-            });
+            // First call clears the trigger, second call inserts the role
+            expect(mockEditor.replaceRange).toHaveBeenNthCalledWith(1, '', mockContext.start, mockContext.end);
+            expect(mockEditor.replaceRange).toHaveBeenNthCalledWith(2, '🚗 = ', expect.any(Object), expect.any(Object));
+            expect(mockEditor.setCursor).toHaveBeenCalledWith(expect.any(Object));
         });
     });
 

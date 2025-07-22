@@ -9,10 +9,10 @@ The Task Center now supports comprehensive filtering across multiple criteria:
 #### **Entity-Based Filters** ✅ COMPLETED
 
 - **Role**: Filter tasks by specific roles ✅
-- **Person or Contact**: Filter by individual people or contacts ✅
+- **Person**: Filter by individual people ✅
 - **Combination of Person and Role**: Filter by a specific person in a specific role ✅
-- **Company or Group**: Filter by organizational entities ✅
-- **Combination of Company and Role**: Filter by a specific company/group in a specific role ✅
+- **Company**: Filter by companies ✅
+- **Combination of Company and Role**: Filter by a specific company in a specific role ✅
 - **None-Set Options**: Filter for tasks with no roles, people, or companies assigned ✅
 
 #### **Date-Based Filters** ✅ COMPLETED

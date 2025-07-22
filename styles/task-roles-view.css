@@ -1385,8 +1385,8 @@ ul.contains-task-list.plugin-tasks-query-result.tasks-layout-hide-urgency,
     color: var(--text-normal);
 }
 
-/* @me Contact DONE Pill Styles */
-.me-contact-done-pill {
+/* @me Person DONE Pill Styles */
+.me-person-done-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;

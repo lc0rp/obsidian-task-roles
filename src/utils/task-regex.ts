@@ -118,7 +118,7 @@ export const TaskUtils = {
             }
         }
 
-        // Check for legacy format: 🚗 [[Contacts/John|@John]]
+        // Check for legacy format: 🚗 [[People/John|@John]]
         for (const role of visibleRoles) {
             const escapedIcon = role.icon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const legacyPattern = new RegExp(`${escapedIcon}\\s+\\[\\[`, 'g');
@@ -168,7 +168,7 @@ export const TaskUtils = {
             }
         }
 
-        // Check for legacy format: 🚗 [[Contacts/John|@John]]
+        // Check for legacy format: 🚗 [[People/John|@John]]
         const legacyPattern = new RegExp(`${escapedIcon}\\s+`, 'g');
         const legacyMatch = legacyPattern.exec(line);
         if (legacyMatch) {
@@ -299,14 +299,16 @@ export const TaskUtils = {
             }
         }
 
-        // End of line (if not already covered)
+        // End of line (if not already covered and is legal)
         const trimmedEnd = line.trimEnd().length;
-        if (!positions.includes(trimmedEnd)) {
+        if (!positions.includes(trimmedEnd) && this.isLegalInsertionPoint(line, trimmedEnd)) {
             positions.push(trimmedEnd);
         }
 
-        // Remove duplicates and sort
-        return [...new Set(positions)].sort((a, b) => a - b);
+        // Remove duplicates and sort, and filter to only legal positions
+        return [...new Set(positions)]
+            .filter(pos => this.isLegalInsertionPoint(line, pos))
+            .sort((a, b) => a - b);
     },
 
     /**
@@ -333,7 +335,7 @@ export const TaskUtils = {
                 if (bracketCount === 0) {
                     // Found the closing bracket
                     const roleEnd = pos;
-                    if (position > roleStart && position <= roleEnd) {
+                    if (position > roleStart && position < roleEnd) {
                         return true;
                     }
                     break;

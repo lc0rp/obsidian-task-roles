@@ -44,10 +44,10 @@ describe('Compatibility Mode Direct Shortcuts', () => {
 
         // Simulate the key handler logic
         onKeyHandler = (e: KeyboardEvent) => {
-            const line = '- [ ] Task \\';
-            const cursor = { line: 0, ch: 15 };
-            const isTaskLine = line.includes('[ ]');
-            const isInTaskBlock = false;
+            const line = mockEditor.getLine();
+            const cursor = mockEditor.getCursor();
+            const isTaskLine = line.includes('[ ]') || line.includes('[x]') || line.includes('[X]');
+            const isInTaskBlock = mockInstance.isInTaskCodeBlock();
 
             if (!isTaskLine && !isInTaskBlock) {
                 return;

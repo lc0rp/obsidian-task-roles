@@ -39,7 +39,7 @@ describe('TaskUtils.findRoleCursorPosition', () => {
     });
 
     it('should handle legacy format', () => {
-        const line = '- [ ] Task with 🚗 [[Contacts/John|@john]] test';
+        const line = '- [ ] Task with 🚗 [[People/John|@john]] test';
         const result = TaskUtils.findRoleCursorPosition(line, testRole);
 
         expect(result).toBeTruthy();

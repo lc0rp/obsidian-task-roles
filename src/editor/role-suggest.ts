@@ -40,7 +40,7 @@ export class RoleSuggest extends EditorSuggest<Role> {
             .join('');
 
         const pattern = shortcuts
-            ? new RegExp(`\\\\(?:([${shortcuts}]?)|)$`)
+            ? new RegExp(`\\\\([${shortcuts}]*)$`)
             : /\\$/;
 
         const match = before.match(pattern);
@@ -48,7 +48,7 @@ export class RoleSuggest extends EditorSuggest<Role> {
             return null;
         }
 
-        const query = match[1];
+        const query = match[1] || '';
         const start = cursor.ch - query.length - 1; // include backslash
         return {
             start: { line: cursor.line, ch: start },
