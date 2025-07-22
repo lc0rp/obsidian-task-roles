@@ -30,6 +30,7 @@ describe("CompactFiltersComponent", () => {
 	let mockUpdateCallback: ReturnType<typeof vi.fn>;
 	let mockRegisterCallback: ReturnType<typeof vi.fn>;
 	let mockResetFiltersCallback: ReturnType<typeof vi.fn>;
+	let mockApplyFiltersCallback: ReturnType<typeof vi.fn>;
 	let container: HTMLElement;
 
 	beforeEach(() => {
@@ -109,13 +110,15 @@ describe("CompactFiltersComponent", () => {
 		mockUpdateCallback = vi.fn();
 		mockRegisterCallback = vi.fn();
 		mockResetFiltersCallback = vi.fn();
+		mockApplyFiltersCallback = vi.fn();
 
 		component = new CompactFiltersComponent(
 			mockPlugin as any,
 			{} as ViewFilters,
 			mockUpdateCallback,
 			mockRegisterCallback,
-			mockResetFiltersCallback
+			mockResetFiltersCallback,
+			mockApplyFiltersCallback
 		);
 	});
 
@@ -131,7 +134,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
@@ -156,7 +160,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
@@ -179,7 +184,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
@@ -202,7 +208,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
@@ -233,7 +240,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
@@ -258,7 +266,8 @@ describe("CompactFiltersComponent", () => {
 				filters,
 				mockUpdateCallback,
 				mockRegisterCallback,
-				mockResetFiltersCallback
+				mockResetFiltersCallback,
+				mockApplyFiltersCallback
 			);
 
 			await component.render(container);
