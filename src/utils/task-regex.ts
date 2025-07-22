@@ -204,11 +204,6 @@ export const TaskUtils = {
         // Clamp position to valid range
         currentPosition = Math.max(0, Math.min(currentPosition, line.length));
         
-        // First, check if current position is already legal
-        if (this.isLegalInsertionPoint(line, currentPosition)) {
-            return currentPosition;
-        }
-
         // Find all legal positions in the line
         const legalPositions = this.findAllLegalInsertionPoints(line);
         
@@ -216,6 +211,30 @@ export const TaskUtils = {
             // No legal positions found, default to after task checkbox if it exists
             const checkboxMatch = this.getCheckboxPrefix(line);
             return checkboxMatch ? checkboxMatch[0].length : 0;
+        }
+
+        // Special case: if cursor is at or near the end of the line,
+        // prefer the position after the last role assignment over the end of line
+        const trimmedEnd = line.trimEnd().length;
+        const isAtEndOfLine = currentPosition >= trimmedEnd;
+        
+        if (isAtEndOfLine) {
+            // Find positions that are after role assignments (not at end of line)
+            const afterRolePositions = legalPositions.filter((pos: number) => {
+                // Check if this position is right after a role assignment closing bracket
+                return pos > 0 && pos < trimmedEnd && line[pos - 1] === ']' && 
+                       !this.isInsideWikilink(line, pos - 1);
+            });
+            
+            if (afterRolePositions.length > 0) {
+                // Return the last position after a role assignment
+                return afterRolePositions[afterRolePositions.length - 1];
+            }
+        }
+
+        // Check if current position is already legal
+        if (this.isLegalInsertionPoint(line, currentPosition)) {
+            return currentPosition;
         }
 
         // Find the closest legal position to current cursor
@@ -325,8 +344,8 @@ export const TaskUtils = {
                 }
                 
                 if (bracketCount === 0) {
-                    // Found the closing bracket, add position at the closing bracket
-                    positions.push(pos);
+                    // Found the closing bracket, add position after the closing bracket
+                    positions.push(pos + 1);
                     break;
                 }
                 pos++;

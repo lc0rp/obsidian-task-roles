@@ -278,6 +278,39 @@ describe("Smart Insertion Point Detection", () => {
 		});
 	});
 
+	describe("Role Insertion Position Bug", () => {
+		it("should find correct position when cursor is at end of task line", () => {
+			// This reproduces the exact bug from the user report
+			const line = "- [ ] T [🚗:: [[Task Roles Demo/People/Me|@Me]], [[Task Roles Demo/People/Tommy|@Tommy]]] ➕ 2025-07-22 ";
+			const cursorPos = line.length; // At the very end of the line
+			
+			const nearestPos = TaskUtils.findNearestLegalInsertionPoint(line, cursorPos);
+			
+			// Should find position right after the closing bracket of the role assignment
+			// Position 88 is after the final ] that closes the role assignment (before the date)
+			const expectedPos = 89; // After the final ] and before the space and date
+			expect(nearestPos).toBe(expectedPos);
+			expect(TaskUtils.isLegalInsertionPoint(line, nearestPos)).toBe(true);
+			
+			// Verify that this position is after the last role but before the date
+			const beforePos = line.substring(0, nearestPos);
+			const afterPos = line.substring(nearestPos);
+			expect(beforePos).toMatch(/\]\s*$/); // Should end with ] and optional space
+			expect(afterPos).toMatch(/^.*➕/); // Should start with space and contain date symbol
+		});
+		
+		it("should prefer position after last role over end of line", () => {
+			const line = "- [ ] Task [🚗:: @user] some text after";
+			const cursorPos = line.length; // At end of line
+			
+			const nearestPos = TaskUtils.findNearestLegalInsertionPoint(line, cursorPos);
+			
+			// Should prefer the position after the role assignment over the end of line
+			const afterRolePos = 22; // After [🚗:: @user]
+			expect(nearestPos).toBe(afterRolePos);
+		});
+	});
+
 	describe("Edge Cases", () => {
 		it("should handle empty lines gracefully", () => {
 			const line = "";
