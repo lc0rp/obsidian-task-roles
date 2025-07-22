@@ -172,6 +172,12 @@ export class TaskQueryService {
             queryLines.push(`description includes ${filters.textSearch.trim()}`);
         }
 
+        // Add result limit
+        const resultLimit = this.plugin.settings.resultLimit;
+        if (resultLimit && resultLimit > 0) {
+            queryLines.push(`limit ${resultLimit}`);
+        }
+
         return queryLines.join('\n');
     }
 

@@ -8,6 +8,7 @@ export interface TaskRolesPluginSettings {
     savedViews: ViewConfiguration[];
     autoApplyFilters: boolean;
     taskDisplayMode: 'minimal' | 'detailed';
+    resultLimit: number;
     debug: boolean;
     compatMode: boolean;
     compatModeUserSet: boolean;
@@ -163,6 +164,7 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
     savedViews: [],
     autoApplyFilters: true,
     taskDisplayMode: 'detailed',
+    resultLimit: 50,
     debug: false,
     compatMode: false,
     compatModeUserSet: false

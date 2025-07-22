@@ -216,6 +216,25 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
+		// Result limit setting
+		new Setting(containerEl)
+			.setName("Task Center result limit")
+			.setDesc(
+				"Maximum number of tasks to display in Task Center (may be overridden by Task plugin's global query setting)"
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder("50")
+					.setValue(this.plugin.settings.resultLimit.toString())
+					.onChange(async (value) => {
+						const numValue = parseInt(value) || 50;
+						if (numValue > 0) {
+							this.plugin.settings.resultLimit = numValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
+
 		// Role management
 		containerEl.createEl("h3", { text: "Role management" });
 
