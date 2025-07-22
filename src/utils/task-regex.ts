@@ -144,7 +144,6 @@ export const TaskUtils = {
         
         if (roleStartMatch) {
             // Find the matching closing bracket, accounting for nested brackets
-            const startPos = roleStartMatch.index;
             const contentStart = roleStartMatch.index + roleStartMatch[0].length;
             let bracketCount = 1; // We've seen the opening [
             let pos = contentStart;
@@ -185,6 +184,9 @@ export const TaskUtils = {
      * Legal positions are: after task checkbox, between roles, after roles, or after task description
      */
     findNearestLegalInsertionPoint(line: string, currentPosition: number): number {
+        // Clamp position to valid range
+        currentPosition = Math.max(0, Math.min(currentPosition, line.length));
+        
         // First, check if current position is already legal
         if (this.isLegalInsertionPoint(line, currentPosition)) {
             return currentPosition;
@@ -273,7 +275,7 @@ export const TaskUtils = {
         }
 
         // Find positions after each role assignment using proper bracket matching
-        const roleStartPattern = /\[[^:]+::\s*/g;
+        const roleStartPattern = /\[.+?::\s*/g;
         let roleMatch;
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
             // Find the matching closing bracket for this role
@@ -316,7 +318,8 @@ export const TaskUtils = {
      */
     isInsideRoleAssignment(line: string, position: number): boolean {
         // Use proper bracket matching to find role assignments
-        const roleStartPattern = /\[[^:]+::\s*/g;
+        // Match any character (including emojis) followed by :: 
+        const roleStartPattern = /\[.+?::\s*/g;
         let roleMatch;
         while ((roleMatch = roleStartPattern.exec(line)) !== null) {
             const roleStart = roleMatch.index;
@@ -335,7 +338,8 @@ export const TaskUtils = {
                 if (bracketCount === 0) {
                     // Found the closing bracket
                     const roleEnd = pos;
-                    if (position > roleStart && position < roleEnd) {
+                    // Position is inside if it's after the start and before or at the end
+                    if (position > roleStart && position <= roleEnd) {
                         return true;
                     }
                     break;
@@ -350,12 +354,39 @@ export const TaskUtils = {
      * Check if position is inside a wikilink like [[Page|Display]]
      */
     isInsideWikilink(line: string, position: number): boolean {
-        // Look for wikilinks that contain this position
-        const wikilinkPattern = /\[\[[^\]]*\]\]/g;
-        let match;
-        while ((match = wikilinkPattern.exec(line)) !== null) {
-            if (position > match.index && position < match.index + match[0].length) {
-                return true;
+        // Use proper bracket matching to find wikilinks
+        let i = 0;
+        while (i < line.length - 1) {
+            if (line[i] === '[' && line[i + 1] === '[') {
+                // Found start of wikilink
+                const wikilinkStart = i;
+                let bracketCount = 2; // We've seen [[
+                let pos = i + 2;
+                
+                while (pos < line.length && bracketCount > 0) {
+                    if (pos < line.length - 1 && line[pos] === ']' && line[pos + 1] === ']') {
+                        bracketCount -= 2;
+                        pos++; // Skip the second ]
+                    }
+                    
+                    if (bracketCount === 0) {
+                        // Found the closing ]]
+                        const wikilinkEnd = pos;
+                        if (position > wikilinkStart && position < wikilinkEnd) {
+                            return true;
+                        }
+                        i = pos; // Continue searching from after this wikilink
+                        break;
+                    }
+                    pos++;
+                }
+                
+                if (bracketCount > 0) {
+                    // Unclosed wikilink, skip
+                    i = pos;
+                }
+            } else {
+                i++;
             }
         }
         return false;
