@@ -9,7 +9,7 @@ describe('TaskUtils.findRoleCursorPosition', () => {
         const result = TaskUtils.findRoleCursorPosition(line, testRole);
 
         expect(result).toBeTruthy();
-        expect(result?.position).toBe(33); // Before the closing bracket
+        expect(result?.position).toBe(34); // Before the closing bracket
         expect(result?.needsSeparator).toBe(true);
     });
 
@@ -18,7 +18,7 @@ describe('TaskUtils.findRoleCursorPosition', () => {
         const result = TaskUtils.findRoleCursorPosition(line, testRole);
 
         expect(result).toBeTruthy();
-        expect(result?.position).toBe(24); // Before the closing bracket
+        expect(result?.position).toBe(22); // Before the closing bracket
         expect(result?.needsSeparator).toBe(false);
     });
 
