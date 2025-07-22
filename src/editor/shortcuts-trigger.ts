@@ -120,16 +120,20 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 					);
 					if (cursorInfo) {
 						// Remove the backslash trigger
+						const backslashPos = cursor.ch - 1;
 						const startPos = {
 							line: cursor.line,
-							ch: cursor.ch - 1,
+							ch: backslashPos,
 						};
 						editor.replaceRange("", startPos, cursor);
 
 						// Position cursor at the role
+						// Only adjust for removed backslash if it was before the role position
 						let cursorPos = {
 							line: cursor.line,
-							ch: cursorInfo.position - 1, // Adjust for removed backslash
+							ch: backslashPos < cursorInfo.position 
+								? cursorInfo.position - 1 
+								: cursorInfo.position,
 						};
 
 						// If there are existing assignees, add separator and space
