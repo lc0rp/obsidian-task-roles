@@ -90,8 +90,21 @@ export abstract class MultiSelectFilterBase<T> {
 			const optLabel = optionsContainer.createEl('label', { cls: 'compact-multiselect-option' });
 			const optCheckbox = optLabel.createEl('input', { type: 'checkbox' });
 			optCheckbox.checked = this.tempValues.includes(option.value);
-			const text = option.icon ? `${option.icon} ${option.label}` : option.label;
-			optLabel.createSpan().setText(text);
+			
+			if (option.icon) {
+				// Check if icon is a character (length 1-2 for emoji) or a Lucide icon name
+				if (option.icon.length <= 2) {
+					// Character icon (emoji) - use text concatenation
+					optLabel.createSpan().setText(`${option.icon} ${option.label}`);
+				} else {
+					// Lucide icon - use setIcon()
+					const iconSpan = optLabel.createEl('span', { cls: 'compact-multiselect-option-icon' });
+					setIcon(iconSpan, option.icon);
+					optLabel.createSpan().setText(` ${option.label}`);
+				}
+			} else {
+				optLabel.createSpan().setText(option.label);
+			}
 			optCheckbox.onchange = (e) => {
 				if ((e.target as HTMLInputElement).checked) {
 					if (!this.tempValues.includes(option.value)) {
