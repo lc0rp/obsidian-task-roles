@@ -3,12 +3,16 @@ import { EditorView } from "@codemirror/view";
 import { App, MarkdownView } from "obsidian";
 import { TaskRolesPluginSettings, Role } from "../types";
 import { TaskUtils } from "../utils/task-regex";
+import { RoleSuggestionDropdown } from "../components/role-suggestion-dropdown";
 
 export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 	return ViewPlugin.fromClass(
 		class {
+			private roleSuggestionDropdown: RoleSuggestionDropdown;
+
 			constructor(readonly view: EditorView) {
 				this.onKey = this.onKey.bind(this);
+				this.roleSuggestionDropdown = new RoleSuggestionDropdown(app, settings);
 				view.dom.addEventListener("keydown", this.onKey, true); // capture phase
 			}
 
@@ -31,6 +35,38 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 					return;
 				}
 
+				// Handle role suggestion dropdown interactions first
+				if (this.roleSuggestionDropdown.handleKeydown(e)) {
+					return; // Dropdown handled the event
+				}
+
+				// Handle double backslash trigger for dropdown
+				const beforeCursor = line.substring(0, cursor.ch);
+				if (e.key === "\\" && beforeCursor.endsWith("\\")) {
+					e.stopPropagation();
+					e.preventDefault();
+					
+					const existingRoles = TaskUtils.getExistingRoles(line, settings.roles);
+					const success = this.roleSuggestionDropdown.show(
+						cursor, 
+						existingRoles, 
+						(role: Role) => {
+							// Remove both backslashes before inserting role
+							const backslashStart = { line: cursor.line, ch: cursor.ch - 1 };
+							const backslashEnd = { line: cursor.line, ch: cursor.ch + 1 };
+							editor.replaceRange("", backslashStart, backslashEnd);
+							
+							// Adjust cursor position after backslash removal
+							const adjustedCursor = { line: cursor.line, ch: cursor.ch - 1 };
+							this.insertRoleDirectly(role, editor, adjustedCursor, isInTaskBlock);
+						}
+					);
+					
+					if (success) {
+						return;
+					}
+				}
+
 				// Handle direct role shortcuts (\d, \a, \c, \i)
 				const visibleRoles = settings.roles.filter(
 					(role) =>
@@ -39,7 +75,6 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 				);
 
 				// Check if this key matches a role shortcut and we have a backslash before cursor
-				const beforeCursor = line.substring(0, cursor.ch);
 				if (
 					beforeCursor.endsWith("\\") &&
 					this.isRoleShortcutKey(e.key, visibleRoles)
@@ -215,6 +250,7 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 
 			destroy() {
 				this.view.dom.removeEventListener("keydown", this.onKey, true);
+				this.roleSuggestionDropdown.hide(); // Clean up dropdown if visible
 			}
 		}
 	);
