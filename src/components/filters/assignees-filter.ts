@@ -91,20 +91,20 @@ export class AssigneesFilter {
 		this.updateDisplay();
 
 		// Click on input opens the assignee selector if provided
-		this.assigneesInput.onclick = () => {
+		this.assigneesInput.addEventListener('click', () => {
 			this.showAssigneeSelector(() => {
 				this.updateDisplay();
 			});
-		};
+		});
 
 		// Clear button click event to remove assignees
-		this.clearButton.onclick = (e: MouseEvent) => {
+		this.clearButton.addEventListener('click', (e: MouseEvent) => {
 			e.stopPropagation();
 			this.callbacks.updateFilters({ people: [], companies: [] });
 			this.currentFilters.people = [];
 			this.currentFilters.companies = [];
 			this.updateDisplay();
-		};
+		});
 	}
 
 	updateDisplay(): void {
