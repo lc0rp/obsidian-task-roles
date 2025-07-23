@@ -215,6 +215,39 @@ describe("Role Shortcuts", () => {
 			expect(result).toBeUndefined();
 			expect(preventDefault).not.toHaveBeenCalled();
 		});
+
+		it("should not insert role metadata on new line when cursor is at end of task line", () => {
+			// Setup task line with cursor at the very end
+			const taskLine = "- [ ] Task description here";
+			const cursorAtEnd = taskLine.length + 1; // +1 for the backslash
+			mockEditor.getLine.mockReturnValue(taskLine + "\\");
+			mockEditor.getCursor.mockReturnValue({ line: 0, ch: cursorAtEnd });
+
+			const mockEvent = new KeyboardEvent("keydown", { key: "d" });
+			const preventDefault = vi.fn();
+			Object.defineProperty(mockEvent, "preventDefault", {
+				value: preventDefault,
+			});
+
+			const result = onKeyHandler(mockEvent);
+
+			expect(result).toEqual({
+				action: "insertRole",
+				role: DEFAULT_ROLES.find((r) => r.shortcut === "d"),
+			});
+			expect(preventDefault).toHaveBeenCalled();
+
+			// Verify that no new line characters would be inserted
+			// The role should be inserted inline, not on a new line
+			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "d");
+			expect(expectedRole).toBeDefined();
+			
+			// The role format should be inline dataview format [🚗:: ] 
+			// not contain any newline characters
+			const roleFormat = `[${expectedRole.icon}:: ]`;
+			expect(roleFormat).not.toContain('\n');
+			expect(roleFormat).not.toContain('\r');
+		});
 	});
 
 	describe("Hidden Roles", () => {
