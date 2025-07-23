@@ -156,56 +156,36 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 					? `${role.icon} = `
 					: `[${role.icon}:: ]`;
 
-				// Find the nearest legal insertion point for the new role
-				const currentCursorPos = cursor.ch; // Current cursor position
-				const legalInsertionPos =
-					TaskUtils.findNearestLegalInsertionPoint(
-						line,
-						currentCursorPos
-					);
-
 				// Remove the backslash trigger first
 				const startPos = { line: cursor.line, ch: cursor.ch - 1 };
 				editor.replaceRange("", startPos, cursor);
 
-				// If we need to move to a different position, do so
-				if (legalInsertionPos !== currentCursorPos - 1) {
-					// Position cursor at legal insertion point
-					const insertPos = {
-						line: cursor.line,
-						ch: legalInsertionPos,
-					};
+				// Get the updated line after backslash removal and find insertion point
+				const updatedLine = editor.getLine(cursor.line);
+				const currentCursorPos = cursor.ch - 1; // Position after backslash removal
+				const legalInsertionPos =
+					TaskUtils.findNearestLegalInsertionPoint(
+						updatedLine,
+						currentCursorPos
+					);
 
-					// Insert the role at the legal position
-					editor.replaceRange(replacement, insertPos, insertPos);
+				// Insert the role at the legal position
+				const insertPos = {
+					line: cursor.line,
+					ch: legalInsertionPos,
+				};
 
-					// Position final cursor
-					const finalCursorPos = {
-						line: cursor.line,
-						ch:
-							legalInsertionPos +
-							replacement.length -
-							(isInTaskBlock ? 0 : 1),
-					};
-					editor.setCursor(finalCursorPos);
-				} else {
-					// Insert at current position (after removing backslash, it's legal)
-					const insertPos = {
-						line: cursor.line,
-						ch: cursor.ch - 1,
-					};
+				editor.replaceRange(replacement, insertPos, insertPos);
 
-					editor.replaceRange(replacement, insertPos, insertPos);
-					const cursorPos = {
-						line: cursor.line,
-						ch:
-							cursor.ch -
-							1 +
-							replacement.length -
-							(isInTaskBlock ? 0 : 1),
-					};
-					editor.setCursor(cursorPos);
-				}
+				// Position final cursor
+				const finalCursorPos = {
+					line: cursor.line,
+					ch:
+						legalInsertionPos +
+						replacement.length -
+						(isInTaskBlock ? 0 : 1),
+				};
+				editor.setCursor(finalCursorPos);
 			}
 
 			private isInTaskCodeBlock(editor: any, line: number): boolean {
