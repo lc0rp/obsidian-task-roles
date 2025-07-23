@@ -27,3 +27,7 @@ data.json
 
 # Exclude test generated files
 coverage
+
+# Exclude test output files
+dist-test
+dist-test/*
