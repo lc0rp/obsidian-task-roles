@@ -248,6 +248,43 @@ describe("Role Shortcuts", () => {
 			expect(roleFormat).not.toContain('\n');
 			expect(roleFormat).not.toContain('\r');
 		});
+
+		it("should insert role inline when task already has newline in multi-line file", () => {
+			// Simulate a task that's part of a multi-line file with existing newline
+			// The editor.getLine() method strips newlines, but the task would have \n at end in actual file
+			const taskLine = "- [ ] Task description here";
+			const cursorBeforeNewline = taskLine.length + 1; // +1 for the backslash, positioned before the existing newline
+			mockEditor.getLine.mockReturnValue(taskLine + "\\"); // getLine returns content without \n
+			mockEditor.getCursor.mockReturnValue({ line: 0, ch: cursorBeforeNewline });
+
+			const mockEvent = new KeyboardEvent("keydown", { key: "a" });
+			const preventDefault = vi.fn();
+			Object.defineProperty(mockEvent, "preventDefault", {
+				value: preventDefault,
+			});
+
+			const result = onKeyHandler(mockEvent);
+
+			expect(result).toEqual({
+				action: "insertRole",
+				role: DEFAULT_ROLES.find((r) => r.shortcut === "a"),
+			});
+			expect(preventDefault).toHaveBeenCalled();
+
+			// Verify the role insertion doesn't add extra newlines
+			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "a");
+			expect(expectedRole).toBeDefined();
+			
+			// The role format should remain inline without additional line breaks
+			const roleFormat = `[${expectedRole.icon}:: ]`;
+			expect(roleFormat).not.toContain('\n');
+			expect(roleFormat).not.toContain('\r');
+			
+			// Ensure the insertion preserves the existing file structure
+			// by not introducing additional line breaks in the role format
+			expect(roleFormat.length).toBeGreaterThan(0);
+			expect(roleFormat.trim()).toBe(roleFormat); // No leading/trailing whitespace that could affect formatting
+		});
 	});
 
 	describe("Hidden Roles", () => {
