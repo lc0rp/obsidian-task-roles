@@ -169,20 +169,44 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 						currentCursorPos
 					);
 
+				// Check if we need to add spacing around the insertion
+				let finalReplacement = replacement;
+
+				// Check if inserting after a role assignment (need space before)
+				if (legalInsertionPos > 0 && updatedLine[legalInsertionPos - 1] === ']') {
+					// Check if it's not inside a wikilink by looking for role assignment pattern
+					const beforePos = legalInsertionPos - 1;
+					const textBefore = updatedLine.substring(0, beforePos + 1);
+					
+					// Only add space if this looks like the end of a role assignment, not a wikilink
+					if (textBefore.match(/\[.*::.*\]$/)) {
+						finalReplacement = ' ' + replacement;
+					}
+				}
+
+				// Check if inserting before a role assignment (need space after)
+				if (legalInsertionPos < updatedLine.length && updatedLine[legalInsertionPos] === '[') {
+					// Check if it's the start of a role assignment
+					const textAfter = updatedLine.substring(legalInsertionPos);
+					if (textAfter.match(/^\[[^[\]]*::/)) {
+						finalReplacement = finalReplacement + ' ';
+					}
+				}
+
 				// Insert the role at the legal position
 				const insertPos = {
 					line: cursor.line,
 					ch: legalInsertionPos,
 				};
 
-				editor.replaceRange(replacement, insertPos, insertPos);
+				editor.replaceRange(finalReplacement, insertPos, insertPos);
 
 				// Position final cursor
 				const finalCursorPos = {
 					line: cursor.line,
 					ch:
 						legalInsertionPos +
-						replacement.length -
+						finalReplacement.length -
 						(isInTaskBlock ? 0 : 1),
 				};
 				editor.setCursor(finalCursorPos);
