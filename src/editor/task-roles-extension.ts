@@ -27,6 +27,11 @@ export const taskRolesExtension = (plugin: TaskRolesPlugin) => ViewPlugin.fromCl
         buildDecorations(view: EditorView): DecorationSet {
             const builder = new RangeSetBuilder<Decoration>();
 
+            // Return empty decorations if inline widgets are disabled
+            if (!plugin.settings.showInlineWidgets) {
+                return builder.finish();
+            }
+
             for (const { from, to } of view.visibleRanges) {
                 for (let pos = from; pos <= to;) {
                     const line = view.state.doc.lineAt(pos);
