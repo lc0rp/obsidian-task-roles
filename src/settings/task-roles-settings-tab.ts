@@ -160,6 +160,19 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		// Create @me person button
 		this.createMePersonFileSetting(containerEl);
 
+		// Inline widget display toggle
+		new Setting(containerEl)
+			.setName("Show inline role assignment icons")
+			.setDesc("Display clickable role assignment icons at the end of task lines")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showInlineWidgets)
+					.onChange(async (value) => {
+						this.plugin.settings.showInlineWidgets = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
 		// Debug logging toggle
 		new Setting(containerEl)
 			.setName("Enable debug logging")

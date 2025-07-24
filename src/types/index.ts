@@ -12,6 +12,7 @@ export interface TaskRolesPluginSettings {
 	debug: boolean;
 	compatMode: boolean;
 	compatModeUserSet: boolean;
+	showInlineWidgets: boolean;
 }
 
 export interface Role {
@@ -203,6 +204,7 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	debug: false,
 	compatMode: false,
 	compatModeUserSet: false,
+	showInlineWidgets: true,
 };
 
 export const ROLE_ASSIGNMENT_COMMENT_START = "<!--TA-->";
