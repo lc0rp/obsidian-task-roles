@@ -51,13 +51,30 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 						cursor, 
 						existingRoles, 
 						(role: Role) => {
-							// Remove both backslashes before inserting role
-							const backslashStart = { line: cursor.line, ch: cursor.ch - 1 };
-							const backslashEnd = { line: cursor.line, ch: cursor.ch + 1 };
-							editor.replaceRange("", backslashStart, backslashEnd);
+							// Bug fix #6 & #7: Remove both backslashes before inserting role
+							// Find the start of the double backslash (cursor is after typing the second \)
+							const currentLine = editor.getLine(cursor.line);
+							const beforeCursor = currentLine.substring(0, cursor.ch);
 							
-							// Adjust cursor position after backslash removal
-							const adjustedCursor = { line: cursor.line, ch: cursor.ch - 1 };
+							// Find where the double backslash starts
+							let backslashStart = cursor.ch - 2; // Both backslashes before cursor
+							if (backslashStart < 0 || !beforeCursor.endsWith("\\\\")) {
+								// Fallback: find the last occurrence of \\
+								const doubleBackslashIndex = beforeCursor.lastIndexOf("\\\\");
+								if (doubleBackslashIndex !== -1) {
+									backslashStart = doubleBackslashIndex;
+								} else {
+									backslashStart = cursor.ch - 1; // Single backslash
+								}
+							}
+							
+							// Remove both backslashes
+							const startPos = { line: cursor.line, ch: backslashStart };
+							const endPos = { line: cursor.line, ch: cursor.ch };
+							editor.replaceRange("", startPos, endPos);
+							
+							// Insert role at the position where backslashes were
+							const adjustedCursor = { line: cursor.line, ch: backslashStart };
 							this.insertRoleDirectly(role, editor, adjustedCursor, isInTaskBlock);
 						}
 					);

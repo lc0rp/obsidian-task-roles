@@ -11,6 +11,7 @@ export class RoleSuggestionDropdown {
 	private currentFilter = '';
 	private triggerPos: { line: number; ch: number } | null = null;
 	private onInsertCallback: ((role: Role) => void) | null = null;
+	private autoHideTimeout: number | null = null;
 
 	constructor(app: App, settings: TaskRolesPluginSettings) {
 		this.app = app;
@@ -20,6 +21,11 @@ export class RoleSuggestionDropdown {
 	}
 
 	show(cursor: { line: number; ch: number }, existingRoles: string[], onInsert: (role: Role) => void): boolean {
+		// Bug fix #1: Ensure only one instance exists - hide existing dropdown first
+		if (this.isVisible) {
+			this.hide();
+		}
+
 		// Filter out hidden and existing roles
 		this.availableRoles = this.getAvailableRoles(existingRoles);
 		
@@ -38,6 +44,11 @@ export class RoleSuggestionDropdown {
 		this.renderRoles();
 		this.attachEventListeners();
 
+		// Bug fix #2: Add timeout to prevent stuck popups (30 seconds)
+		this.autoHideTimeout = window.setTimeout(() => {
+			this.hide();
+		}, 30000);
+
 		return true;
 	}
 
@@ -46,6 +57,12 @@ export class RoleSuggestionDropdown {
 
 		this.isVisible = false;
 		this.detachEventListeners();
+		
+		// Bug fix #3: Clear timeout when manually closed
+		if (this.autoHideTimeout !== null) {
+			window.clearTimeout(this.autoHideTimeout);
+			this.autoHideTimeout = null;
+		}
 		
 		if (this.dropdownElement) {
 			this.dropdownElement.remove();
@@ -210,34 +227,40 @@ export class RoleSuggestionDropdown {
 		const editorElement = activeView.containerEl.querySelector('.cm-editor');
 		if (!editorElement) return;
 
-		// Calculate cursor position in pixels
-		const charWidth = 8; // Approximate character width
-		const lineHeight = 20; // Approximate line height
-		const editorRect = editorElement.getBoundingClientRect();
+		// Bug fix #5: Fix positioning logic - use character count not pixel count
+		const position = this.calculatePosition(this.triggerPos, editorElement);
 		
-		const cursorX = this.triggerPos.ch * charWidth;
-		const cursorY = this.triggerPos.line * lineHeight;
-
-		// Constants for positioning logic
-		const TASKS_PLUGIN_MENU_WIDTH = 300;
-		const MENU_MIN_LEFT_MARGIN = 20;
-
-		// Calculate position with clearance from left edge to avoid tasks plugin conflicts
-		let left = editorRect.left + cursorX;
-		if (cursorX < TASKS_PLUGIN_MENU_WIDTH) {
-			// Cursor is close to left edge, position with clearance
-			left = editorRect.left + TASKS_PLUGIN_MENU_WIDTH + MENU_MIN_LEFT_MARGIN;
-		}
-
-		const top = editorRect.top + cursorY + lineHeight;
-
 		// Ensure dropdown doesn't go off screen
 		const dropdownRect = this.dropdownElement.getBoundingClientRect();
 		const maxLeft = window.innerWidth - dropdownRect.width - 20;
 		const maxTop = window.innerHeight - dropdownRect.height - 20;
 
-		this.dropdownElement.style.left = Math.min(left, maxLeft) + 'px';
-		this.dropdownElement.style.top = Math.min(top, maxTop) + 'px';
+		this.dropdownElement.style.left = Math.min(parseInt(position.left), maxLeft) + 'px';
+		this.dropdownElement.style.top = Math.min(parseInt(position.top), maxTop) + 'px';
+	}
+
+	calculatePosition(cursor: { line: number; ch: number }, editorElement: Element): { left: string; top: string } {
+		// Calculate cursor position in pixels
+		const charWidth = 8; // Approximate character width
+		const lineHeight = 20; // Approximate line height
+		const editorRect = editorElement.getBoundingClientRect();
+		
+		const cursorX = cursor.ch * charWidth;
+		const cursorY = cursor.line * lineHeight;
+
+		// Bug fix #5: Position at cursor when > 40 characters from left, otherwise offset
+		let left = editorRect.left + cursorX;
+		if (cursor.ch < 40) {
+			// Cursor is < 40 characters from left edge, position with offset
+			left = editorRect.left + (40 * charWidth);
+		}
+
+		const top = editorRect.top + cursorY + lineHeight;
+
+		return {
+			left: left + 'px',
+			top: top + 'px'
+		};
 	}
 
 	private renderRoles(): void {
@@ -345,7 +368,7 @@ export class RoleSuggestionDropdown {
 		document.removeEventListener('click', this.handleClickOutside, true);
 	}
 
-	private handleClickOutside(e: MouseEvent): void {
+	handleClickOutside(e: MouseEvent): void {
 		if (!this.dropdownElement || !this.isVisible) return;
 
 		const target = e.target as Node;
