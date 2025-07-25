@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Role Suggestion Dropdown is a DOM-based menu system that provides an intuitive way to insert role assignments into tasks using a double backslash (`\\`) trigger. This feature complements the existing single backslash shortcuts (`\d`, `\a`, `\c`, `\i`) by offering a visual selection interface for all available roles.
+The Role Suggestion Dropdown is a DOM-based menu system that provides an intuitive way to insert role assignments
+into tasks using a double backslash (`\\`) trigger. This feature complements the existing single backslash shortcuts
+(`\d`, `\a`, `\c`, `\i`) by offering a visual selection interface for all available roles.
 
 ## Trigger Mechanism
 
@@ -11,22 +13,25 @@ The Role Suggestion Dropdown is a DOM-based menu system that provides an intuiti
 The dropdown is triggered by typing two consecutive backslashes (`\\`) in specific contexts:
 
 - **Task lines**: Any line starting with a task marker (`- [ ]`, `- [x]`, `- [X]`)
-- **Tasks codeblocks**: Inside `\```tasks` code blocks
-- **Dataview codeblocks**: Inside `\```dataview` code blocks
+- **Tasks codeblocks**: Inside ``\`\`\`tasks` code blocks
+- **Dataview codeblocks**: Inside ``\`\`\`dataview` code blocks
 
 ### Visual Indicator
 
 When the double backslash is typed, the system:
+
 1. Detects the trigger pattern
 2. Shows a styled dropdown menu below the cursor
 3. Prevents the second backslash from being inserted into the text
 4. Positions the menu with smart placement logic
+5. Remove the first backslash upon finalization of the role update
 
 ## Menu Features
 
 ### Role Display
 
 The dropdown shows all available roles with:
+
 - **Role icon**: The emoji representation (🚗, 👍, 👥, 📢)
 - **Role name**: The full descriptive name (Drivers, Approvers, Contributors, Informed)
 - **Visual highlighting**: The currently selected role is highlighted
@@ -40,6 +45,7 @@ The dropdown shows all available roles with:
 ### Navigation Methods
 
 #### Keyboard Navigation
+
 - **Arrow Up/Down**: Navigate through available roles
 - **Enter**: Insert the selected role
 - **Escape**: Close the dropdown without insertion
@@ -47,6 +53,7 @@ The dropdown shows all available roles with:
 - **Letter keys**: Filter roles by typing the first letters of role names
 
 #### Mouse Interaction
+
 - **Hover**: Highlight role on mouse hover
 - **Click**: Select and insert role
 - **Click outside**: Close dropdown without insertion
@@ -80,8 +87,9 @@ The system uses the same legal insertion point logic as existing shortcuts:
 ### Format Consistency
 
 Inserted roles maintain consistency with the existing system:
-- **Dataview format**: `[🚗:: ]` for standard task lines
-- **Task block format**: `🚗 = ` for tasks/dataview codeblocks
+
+- **Dataview format**: `[🚗::]` for standard task lines
+- **Task block format**: `🚗 =` for tasks/dataview codeblocks
 - **Cursor positioning**: Places cursor in the assignee area for immediate editing
 
 ## Integration with Existing Features
@@ -141,36 +149,45 @@ Inserted roles maintain consistency with the existing system:
 ## Usage Examples
 
 ### Basic Usage
+
 ```markdown
 - [ ] Review the proposal \\
 ```
-*Types double backslash, dropdown appears, user selects "Drivers" role*
+
+Types double backslash, dropdown appears, user selects "Drivers" role
 
 Result:
+
 ```markdown
 - [ ] Review the proposal [🚗:: ]
 ```
 
 ### With Filtering
+
 ```markdown
 - [ ] Update documentation \\ap
 ```
-*User types "ap" to filter for "Approvers"*
+
+User types "ap" to filter for "Approvers"
 
 Result after selection:
+
 ```markdown
 - [ ] Update documentation [👍:: ]
 ```
 
 ### In Codeblocks
+
 ```markdown
 \```tasks
 - [ ] Complete feature \\
 \```
 ```
-*Dropdown works in task codeblocks with appropriate formatting*
+
+Dropdown works in task codeblocks with appropriate formatting
 
 Result:
+
 ```markdown
 \```tasks
 - [ ] Complete feature 🚗 = 

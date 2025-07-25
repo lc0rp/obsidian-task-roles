@@ -21,7 +21,6 @@ export class RoleSuggestionDropdown {
 	}
 
 	show(cursor: { line: number; ch: number }, existingRoles: string[], onInsert: (role: Role) => void): boolean {
-		// Bug fix #1: Ensure only one instance exists - hide existing dropdown first
 		if (this.isVisible) {
 			this.hide();
 		}
