@@ -12,10 +12,12 @@ export class RoleSuggestionDropdown {
 	private triggerPos: { line: number; ch: number } | null = null;
 	private onInsertCallback: ((role: Role) => void) | null = null;
 	private autoHideTimeout: number | null = null;
+	private useAbsolutePositioning: boolean;
 
-	constructor(app: App, settings: TaskRolesPluginSettings) {
+	constructor(app: App, settings: TaskRolesPluginSettings, useAbsolutePositioning: boolean = true) {
 		this.app = app;
 		this.settings = settings;
+		this.useAbsolutePositioning = useAbsolutePositioning;
 		this.handleKeydown = this.handleKeydown.bind(this);
 		this.handleClickOutside = this.handleClickOutside.bind(this);
 	}
@@ -248,10 +250,12 @@ export class RoleSuggestionDropdown {
 		const cursorX = cursor.ch * charWidth;
 		let cursorY = cursor.line * lineHeight;
 
-		// Account for scroll offset to fix positioning bug
-		const scroller = editorElement.querySelector('.cm-scroller') as HTMLElement;
-		if (scroller && scroller.scrollTop) {
-			cursorY -= scroller.scrollTop;
+		// Conditionally account for scroll offset based on flag
+		if (this.useAbsolutePositioning) {
+			const scroller = editorElement.querySelector('.cm-scroller') as HTMLElement;
+			if (scroller && scroller.scrollTop) {
+				cursorY -= scroller.scrollTop;
+			}
 		}
 
 		// Bug fix #5: Position at cursor when > 40 characters from left, otherwise offset

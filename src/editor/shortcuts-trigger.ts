@@ -12,7 +12,7 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 
 			constructor(readonly view: EditorView) {
 				this.onKey = this.onKey.bind(this);
-				this.roleSuggestionDropdown = new RoleSuggestionDropdown(app, settings);
+				this.roleSuggestionDropdown = new RoleSuggestionDropdown(app, settings, true);
 				view.dom.addEventListener("keydown", this.onKey, true); // capture phase
 			}
 
