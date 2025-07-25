@@ -58,7 +58,7 @@ export default class TaskRolesPlugin extends Plugin {
 		});
 
 		// Register editor suggest for inline role suggestions
-		this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
+		// this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
 
 		// Register role suggestion for \ shortcuts - always use backslash trigger
 		this.registerEditorExtension(shortcutsTrigger(this.app, this.settings));

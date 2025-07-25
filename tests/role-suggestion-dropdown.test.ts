@@ -93,6 +93,7 @@ describe("Role Suggestion Dropdown", () => {
 			selectedIndex: 0,
 			availableRoles: [],
 			dropdownElement: null,
+			useAbsolutePositioning: true,
 
 			show: vi.fn(function(this: any, cursor: any, existingRoles: string[], callback: any) {
 				// Hide existing dropdown first (single instance management)
@@ -208,13 +209,21 @@ describe("Role Suggestion Dropdown", () => {
 			}),
 
 			// Add calculatePosition method for testing
-			calculatePosition: vi.fn(function(cursor: any, editorElement: any) {
+			calculatePosition: vi.fn(function(this: any, cursor: any, editorElement: any) {
 				const charWidth = 8;
 				const lineHeight = 20;
 				const editorRect = editorElement.getBoundingClientRect();
 				
 				const cursorX = cursor.ch * charWidth;
-				const cursorY = cursor.line * lineHeight;
+				let cursorY = cursor.line * lineHeight;
+
+				// Conditionally account for scroll offset based on flag
+				if (this.useAbsolutePositioning && editorElement.querySelector) {
+					const scroller = editorElement.querySelector('.cm-scroller');
+					if (scroller && scroller.scrollTop) {
+						cursorY -= scroller.scrollTop;
+					}
+				}
 
 				let left = editorRect.left + cursorX;
 				if (cursor.ch < 40) {
@@ -934,6 +943,50 @@ describe("Role Suggestion Dropdown", () => {
 				// Should be positioned below line 5 (5 * 20px line height + 20px offset + 200px editor top)
 				expect(position.left).toBe('500px'); // 100 + 50*8 (cursor at position)
 				expect(position.top).toBe('320px'); // 200 + 5*20 + 20
+			});
+
+			it("should account for scroll offset when absolute positioning is enabled", () => {
+				roleSuggestionDropdown.useAbsolutePositioning = true;
+				const cursor = { line: 50, ch: 50 }; // Line 50 in document
+				const mockEditorElement = {
+					getBoundingClientRect: () => ({ left: 100, top: 200 }),
+					querySelector: vi.fn((selector) => {
+						if (selector === '.cm-scroller') {
+							return {
+								scrollTop: 600 // Scrolled down 600px (30 lines * 20px each)
+							};
+						}
+						return null;
+					})
+				};
+				
+				const position = roleSuggestionDropdown.calculatePosition(cursor, mockEditorElement);
+				
+				// With scroll correction: 200 + (50*20 - 600) + 20 = 620px (correct visible position)
+				expect(position.left).toBe('500px'); // 100 + 50*8 (cursor position)
+				expect(position.top).toBe('620px'); // 200 + (50*20 - 600) + 20 = 620px
+			});
+
+			it("should not account for scroll offset when absolute positioning is disabled", () => {
+				roleSuggestionDropdown.useAbsolutePositioning = false;
+				const cursor = { line: 50, ch: 50 }; // Line 50 in document
+				const mockEditorElement = {
+					getBoundingClientRect: () => ({ left: 100, top: 200 }),
+					querySelector: vi.fn((selector) => {
+						if (selector === '.cm-scroller') {
+							return {
+								scrollTop: 600 // Scrolled down 600px (30 lines * 20px each)
+							};
+						}
+						return null;
+					})
+				};
+				
+				const position = roleSuggestionDropdown.calculatePosition(cursor, mockEditorElement);
+				
+				// Without scroll correction: 200 + 50*20 + 20 = 1220px (original behavior)
+				expect(position.left).toBe('500px'); // 100 + 50*8 (cursor position)
+				expect(position.top).toBe('1220px'); // 200 + 50*20 + 20 = 1220px
 			});
 		});
 
