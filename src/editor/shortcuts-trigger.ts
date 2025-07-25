@@ -12,7 +12,10 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 
 			constructor(readonly view: EditorView) {
 				this.onKey = this.onKey.bind(this);
-				this.roleSuggestionDropdown = new RoleSuggestionDropdown(app, settings, true);
+				this.roleSuggestionDropdown = new RoleSuggestionDropdown(
+					app,
+					settings
+				);
 				view.dom.addEventListener("keydown", this.onKey, true); // capture phase
 			}
 
@@ -45,40 +48,33 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 				if (e.key === "\\" && beforeCursor.endsWith("\\")) {
 					e.stopPropagation();
 					e.preventDefault();
-					
-					const existingRoles = TaskUtils.getExistingRoles(line, settings.roles);
+
+					// Remove the first backslash (the second is the trigger, and isn't propagated, so is alreday removed)
+					// this.removeBackslash(editor, cursor);
+
+					const existingRoles = TaskUtils.getExistingRoles(
+						line,
+						settings.roles
+					);
 					const success = this.roleSuggestionDropdown.show(
-						cursor, 
-						existingRoles, 
+						cursor,
+						existingRoles,
 						(role: Role) => {
-							// Bug fix #6 & #7: Remove both backslashes before inserting role
-							// Find the start of the double backslash (cursor is after typing the second \)
-							const currentLine = editor.getLine(cursor.line);
-							const beforeCursor = currentLine.substring(0, cursor.ch);
-							
-							// Find where the double backslash starts
-							let backslashStart = cursor.ch - 2; // Both backslashes before cursor
-							if (backslashStart < 0 || !beforeCursor.endsWith("\\\\")) {
-								// Fallback: find the last occurrence of \\
-								const doubleBackslashIndex = beforeCursor.lastIndexOf("\\\\");
-								if (doubleBackslashIndex !== -1) {
-									backslashStart = doubleBackslashIndex;
-								} else {
-									backslashStart = cursor.ch - 1; // Single backslash
-								}
-							}
-							
-							// Remove both backslashes
-							const startPos = { line: cursor.line, ch: backslashStart };
-							const endPos = { line: cursor.line, ch: cursor.ch };
-							editor.replaceRange("", startPos, endPos);
-							
+							const adjustedCursor = {
+								line: cursor.line,
+								ch: cursor.ch, // Adjust for the removed backslash
+							};
+							// Select the role and replace the backslash with the role
 							// Insert role at the position where backslashes were
-							const adjustedCursor = { line: cursor.line, ch: backslashStart };
-							this.insertRoleDirectly(role, editor, adjustedCursor, isInTaskBlock);
+							this.insertRoleDirectly(
+								role,
+								editor,
+								adjustedCursor,
+								isInTaskBlock
+							);
 						}
 					);
-					
+
 					if (success) {
 						return;
 					}
@@ -110,6 +106,37 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 						);
 					}
 				}
+			}
+
+			private insertBackslash(editor: any, cursor: any) {
+				// Insert a backslash at the cursor position
+				const startPos = { line: cursor.line, ch: cursor.ch };
+				editor.replaceRange("\\", startPos, startPos);
+			}
+
+			private removeBackslash(editor: any, cursor: any) {
+				const currentLine = editor.getLine(cursor.line);
+				const beforeCursor = currentLine.substring(0, cursor.ch);
+
+				// Find where the double backslash starts
+				let backslashStart = cursor.ch - 1; // Both backslashes before cursor
+				if (backslashStart < 0 || !beforeCursor.endsWith("\\")) {
+					// Fallback: find the last occurrence of \\
+					const doubleBackslashIndex = beforeCursor.lastIndexOf("\\");
+					if (doubleBackslashIndex !== -1) {
+						backslashStart = doubleBackslashIndex;
+					} else {
+						backslashStart = cursor.ch - 1; // Single backslash
+					}
+				}
+
+				// Remove both backslashes
+				const startPos = {
+					line: cursor.line,
+					ch: backslashStart,
+				};
+				const endPos = { line: cursor.line, ch: cursor.ch };
+				editor.replaceRange("", startPos, endPos);
 			}
 
 			private selectRole(
@@ -183,9 +210,10 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 						// Only adjust for removed backslash if it was before the role position
 						let cursorPos = {
 							line: cursor.line,
-							ch: backslashPos < cursorInfo.position 
-								? cursorInfo.position - 1 
-								: cursorInfo.position,
+							ch:
+								backslashPos < cursorInfo.position
+									? cursorInfo.position - 1
+									: cursorInfo.position,
 						};
 
 						// If there are existing assignees, add separator and space
@@ -225,23 +253,29 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 				let finalReplacement = replacement;
 
 				// Check if inserting after a role assignment (need space before)
-				if (legalInsertionPos > 0 && updatedLine[legalInsertionPos - 1] === ']') {
+				if (
+					legalInsertionPos > 0 &&
+					updatedLine[legalInsertionPos - 1] === "]"
+				) {
 					// Check if it's not inside a wikilink by looking for role assignment pattern
 					const beforePos = legalInsertionPos - 1;
 					const textBefore = updatedLine.substring(0, beforePos + 1);
-					
+
 					// Only add space if this looks like the end of a role assignment, not a wikilink
 					if (textBefore.match(/\[.*::.*\]$/)) {
-						finalReplacement = ' ' + replacement;
+						finalReplacement = " " + replacement;
 					}
 				}
 
 				// Check if inserting before a role assignment (need space after)
-				if (legalInsertionPos < updatedLine.length && updatedLine[legalInsertionPos] === '[') {
+				if (
+					legalInsertionPos < updatedLine.length &&
+					updatedLine[legalInsertionPos] === "["
+				) {
 					// Check if it's the start of a role assignment
 					const textAfter = updatedLine.substring(legalInsertionPos);
 					if (textAfter.match(/^\[[^[\]]*::/)) {
-						finalReplacement = finalReplacement + ' ';
+						finalReplacement = finalReplacement + " ";
 					}
 				}
 
