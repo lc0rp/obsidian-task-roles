@@ -246,7 +246,13 @@ export class RoleSuggestionDropdown {
 		const editorRect = editorElement.getBoundingClientRect();
 		
 		const cursorX = cursor.ch * charWidth;
-		const cursorY = cursor.line * lineHeight;
+		let cursorY = cursor.line * lineHeight;
+
+		// Account for scroll offset to fix positioning bug
+		const scroller = editorElement.querySelector('.cm-scroller') as HTMLElement;
+		if (scroller && scroller.scrollTop) {
+			cursorY -= scroller.scrollTop;
+		}
 
 		// Bug fix #5: Position at cursor when > 40 characters from left, otherwise offset
 		let left = editorRect.left + cursorX;

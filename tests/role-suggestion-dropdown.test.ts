@@ -214,7 +214,15 @@ describe("Role Suggestion Dropdown", () => {
 				const editorRect = editorElement.getBoundingClientRect();
 				
 				const cursorX = cursor.ch * charWidth;
-				const cursorY = cursor.line * lineHeight;
+				let cursorY = cursor.line * lineHeight;
+
+				// Account for scroll offset
+				if (editorElement.querySelector) {
+					const scroller = editorElement.querySelector('.cm-scroller');
+					if (scroller && scroller.scrollTop) {
+						cursorY -= scroller.scrollTop;
+					}
+				}
 
 				let left = editorRect.left + cursorX;
 				if (cursor.ch < 40) {
@@ -934,6 +942,29 @@ describe("Role Suggestion Dropdown", () => {
 				// Should be positioned below line 5 (5 * 20px line height + 20px offset + 200px editor top)
 				expect(position.left).toBe('500px'); // 100 + 50*8 (cursor at position)
 				expect(position.top).toBe('320px'); // 200 + 5*20 + 20
+			});
+
+			it("should account for scroll offset when positioning dropdown", () => {
+				const cursor = { line: 50, ch: 50 }; // Line 50 in document
+				const mockEditorElement = {
+					getBoundingClientRect: () => ({ left: 100, top: 200 }),
+					querySelector: vi.fn((selector) => {
+						if (selector === '.cm-scroller') {
+							return {
+								scrollTop: 600 // Scrolled down 600px (30 lines * 20px each)
+							};
+						}
+						return null;
+					})
+				};
+				
+				const position = roleSuggestionDropdown.calculatePosition(cursor, mockEditorElement);
+				
+				// Without accounting for scroll, this would be way too far down:
+				// expected wrong: 200 + 50*20 + 20 = 1220px (way off screen)
+				// With scroll correction: 200 + (50-30)*20 + 20 = 620px (correct visible position)
+				expect(position.left).toBe('500px'); // 100 + 50*8 (cursor position)
+				expect(position.top).toBe('620px'); // 200 + (50*20 - 600) + 20 = 620px
 			});
 		});
 
