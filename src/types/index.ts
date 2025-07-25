@@ -157,6 +157,14 @@ export interface ViewColumn {
 
 export const DEFAULT_ROLES: Role[] = [
 	{
+		id: "assign",
+		name: "Assign",
+		icon: "👤",
+		shortcut: "a",
+		isDefault: false,
+		order: 0,
+	},
+	{
 		id: "drivers",
 		name: "Drivers",
 		icon: "🚗",

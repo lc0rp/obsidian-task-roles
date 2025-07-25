@@ -255,7 +255,7 @@ export class TaskRolesService {
 			.sort((a, b) => {
 				const roleA = visibleRoles.find((r) => r.id === a.roleId);
 				const roleB = visibleRoles.find((r) => r.id === b.roleId);
-				return (roleA?.order || 999) - (roleB?.order || 999);
+				return (roleA?.order ?? 999) - (roleB?.order ?? 999);
 			});
 
 		for (const roleAssignment of sortedRoleAssignments) {

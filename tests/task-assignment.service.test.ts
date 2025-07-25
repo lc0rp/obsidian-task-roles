@@ -13,8 +13,9 @@ describe('TaskRolesService', () => {
         const service = createService();
         const input = '[🚗:: [[People/John|@John]]]';
         const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
+        const driversRole = DEFAULT_ROLES.find(role => role.id === 'drivers');
         expect(result).toEqual([
-            { role: DEFAULT_ROLES[0], assignees: ['@John'] }
+            { role: driversRole, assignees: ['@John'] }
         ]);
     });
 
@@ -32,9 +33,11 @@ describe('TaskRolesService', () => {
         const service = createService();
         const input = '[🚗:: [[People/John|@John]]] [👍:: [[People/Jane|@Jane]]]';
         const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
+        const driversRole = DEFAULT_ROLES.find(role => role.id === 'drivers');
+        const approversRole = DEFAULT_ROLES.find(role => role.id === 'approvers');
         expect(result).toEqual([
-            { role: DEFAULT_ROLES[0], assignees: ['@John'] },
-            { role: DEFAULT_ROLES[1], assignees: ['@Jane'] }
+            { role: driversRole, assignees: ['@John'] },
+            { role: approversRole, assignees: ['@Jane'] }
         ]);
     });
 
@@ -65,5 +68,49 @@ describe('TaskRolesService', () => {
         expect(result).toBe(
             '- [ ] Task [👍:: [[People/Manager|@Manager]]] 📅 2024-01-01'
         );
+    });
+
+    describe('Assign Role Integration', () => {
+        it('parseRoleAssignments should handle Assign role with 👤 icon', () => {
+            const service = createService();
+            const input = '[👤:: [[People/John|@John]]]';
+            const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
+            const assignRole = DEFAULT_ROLES.find(role => role.id === 'assign');
+            expect(result).toEqual([
+                { role: assignRole, assignees: ['@John'] }
+            ]);
+        });
+
+        it('applyRoleAssignmentsToLine should insert Assign role assignments', () => {
+            const service = createService();
+            const line = '- [ ] Test task 🔴 📅 2024-01-01';
+            const roleAssignments = [{ roleId: 'assign', assignees: ['@John'] }];
+            const result = service.applyRoleAssignmentsToLine(line, roleAssignments, DEFAULT_ROLES);
+            expect(result).toBe(
+                '- [ ] Test task [👤:: [[People/John|@John]]] 🔴 📅 2024-01-01'
+            );
+        });
+
+        it('formatRoleAssignments should place Assign role first due to order', () => {
+            const service = createService();
+            const roleAssignments = [
+                { roleId: 'drivers', assignees: ['@Driver'] },
+                { roleId: 'assign', assignees: ['@Assignee'] }
+            ];
+            const output = service.formatRoleAssignments(roleAssignments, DEFAULT_ROLES);
+            expect(output).toBe(
+                '[👤:: [[People/Assignee|@Assignee]]] [🚗:: [[People/Driver|@Driver]]]'
+            );
+        });
+
+        it('parseRoleAssignments should handle Assign role with multiple assignees', () => {
+            const service = createService();
+            const input = '[👤:: [[People/John|@John]], [[People/Jane|@Jane]]]';
+            const result = service.parseRoleAssignments(input, DEFAULT_ROLES);
+            const assignRole = DEFAULT_ROLES.find(role => role.id === 'assign');
+            expect(result).toEqual([
+                { role: assignRole, assignees: ['@John', '@Jane'] }
+            ]);
+        });
     });
 });
