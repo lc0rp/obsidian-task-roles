@@ -39,15 +39,15 @@ folders you specify.
 
 ### The 'Quick-access icon' setting shows an icon at the end of each task line
 
-<video src="media/assign_inline_icon_downsized.mp4" autoplay loop muted playsinline width="600"></video>
+<img src="media/assign_inline_icon.gif" alt="Quick-access icon" width="600"/>
 
 ### Each role comes with a backslash shortcut for instant insertion
 
-<video src="media/shortcuts_downsized.mp4" autoplay loop muted playsinline width="600"></video>
+<img src="media/shortcuts.gif" alt="Role shortcuts" width="600"/>
 
 ### Access a role suggestion menu via double backslash
 
-<video src="media/double_backslash_downized.mp4" autoplay loop muted playsinline width="600"></video>
+<img src="media/double_backslash.gif" alt="Role suggestion menu" width="600"/>
 
 ---
 
