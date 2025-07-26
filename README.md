@@ -8,7 +8,7 @@ a powerful Task Center._
 [![License](https://img.shields.io/github/license/lc0rp/obsidian-task-roles)](LICENSE.md)
 
 <p align="center">
-   <img src="media/assign-modal.png" alt="Task Roles assignment modal" />
+   <img src="media/assign-modal.png" alt="Task Roles assignment modal" width="600"/>
 </p>
 ---
 
@@ -35,19 +35,19 @@ folders you specify.
 
 ### A tasklist with roles assigned
 
-<img src="media/tasklist.png" alt="A tasklist with roles assigned" width="790"/>
+<img src="media/tasklist.png" alt="A tasklist with roles assigned" width="600"/>
 
 ### The 'Quick-access icon' setting shows an icon at the end of each task line
 
-<video src="media/assign_inline_icon_downsized.mp4" autoplay loop muted playsinline width="790"></video>
+<video src="media/assign_inline_icon_downsized.mp4" autoplay loop muted playsinline width="600"></video>
 
 ### Each role comes with a backslash shortcut for instant insertion
 
-<video src="media/shortcuts_downsized.mp4" autoplay loop muted playsinline width="790"></video>
+<video src="media/shortcuts_downsized.mp4" autoplay loop muted playsinline width="600"></video>
 
 ### Access a role suggestion menu via double backslash
 
-<video src="media/double_backslash_downized.mp4" autoplay loop muted playsinline width="790"></video>
+<video src="media/double_backslash_downized.mp4" autoplay loop muted playsinline width="600"></video>
 
 ---
 
