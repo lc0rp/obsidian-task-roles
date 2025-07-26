@@ -31,73 +31,35 @@ Object.defineProperty(global, 'MouseEvent', {
     }
 });
 
-// Mock document methods
-Object.defineProperty(global, 'document', {
-    value: {
-        ...global.document,
-        createElement: vi.fn().mockImplementation((tagName: string) => {
-            const children: any[] = [];
-            const element = {
-                tagName: tagName.toUpperCase(),
-                className: '',
-                style: {},
-                innerHTML: '',
-                children,
-                appendChild: vi.fn().mockImplementation((child: any) => {
-                    children.push(child);
-                    child.parentElement = element;
-                    return child;
-                }),
-                addEventListener: vi.fn().mockImplementation((event: string, handler: Function) => {
-                    element._eventHandlers = element._eventHandlers || {};
-                    element._eventHandlers[event] = element._eventHandlers[event] || [];
-                    element._eventHandlers[event].push(handler);
-                }),
-                removeEventListener: vi.fn(),
-                remove: vi.fn(),
-                contains: vi.fn(),
-                click: vi.fn().mockImplementation(() => {
-                    const clickHandlers = element._eventHandlers?.click || [];
-                    clickHandlers.forEach((handler: Function) => handler({ 
-                        type: 'click', 
-                        target: element,
-                        stopPropagation: vi.fn(),
-                        preventDefault: vi.fn()
-                    }));
-                }),
-                querySelector: vi.fn().mockImplementation((selector: string) => {
-                    // Simple implementation for class selectors
-                    if (selector.startsWith('.')) {
-                        const className = selector.substring(1);
-                        const findByClass = (el: any): any => {
-                            if (el.className === className || (el.className && el.className.includes(className))) {
-                                return el;
-                            }
-                            for (const child of el.children || []) {
-                                const found = findByClass(child);
-                                if (found) return found;
-                            }
-                            return null;
-                        };
-                        return findByClass(element);
-                    }
-                    return null;
-                }),
-                querySelectorAll: vi.fn().mockReturnValue([]),
-                setAttribute: vi.fn(),
-                getAttribute: vi.fn(),
-                classList: {
-                    add: vi.fn(),
-                    remove: vi.fn(),
-                }
-            };
-            return element;
-        }),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        body: {
-            appendChild: vi.fn(),
-        }
-    },
-    writable: true
-});
+// Mock document enhancements for CodeMirror compatibility
+// Only add the specific properties CodeMirror needs while preserving jsdom's DOM
+if (global.document && global.document.documentElement) {
+    // Ensure documentElement has style if it doesn't already
+    if (!global.document.documentElement.style) {
+        global.document.documentElement.style = {};
+    }
+}
+
+if (global.document && global.document.body) {
+    // Ensure body has style if it doesn't already  
+    if (!global.document.body.style) {
+        global.document.body.style = {};
+    }
+}
+
+// Mock for createElement that CodeMirror will use, while preserving jsdom functionality
+const originalCreateElement = global.document?.createElement;
+if (originalCreateElement && global.document) {
+    global.document.createElement = vi.fn().mockImplementation((tagName: string) => {
+        // Use jsdom's real createElement and just add our mocked behaviors if needed
+        const element = originalCreateElement.call(global.document, tagName);
+        
+        // Add any additional mocked methods if needed for our tests
+        element.click = vi.fn().mockImplementation(() => {
+            const clickEvent = new MouseEvent('click');
+            element.dispatchEvent(clickEvent);
+        });
+        
+        return element;
+    });
+}
