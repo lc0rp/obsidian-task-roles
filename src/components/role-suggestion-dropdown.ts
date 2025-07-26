@@ -4,6 +4,7 @@ import { Role, TaskRolesPluginSettings } from "../types";
 export class RoleSuggestionDropdown {
 	private app: App;
 	private settings: TaskRolesPluginSettings;
+	private getVisibleRoles: () => Role[];
 	private dropdownElement: HTMLElement | null = null;
 	private isVisible = false;
 	private availableRoles: Role[] = [];
@@ -13,9 +14,10 @@ export class RoleSuggestionDropdown {
 	private onInsertCallback: ((role: Role) => void) | null = null;
 	private autoHideTimeout: number | null = null;
 
-	constructor(app: App, settings: TaskRolesPluginSettings) {
+	constructor(app: App, settings: TaskRolesPluginSettings, getVisibleRoles: () => Role[]) {
 		this.app = app;
 		this.settings = settings;
+		this.getVisibleRoles = getVisibleRoles;
 		this.handleKeydown = this.handleKeydown.bind(this);
 		this.handleClickOutside = this.handleClickOutside.bind(this);
 	}
@@ -426,15 +428,8 @@ export class RoleSuggestionDropdown {
 	}
 
 	private getAvailableRoles(existingRoles: string[]): Role[] {
-		return this.settings.roles.filter((role) => {
-			// Filter out hidden default roles
-			if (
-				role.isDefault &&
-				this.settings.hiddenDefaultRoles.includes(role.id)
-			) {
-				return false;
-			}
-
+		// Use the plugin's getVisibleRoles method which respects Simple Assignee Role mode
+		return this.getVisibleRoles().filter((role) => {
 			// Filter out roles already present in task
 			if (existingRoles.includes(role.id)) {
 				return false;

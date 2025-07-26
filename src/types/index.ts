@@ -5,6 +5,7 @@ export interface TaskRolesPluginSettings {
 	companyDirectory: string;
 	roles: Role[];
 	hiddenDefaultRoles: string[];
+	simpleAssigneeMode: boolean;
 	savedViews: ViewConfiguration[];
 	autoApplyFilters: boolean;
 	taskDisplayMode: "minimal" | "detailed";
@@ -190,6 +191,15 @@ export const DEFAULT_ROLES: Role[] = [
 	},
 ];
 
+export const SIMPLE_ASSIGNEE_ROLE: Role = {
+	id: "assignees",
+	name: "Assignees",
+	icon: "👤",
+	shortcut: "a",
+	isDefault: true,
+	order: 1,
+};
+
 export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	personSymbol: "@",
 	companySymbol: "+",
@@ -197,6 +207,7 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	companyDirectory: "Companies",
 	roles: DEFAULT_ROLES,
 	hiddenDefaultRoles: [],
+	simpleAssigneeMode: false,
 	savedViews: [],
 	autoApplyFilters: true,
 	taskDisplayMode: "detailed",

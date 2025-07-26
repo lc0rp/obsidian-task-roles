@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { DEFAULT_ROLES, Role } from "../types";
+import { DEFAULT_ROLES, Role, SIMPLE_ASSIGNEE_ROLE } from "../types";
 import { RoleEditModal } from "../modals/role-edit-modal";
 import type TaskRolesPlugin from "../main";
 
@@ -10,6 +10,143 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: TaskRolesPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	private createDefaultRolesTabs(containerEl: HTMLElement): void {
+		const tabsContainer = containerEl.createDiv("task-roles-tabs-container");
+		
+		// Header
+		tabsContainer.createEl("h4", { text: "Default roles" });
+		
+		// Tab buttons
+		const tabButtonsContainer = tabsContainer.createDiv("task-roles-tab-buttons");
+		const allDriverRolesTab = tabButtonsContainer.createEl("button", {
+			text: "All Driver Roles",
+			cls: "task-roles-tab-button"
+		});
+		const simpleAssigneeTab = tabButtonsContainer.createEl("button", {
+			text: "Simple Assignee Role",
+			cls: "task-roles-tab-button"
+		});
+		
+		// Tab content containers
+		const allDriverRolesContent = tabsContainer.createDiv("task-roles-tab-content");
+		const simpleAssigneeContent = tabsContainer.createDiv("task-roles-tab-content");
+		
+		// State management
+		let activeTab: "driver" | "simple" = this.plugin.settings.simpleAssigneeMode ? "simple" : "driver";
+		
+		const showTab = (tab: "driver" | "simple") => {
+			activeTab = tab;
+			
+			// Update button states
+			allDriverRolesTab.classList.toggle("active", tab === "driver");
+			simpleAssigneeTab.classList.toggle("active", tab === "simple");
+			
+			// Update content visibility
+			allDriverRolesContent.style.display = tab === "driver" ? "block" : "none";
+			simpleAssigneeContent.style.display = tab === "simple" ? "block" : "none";
+		};
+		
+		// Tab click handlers
+		allDriverRolesTab.onclick = () => showTab("driver");
+		simpleAssigneeTab.onclick = () => showTab("simple");
+		
+		// Create All Driver Roles content
+		this.createAllDriverRolesContent(allDriverRolesContent);
+		
+		// Create Simple Assignee Role content
+		this.createSimpleAssigneeRoleContent(simpleAssigneeContent);
+		
+		// Initialize to correct tab
+		showTab(activeTab);
+	}
+
+	private createAllDriverRolesContent(containerEl: HTMLElement): void {
+		if (this.plugin.settings.simpleAssigneeMode) {
+			// Show disabled message when simple mode is active
+			const messageDiv = containerEl.createDiv("simple-mode-message");
+			messageDiv.innerHTML = `
+				<p><strong>Advanced mode is disabled</strong></p>
+				<p>Go to the "Simple Assignee Role" tab and disable Simple Assignee Role mode to re-enable this tab.</p>
+			`;
+			return;
+		}
+		
+		// Show the normal default roles toggles
+		for (const role of DEFAULT_ROLES) {
+			new Setting(containerEl)
+				.setName(`${role.icon} ${role.name}`)
+				.setDesc(
+					`Turn this off to hide the '${role.name}' role in future role assignment operations.\nShortcut: \\${role.shortcut}`
+				)
+				.addToggle((toggle) =>
+					toggle
+						.setValue(
+							!this.plugin.settings.hiddenDefaultRoles.includes(
+								role.id
+							)
+						)
+						.onChange(async (value) => {
+							if (!value) {
+								if (
+									!this.plugin.settings.hiddenDefaultRoles.includes(
+										role.id
+									)
+								) {
+									this.plugin.settings.hiddenDefaultRoles.push(
+										role.id
+									);
+								}
+							} else {
+								this.plugin.settings.hiddenDefaultRoles =
+									this.plugin.settings.hiddenDefaultRoles.filter(
+										(id) => id !== role.id
+									);
+							}
+							await this.plugin.saveSettings();
+							await this.plugin.loadSettings(); // Refresh roles
+						})
+				);
+		}
+	}
+
+	private createSimpleAssigneeRoleContent(containerEl: HTMLElement): void {
+		// Simple Assignee Mode toggle
+		new Setting(containerEl)
+			.setName("Enable Simple Assignee Role mode")
+			.setDesc("This will disable all the driver roles, and create only one role called \"Assignees\"")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.simpleAssigneeMode)
+					.onChange(async (value) => {
+						this.plugin.settings.simpleAssigneeMode = value;
+						await this.plugin.saveSettings();
+						await this.plugin.loadSettings(); // Refresh roles and UI
+						this.display(); // Refresh the entire settings display
+					})
+			);
+
+		// Assignees role setting (disabled when simple mode is off)
+		const assigneeSetting = new Setting(containerEl)
+			.setName(`${SIMPLE_ASSIGNEE_ROLE.icon} ${SIMPLE_ASSIGNEE_ROLE.name}`)
+			.setDesc(`Shortcut: \\${SIMPLE_ASSIGNEE_ROLE.shortcut}`);
+
+		if (this.plugin.settings.simpleAssigneeMode) {
+			// Show as enabled but not toggleable when simple mode is on
+			assigneeSetting.addToggle((toggle) =>
+				toggle
+					.setValue(true)
+					.setDisabled(true)
+			);
+		} else {
+			// Show as disabled when simple mode is off
+			assigneeSetting.addToggle((toggle) =>
+				toggle
+					.setValue(false)
+					.setDisabled(true)
+			);
+		}
 	}
 
 	private createMePersonFileSetting(containerEl: HTMLElement): void {
@@ -223,43 +360,8 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Default roles
-		containerEl.createEl("h4", { text: "Default roles" });
-		for (const role of DEFAULT_ROLES) {
-			new Setting(containerEl)
-				.setName(`${role.icon} ${role.name}`)
-				.setDesc(
-					`Turn this off to hide the '${role.name}' role in future role assignment operations.\nShortcut: \\${role.shortcut}`
-				)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(
-							!this.plugin.settings.hiddenDefaultRoles.includes(
-								role.id
-							)
-						)
-						.onChange(async (value) => {
-							if (!value) {
-								if (
-									!this.plugin.settings.hiddenDefaultRoles.includes(
-										role.id
-									)
-								) {
-									this.plugin.settings.hiddenDefaultRoles.push(
-										role.id
-									);
-								}
-							} else {
-								this.plugin.settings.hiddenDefaultRoles =
-									this.plugin.settings.hiddenDefaultRoles.filter(
-										(id) => id !== role.id
-									);
-							}
-							await this.plugin.saveSettings();
-							await this.plugin.loadSettings(); // Refresh roles
-						})
-				);
-		}
+		// Default roles with tabs
+		this.createDefaultRolesTabs(containerEl);
 
 		// Custom roles
 		const customRoles = this.plugin.settings.roles.filter(
