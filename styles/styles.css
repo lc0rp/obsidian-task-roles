@@ -469,3 +469,65 @@ If your plugin does not need CSS, delete this file.
     overflow-y: auto;
     max-height: calc(100vh - 200px);
 }
+
+/* Tab interface styles for settings */
+.task-roles-tabs-container {
+    margin: 1em 0;
+}
+
+.task-roles-tab-buttons {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1em;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.task-roles-tab-button {
+    padding: 0.75em 1.5em;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    bottom: -1px;
+}
+
+.task-roles-tab-button:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.task-roles-tab-button.active {
+    background: var(--background-primary);
+    color: var(--text-normal);
+    border-color: var(--background-modifier-border);
+    border-bottom: 1px solid var(--background-primary);
+    z-index: 1;
+}
+
+.task-roles-tab-content {
+    padding: 1em 0;
+}
+
+.simple-mode-message {
+    padding: 1em;
+    background: var(--background-secondary);
+    border: 1px dashed var(--background-modifier-border);
+    border-radius: 4px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 1em;
+}
+
+.simple-mode-message p {
+    margin: 0.5em 0;
+}
+
+.simple-mode-message strong {
+    color: var(--text-normal);
+}

@@ -1,9 +1,9 @@
 import { Editor, MarkdownView, Plugin, WorkspaceLeaf } from "obsidian";
 
-import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role } from "./types";
+import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role, SIMPLE_ASSIGNEE_ROLE } from "./types";
 import { TaskRolesService } from "./services/task-roles.service";
 import { taskRolesExtension } from "./editor/task-roles-extension";
-import { TaskRolesSuggest } from "./editor/task-roles-suggest";
+// import { TaskRolesSuggest } from "./editor/task-roles-suggest";
 import { shortcutsTrigger } from "./editor/shortcuts-trigger";
 import { TaskRoleAssignmentModal } from "./modals/task-role-assignment-modal";
 import { TaskRolesSettingTab } from "./settings/task-roles-settings-tab";
@@ -122,6 +122,28 @@ export default class TaskRolesPlugin extends Plugin {
 			}
 		}
 
+		// Handle Simple Assignee Role mode
+		const existingAssigneeRole = this.settings.roles.find(r => r.id === "assignees");
+		
+		if (this.settings.simpleAssigneeMode) {
+			// Add the assignee role if it doesn't exist
+			if (!existingAssigneeRole) {
+				this.settings.roles.push({ ...SIMPLE_ASSIGNEE_ROLE });
+			} else {
+				// Update existing assignee role with correct properties
+				existingAssigneeRole.icon = SIMPLE_ASSIGNEE_ROLE.icon;
+				existingAssigneeRole.name = SIMPLE_ASSIGNEE_ROLE.name;
+				existingAssigneeRole.shortcut = SIMPLE_ASSIGNEE_ROLE.shortcut;
+				existingAssigneeRole.isDefault = SIMPLE_ASSIGNEE_ROLE.isDefault;
+				existingAssigneeRole.order = SIMPLE_ASSIGNEE_ROLE.order;
+			}
+		} else {
+			// Remove the assignee role if simple mode is disabled
+			if (existingAssigneeRole) {
+				this.settings.roles = this.settings.roles.filter(r => r.id !== "assignees");
+			}
+		}
+
 		// Sort roles by order
 		this.settings.roles.sort((a, b) => a.order - b.order);
 
@@ -145,6 +167,15 @@ export default class TaskRolesPlugin extends Plugin {
 	}
 
 	getVisibleRoles(): Role[] {
+		if (this.settings.simpleAssigneeMode) {
+			// In simple assignee mode, return only the assignee role and custom roles
+			const customRoles = this.settings.roles.filter(role => !role.isDefault);
+			const assigneeRole = this.settings.roles.find(role => role.id === "assignees");
+			
+			return assigneeRole ? [assigneeRole, ...customRoles] : customRoles;
+		}
+		
+		// Default behavior: filter based on hiddenDefaultRoles
 		return this.settings.roles.filter(
 			(role) =>
 				!role.isDefault ||
