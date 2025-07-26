@@ -61,7 +61,7 @@ export default class TaskRolesPlugin extends Plugin {
 		// this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
 
 		// Register role suggestion for \ shortcuts - always use backslash trigger
-		this.registerEditorExtension(shortcutsTrigger(this.app, this.settings));
+		this.registerEditorExtension(shortcutsTrigger(this.app, this.settings, () => this.getVisibleRoles()));
 
 		// Register the CodeMirror extension for task icons
 		this.registerEditorExtension(taskRolesExtension(this));

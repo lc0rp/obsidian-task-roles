@@ -5,7 +5,11 @@ import { TaskRolesPluginSettings, Role } from "../types";
 import { TaskUtils } from "../utils/task-regex";
 import { RoleSuggestionDropdown } from "../components/role-suggestion-dropdown";
 
-export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
+export function shortcutsTrigger(
+	app: App, 
+	settings: TaskRolesPluginSettings, 
+	getVisibleRoles: () => Role[]
+) {
 	return ViewPlugin.fromClass(
 		class {
 			private roleSuggestionDropdown: RoleSuggestionDropdown;
@@ -14,7 +18,8 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 				this.onKey = this.onKey.bind(this);
 				this.roleSuggestionDropdown = new RoleSuggestionDropdown(
 					app,
-					settings
+					settings,
+					getVisibleRoles
 				);
 				view.dom.addEventListener("keydown", this.onKey, true); // capture phase
 			}
@@ -81,11 +86,7 @@ export function shortcutsTrigger(app: App, settings: TaskRolesPluginSettings) {
 				}
 
 				// Handle direct role shortcuts (\d, \a, \c, \i)
-				const visibleRoles = settings.roles.filter(
-					(role) =>
-						!role.isDefault ||
-						!settings.hiddenDefaultRoles.includes(role.id)
-				);
+				const visibleRoles = getVisibleRoles();
 
 				// Check if this key matches a role shortcut and we have a backslash before cursor
 				if (
