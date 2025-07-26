@@ -1,7 +1,7 @@
 # Task Roles 🗂️
 
-_Assign DACI-style roles (“Driver, Approver, Contributor, Informed” or your own) to any markdown task and review them in
-a powerful Task Center._
+_Designate Assignees, DACI-style roles (“Driver, Approver, Contributor, Informed”), or your own custom ones any
+[Obsidian](https://obsidian.md/) task and review them in a powerful Task Center._
 
 [![Latest release](https://img.shields.io/github/v/release/lc0rp/obsidian-task-roles?label=release)](https://github.com/lc0rp/obsidian-task-roles/releases)
 [![Downloads](https://img.shields.io/github/downloads/lc0rp/obsidian-task-roles/total)](https://github.com/lc0rp/obsidian-task-roles/releases)
@@ -26,8 +26,10 @@ If you find this helpful or have ideas to improve it, I'd love to hear from you!
 
 * **One-click role assignment** – a tiny 👤 icon appears at the end of every task line; click to pick people/companies
 and their role.
+* **Choose simple or advanced roles** - choose between "Assigneee" mode for simple task assignment, or DACI-style roles
+ for more complex tracking.
 * **Inline shortcuts** – type `\d`, `\a`, `\c`, or `\i` to drop in Driver, Approver, Contributor, Informed fields without
-leaving the keyboard.  
+leaving the keyboard.  In single Assignee mode, \a works for Assignee.
 * **@People & +Companies autocompletion**  – link tasks to people (`@Jane`) or companies (`+AcmeCorp`) pulled from
 folders you specify.
 * **Custom roles & icons** – hide DACI defaults you don’t need or add your own (e.g. `Reviewer 🔍`).  
