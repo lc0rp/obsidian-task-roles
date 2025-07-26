@@ -33,19 +33,17 @@ folders you specify.
 * **Custom roles & icons** – hide DACI defaults you don’t need or add your own (e.g. `Reviewer 🔍`).  
 * **Task Center dashboard** – filter by status, role, person, due date and more in real time.
 
-### A tasklist with roles assigned
+### Examples
 
-<img src="media/tasklist.png" alt="A tasklist with roles assigned" width="600"/>
+A tasklist with roles assigned, and the optional 'Quick access icon' added to the end of each task line
 
-### The 'Quick-access icon' setting shows an icon at the end of each task line
-
-<img src="media/assign_inline_icon.gif" alt="Quick-access icon" width="600"/>
+<img src="media/tasklist.png" alt="A tasklist with roles & quick access icon" width="600"/>
 
 ### Each role comes with a backslash shortcut for instant insertion
 
 <img src="media/shortcuts.gif" alt="Role shortcuts" width="600"/>
 
-### Access a role suggestion menu via double backslash
+### Hitting backslash twice reveals a role suggestion menu
 
 <img src="media/double_backslash.gif" alt="Role suggestion menu" width="600"/>
 
