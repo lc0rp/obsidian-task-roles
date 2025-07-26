@@ -14,11 +14,18 @@ export class TaskRolesService {
 	private cacheInitialized = false;
 
 	constructor(private app: App, private settings: TaskRolesPluginSettings) {
-		// Build initial cache and listen for file system changes
+		// Defer heavy cache initialization - will be triggered on first use
+		this.setupCacheWatchers();
+		
+		// Initialize cache in background without blocking
+		this.initializeCacheInBackground();
+	}
+
+	private initializeCacheInBackground(): void {
+		// Don't await - let it run in background
 		this.refreshAssigneeCache().catch((error) =>
 			console.error("Error refreshing assignee cache:", error)
 		);
-		this.setupCacheWatchers();
 	}
 
 	private setupCacheWatchers(): void {
