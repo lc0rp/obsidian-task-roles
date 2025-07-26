@@ -13,20 +13,19 @@ import { syntaxTree } from "@codemirror/language";
 export default class TaskRolesPlugin extends Plugin {
 	settings: TaskRolesPluginSettings;
 	taskRolesService: TaskRolesService;
+	private initializationComplete = false;
 
 	async onload() {
+		// Only essential synchronous setup in onload
 		await this.loadSettings();
 
-		// Initialize services
-		this.taskRolesService = new TaskRolesService(this.app, this.settings);
-
-		// Register view
+		// Register view (lightweight)
 		this.registerView(
 			"task-roles-view",
 			(leaf) => new TaskRolesView(leaf, this)
 		);
 
-		// Register the role assign command
+		// Register commands (lightweight)
 		this.addCommand({
 			id: "assign-task-roles",
 			name: "Assign or Update Roles",
@@ -48,7 +47,6 @@ export default class TaskRolesPlugin extends Plugin {
 			},
 		});
 
-		// Register view commands
 		this.addCommand({
 			id: "open-task-roles-view",
 			name: "Open Task Center",
@@ -57,17 +55,35 @@ export default class TaskRolesPlugin extends Plugin {
 			},
 		});
 
-		// Register editor suggest for inline role suggestions
-		// this.registerEditorSuggest(new TaskRolesSuggest(this.app, this));
-
-		// Register role suggestion for \ shortcuts - always use backslash trigger
-		this.registerEditorExtension(shortcutsTrigger(this.app, this.settings, () => this.getVisibleRoles()));
-
-		// Register the CodeMirror extension for task icons
-		this.registerEditorExtension(taskRolesExtension(this));
-
-		// Add settings tab
+		// Add settings tab (lightweight)
 		this.addSettingTab(new TaskRolesSettingTab(this.app, this));
+
+		// Defer heavy initialization to onLayoutReady
+		if (this.app.workspace.layoutReady) {
+			this.initializeHeavyComponents();
+		} else {
+			this.app.workspace.onLayoutReady(() => this.initializeHeavyComponents());
+		}
+	}
+
+	private initializeHeavyComponents() {
+		// Don't await - let it run in background to avoid blocking
+		this.performHeavyInitialization().catch(console.error);
+	}
+
+	private async performHeavyInitialization() {
+		try {
+			// Initialize services with potential file system operations
+			this.taskRolesService = new TaskRolesService(this.app, this.settings);
+
+			// Register editor extensions that may be heavy
+			this.registerEditorExtension(shortcutsTrigger(this.app, this.settings, () => this.getVisibleRoles()));
+			this.registerEditorExtension(taskRolesExtension(this));
+
+			this.initializationComplete = true;
+		} catch (error) {
+			console.error('TaskRoles plugin: Error during heavy initialization:', error);
+		}
 	}
 
 	async onunload() {
@@ -158,11 +174,21 @@ export default class TaskRolesPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		// Update services with new settings
-		this.taskRolesService = new TaskRolesService(this.app, this.settings);
+		// Update services with new settings if initialized
+		if (this.initializationComplete) {
+			this.taskRolesService = new TaskRolesService(this.app, this.settings);
+		}
 	}
 
 	openRolesModal(editor: Editor) {
+		// Ensure initialization is complete before opening modal
+		if (!this.initializationComplete) {
+			console.warn('TaskRoles plugin: Initialization not complete, deferring modal opening');
+			this.performHeavyInitialization().then(() => {
+				new TaskRoleAssignmentModal(this.app, this, editor).open();
+			}).catch(console.error);
+			return;
+		}
 		new TaskRoleAssignmentModal(this.app, this, editor).open();
 	}
 
