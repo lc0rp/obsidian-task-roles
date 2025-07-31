@@ -1,6 +1,6 @@
 {
     "name": "obsidian-task-roles",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Assign roles, people and companies to tasks.",
     "main": "main.js",
     "scripts": {
