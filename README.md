@@ -10,9 +10,11 @@ and track them all in a powerful Task Center.
 [![Downloads](https://img.shields.io/github/downloads/lc0rp/obsidian-task-roles/total)](https://github.com/lc0rp/obsidian-task-roles/releases)
 [![License](https://img.shields.io/github/license/lc0rp/obsidian-task-roles)](LICENSE.md)
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
    <img src="media/assign-modal.png" alt="Task Roles assignment modal" width="600"/>
 </p>
+<!-- markdownlint-enable MD033 -->
 ---
 
 I often find myself creating sub-tasks like: _Update legal weekly_, or _Inform Jane about supplier delays_, and wishing
@@ -42,14 +44,17 @@ folders you specify.
 
 A tasklist with roles assigned, and the optional 'Quick access icon' added to the end of each task line
 
+<!-- markdownlint-disable-next-line MD033 -->
 <img src="media/tasklist.png" alt="A tasklist with roles & quick access icon" width="600"/>
 
 ### Each role comes with a backslash shortcut for instant insertion
 
+<!-- markdownlint-disable-next-line MD033 -->
 <img src="media/shortcuts.gif" alt="Role shortcuts" width="600"/>
 
 ### Hitting backslash twice reveals a role suggestion menu
 
+<!-- markdownlint-disable-next-line MD033 -->
 <img src="media/double_backslash.gif" alt="Role suggestion menu" width="600"/>
 
 ---
