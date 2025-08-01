@@ -2,7 +2,8 @@
 
 _Assignee & Role Tracking for your [Obsidian](https://obsidian.md/) Tasks._
 
-Assign tasks to people or companies. Designate DACI-style roles (“Driver, Approver, Contributor, Informed”), or roll out your own
+Assign tasks to people or companies. Designate DACI-style roles (“Driver, Approver, Contributor, Informed”), or roll out
+your own
 and track them all in a powerful Task Center.
 
 [![Latest release](https://img.shields.io/github/v/release/lc0rp/obsidian-task-roles?label=release)](https://github.com/lc0rp/obsidian-task-roles/releases)
