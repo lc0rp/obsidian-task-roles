@@ -1,7 +1,9 @@
-# Task Roles 🗂️
+# Obsidian Task Roles
 
-_Designate Assignees, DACI-style roles (“Driver, Approver, Contributor, Informed”), or your own custom ones any
-[Obsidian](https://obsidian.md/) task and review them in a powerful Task Center._
+_Assignee & Role Tracking for your [Obsidian](https://obsidian.md/) Tasks._
+
+Assign tasks to people or companies. Designate DACI-style roles (“Driver, Approver, Contributor, Informed”), or roll out your own
+and track them all in a powerful Task Center.
 
 [![Latest release](https://img.shields.io/github/v/release/lc0rp/obsidian-task-roles?label=release)](https://github.com/lc0rp/obsidian-task-roles/releases)
 [![Downloads](https://img.shields.io/github/downloads/lc0rp/obsidian-task-roles/total)](https://github.com/lc0rp/obsidian-task-roles/releases)
