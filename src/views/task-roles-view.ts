@@ -55,6 +55,11 @@ export class TaskRolesView extends TaskRolesViewBase {
         );
     }
 
+    async onOpen(): Promise<void> {
+        // Re-check plugin availability when view opens (handles late plugin loading)
+        await super.onOpen();
+    }
+
     protected async renderAsync(): Promise<void> {
         this.viewContainerEl = this.contentEl;
         this.viewContainerEl.empty();
