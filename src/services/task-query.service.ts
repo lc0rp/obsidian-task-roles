@@ -18,7 +18,7 @@ export class TaskQueryService {
                pluginManager.plugins['obsidian-tasks-plugin']?.enabled;
     }
 
-    private displayTasksPluginNotice(columnDiv: HTMLElement): void {
+    private displayTasksPluginNotice(columnDiv: HTMLElement, onRefresh?: () => void): void {
         const noticeDiv = columnDiv.createDiv('tasks-plugin-notice');
         noticeDiv.style.padding = '20px';
         noticeDiv.style.textAlign = 'center';
@@ -56,7 +56,17 @@ export class TaskQueryService {
         const instructionsEl = textDiv.createEl('div');
         instructionsEl.style.fontSize = '12px';
         instructionsEl.style.color = 'var(--text-muted)';
+        instructionsEl.style.marginBottom = '15px';
         instructionsEl.innerHTML = 'Install the <strong>Tasks</strong> plugin from Community Plugins and enable it to use this feature.';
+        
+        // Refresh button if callback provided
+        if (onRefresh) {
+            const refreshButton = noticeDiv.createEl('button', { cls: 'mod-cta' });
+            refreshButton.textContent = 'Check Again';
+            refreshButton.style.marginTop = '10px';
+            refreshButton.style.padding = '6px 12px';
+            refreshButton.onclick = onRefresh;
+        }
     }
 
     buildTaskQueryFromFilters(filters: ViewFilters): string {
@@ -381,7 +391,10 @@ export class TaskQueryService {
 
         // Check if Tasks plugin is installed before rendering content
         if (!this.isTasksPluginInstalled()) {
-            this.displayTasksPluginNotice(columnDiv);
+            const refreshCallback = viewContext && typeof viewContext.renderAsync === 'function' 
+                ? () => viewContext.renderAsync() 
+                : undefined;
+            this.displayTasksPluginNotice(columnDiv, refreshCallback);
             return;
         }
 
