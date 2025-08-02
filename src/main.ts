@@ -55,6 +55,11 @@ export default class TaskRolesPlugin extends Plugin {
 			},
 		});
 
+		// Add sidebar ribbon icon
+		this.addRibbonIcon('layout-grid', 'Open Task Center', () => {
+			this.activateView();
+		});
+
 		// Add settings tab (lightweight)
 		this.addSettingTab(new TaskRolesSettingTab(this.app, this));
 

@@ -9,6 +9,56 @@ export class TaskQueryService {
         this.plugin = plugin;
     }
 
+    private isTasksPluginInstalled(): boolean {
+        // Check if the Tasks plugin is installed and enabled
+        const pluginManager = (this.plugin.app as any).plugins;
+        return pluginManager && 
+               pluginManager.plugins && 
+               pluginManager.plugins.hasOwnProperty('obsidian-tasks-plugin') && 
+               pluginManager.plugins['obsidian-tasks-plugin']?.enabled;
+    }
+
+    private displayTasksPluginNotice(columnDiv: HTMLElement): void {
+        const noticeDiv = columnDiv.createDiv('tasks-plugin-notice');
+        noticeDiv.style.padding = '20px';
+        noticeDiv.style.textAlign = 'center';
+        noticeDiv.style.color = 'var(--text-muted)';
+        noticeDiv.style.border = '2px dashed var(--background-modifier-border)';
+        noticeDiv.style.borderRadius = '8px';
+        noticeDiv.style.margin = '10px 0';
+        noticeDiv.style.backgroundColor = 'var(--background-secondary)';
+
+        // Warning icon
+        const iconDiv = noticeDiv.createDiv();
+        iconDiv.style.marginBottom = '10px';
+        const iconSpan = iconDiv.createSpan();
+        setIcon(iconSpan, 'alert-triangle');
+        iconSpan.style.width = '24px';
+        iconSpan.style.height = '24px';
+        iconSpan.style.color = 'var(--text-warning)';
+
+        // Notice text
+        const textDiv = noticeDiv.createDiv();
+        textDiv.style.fontSize = '14px';
+        textDiv.style.lineHeight = '1.4';
+        
+        const titleEl = textDiv.createEl('div');
+        titleEl.style.fontWeight = 'bold';
+        titleEl.style.marginBottom = '8px';
+        titleEl.style.color = 'var(--text-normal)';
+        titleEl.textContent = 'Tasks Plugin Required';
+        
+        const descEl = textDiv.createEl('div');
+        descEl.style.marginBottom = '12px';
+        descEl.textContent = 'The Task Center requires the Tasks plugin to be installed and enabled to display task columns.';
+        
+        // Instructions
+        const instructionsEl = textDiv.createEl('div');
+        instructionsEl.style.fontSize = '12px';
+        instructionsEl.style.color = 'var(--text-muted)';
+        instructionsEl.innerHTML = 'Install the <strong>Tasks</strong> plugin from Community Plugins and enable it to use this feature.';
+    }
+
     buildTaskQueryFromFilters(filters: ViewFilters): string {
         const queryLines: string[] = [];
 
@@ -329,6 +379,12 @@ export class TaskQueryService {
         titleEl.style.alignItems = 'center';
         titleEl.style.gap = '0';
 
+        // Check if Tasks plugin is installed before rendering content
+        if (!this.isTasksPluginInstalled()) {
+            this.displayTasksPluginNotice(columnDiv);
+            return;
+        }
+
         // Query display
         const queryContainer = columnDiv.createDiv('task-query-display');
         
@@ -437,6 +493,9 @@ export class TaskQueryService {
                     checkbox.style.setProperty('left', '12px', 'important');
                     checkbox.style.setProperty('margin', '0', 'important');
                     checkbox.style.setProperty('transform', 'scale(1.0)', 'important');
+                    checkbox.style.setProperty('z-index', '10', 'important');
+                    checkbox.style.setProperty('pointer-events', 'auto', 'important');
+                    checkbox.style.setProperty('cursor', 'pointer', 'important');
                 }
                 
                 // Force task content margin
