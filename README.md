@@ -158,20 +158,6 @@ PRs and issue reports are welcome!
 
 ---
 
-## 🗺️ Roadmap
-
-* 🔄 Bulk‑edit roles across multiple tasks
-* 🗓️ Calendar overlay in Task Center  
-* ☁️ Optional remote cache for large vaults
-
----
-
-## License
-
-[MIT](LICENSE.md) – do what you want, just keep the copyright notice.
-
----
-
 ### Acknowledgements
 
 Built with ❤ on top of the Obsidian API and inspired by team‑task frameworks like DACI and RACI.
