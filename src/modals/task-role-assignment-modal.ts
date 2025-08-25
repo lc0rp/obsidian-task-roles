@@ -241,7 +241,7 @@ export class TaskRoleAssignmentModal extends Modal {
 			type: "text",
 			placeholder: "🎯",
 		});
-		iconInput.style.width = "40px";
+		iconInput.className = "task-role-assignment-icon-input";
 
 		const addBtn = newRoleDiv.createEl("button", { text: "Add Role" });
 		addBtn.onclick = async () => {

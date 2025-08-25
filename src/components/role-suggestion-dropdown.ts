@@ -216,19 +216,6 @@ export class RoleSuggestionDropdown {
 	private createDropdownElement(): void {
 		this.dropdownElement = document.createElement("div");
 		this.dropdownElement.className = "task-roles-suggestion-dropdown";
-		this.dropdownElement.style.cssText = `
-			position: fixed;
-			background: var(--background-primary);
-			border: 1px solid var(--background-modifier-border);
-			border-radius: 8px;
-			box-shadow: var(--shadow-s);
-			padding: 4px 0;
-			min-width: 200px;
-			max-height: 300px;
-			overflow-y: auto;
-			z-index: 10000;
-			font-size: var(--font-ui-small);
-		`;
 
 		document.body.appendChild(this.dropdownElement);
 	}
@@ -360,20 +347,10 @@ export class RoleSuggestionDropdown {
 				<span class="role-name">${displayName}</span>
 			`;
 
-			item.style.cssText = `
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				padding: 6px 12px;
-				cursor: pointer;
-				border-radius: 4px;
-				margin: 0 4px;
-				${
-					index === this.selectedIndex
-						? "background: var(--background-modifier-hover);"
-						: ""
-				}
-			`;
+			// Set selected class if this is the selected index
+			if (index === this.selectedIndex) {
+				item.classList.add("selected");
+			}
 
 			// Add hover effect
 			item.addEventListener("mouseenter", () => {
@@ -398,12 +375,7 @@ export class RoleSuggestionDropdown {
 		if (this.availableRoles.length === 0 && this.dropdownElement) {
 			const noRolesItem = document.createElement("div");
 			noRolesItem.textContent = "No roles available";
-			noRolesItem.style.cssText = `
-				padding: 12px;
-				text-align: center;
-				color: var(--text-muted);
-				font-style: italic;
-			`;
+			noRolesItem.className = "task-roles-suggestion-no-roles";
 			this.dropdownElement.appendChild(noRolesItem);
 		}
 	}
@@ -417,9 +389,9 @@ export class RoleSuggestionDropdown {
 		items.forEach((item, index) => {
 			const element = item as HTMLElement;
 			if (index === this.selectedIndex) {
-				element.style.background = "var(--background-modifier-hover)";
+				element.classList.add("selected");
 			} else {
-				element.style.background = "";
+				element.classList.remove("selected");
 			}
 		});
 	}

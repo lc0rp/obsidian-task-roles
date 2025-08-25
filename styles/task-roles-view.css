@@ -813,13 +813,27 @@
 
 /* Enhanced Task Card Styling - Based on Tasks Plugin Style */
 .task-query-display .task-list-item {
-    margin: 0 !important;
+    margin: 0 0 8px 0 !important;
     padding: 12px !important;
     background: var(--background-primary) !important;
-    border: none !important;
-    border-bottom: 1px solid var(--background-modifier-border) !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    border: 1px solid var(--background-modifier-border) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    list-style: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Force re-apply for task items that may be overridden by other plugins */
+.task-query-display .task-list-item.task-roles-styled {
+    margin: 0 0 8px 0 !important;
+    padding: 12px !important;
+    background: var(--background-primary) !important;
+    border: 1px solid var(--background-modifier-border) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
     transition: all 0.2s ease !important;
     position: relative !important;
     list-style: none !important;
@@ -849,6 +863,21 @@
     left: 12px !important;
     margin: 0 !important;
     transform: scale(1.0) !important;
+    z-index: 10 !important;
+    border-radius: 2px !important;
+    border: 1px solid var(--background-modifier-border) !important;
+}
+
+/* Force re-apply checkbox styling for styled items */
+.task-query-display .task-list-item.task-roles-styled input[type="checkbox"] {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    margin: 0 !important;
+    transform: scale(1.0) !important;
+    z-index: 10 !important;
+    border-radius: 2px !important;
+    border: 1px solid var(--background-modifier-border) !important;
 }
 
 /* Task content wrapper - positioned below checkbox and priority with better typography */
@@ -865,23 +894,41 @@
     font-weight: 400 !important;
 }
 
+/* Force re-apply for styled items */
+.task-query-display .task-list-item.task-roles-styled .task-description,
+.task-query-display .task-list-item.task-roles-styled > p {
+    margin-left: 0 !important;
+    margin-top: 22px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.4 !important;
+    font-size: 12.5px !important;
+    color: var(--text-normal) !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    font-weight: 400 !important;
+}
+
 /* Priority-based styling classes */
-.task-query-display .task-list-item.priority-urgent {
+.task-query-display .task-list-item.priority-urgent,
+.task-query-display .task-list-item.task-roles-styled.priority-urgent {
     border-left: 4px solid var(--text-error) !important;
     background: linear-gradient(90deg, rgba(255, 67, 54, 0.05) 0%, var(--background-primary) 20%) !important;
 }
 
-.task-query-display .task-list-item.priority-high {
+.task-query-display .task-list-item.priority-high,
+.task-query-display .task-list-item.task-roles-styled.priority-high {
     border-left: 4px solid var(--color-orange) !important;
     background: linear-gradient(90deg, rgba(255, 152, 0, 0.05) 0%, var(--background-primary) 20%) !important;
 }
 
-.task-query-display .task-list-item.priority-medium {
+.task-query-display .task-list-item.priority-medium,
+.task-query-display .task-list-item.task-roles-styled.priority-medium {
     border-left: 4px solid var(--color-blue) !important;
     background: linear-gradient(90deg, rgba(33, 150, 243, 0.05) 0%, var(--background-primary) 20%) !important;
 }
 
-.task-query-display .task-list-item.priority-low {
+.task-query-display .task-list-item.priority-low,
+.task-query-display .task-list-item.task-roles-styled.priority-low {
     border-left: 4px solid var(--color-green) !important;
     background: linear-gradient(90deg, rgba(76, 175, 80, 0.05) 0%, var(--background-primary) 20%) !important;
 }
@@ -894,6 +941,24 @@
     margin-top: 8px !important;
     margin-left: 0 !important;
     align-items: center !important;
+}
+
+/* Force re-apply for styled items */
+.task-query-display .task-list-item.task-roles-styled .task-metadata {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-top: 8px !important;
+    margin-left: 0 !important;
+    align-items: center !important;
+}
+
+/* Container styling for forced re-apply */
+.task-query-display .contains-task-list.task-roles-styled {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .task-query-display .task-list-item .task-tag,

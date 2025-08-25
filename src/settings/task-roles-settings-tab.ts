@@ -44,8 +44,17 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			simpleAssigneeTab.classList.toggle("active", tab === "simple");
 			
 			// Update content visibility
-			allDriverRolesContent.style.display = tab === "driver" ? "block" : "none";
-			simpleAssigneeContent.style.display = tab === "simple" ? "block" : "none";
+			if (tab === "driver") {
+				allDriverRolesContent.classList.remove("settings-tab-content-hidden");
+				allDriverRolesContent.classList.add("settings-tab-content-visible");
+				simpleAssigneeContent.classList.remove("settings-tab-content-visible");
+				simpleAssigneeContent.classList.add("settings-tab-content-hidden");
+			} else {
+				allDriverRolesContent.classList.remove("settings-tab-content-visible");
+				allDriverRolesContent.classList.add("settings-tab-content-hidden");
+				simpleAssigneeContent.classList.remove("settings-tab-content-hidden");
+				simpleAssigneeContent.classList.add("settings-tab-content-visible");
+			}
 		};
 		
 		// Tab click handlers
@@ -440,12 +449,13 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 					// Check for duplicate shortcut
 					if (shortcut && this.isShortcutInUse(shortcut)) {
-						shortcutInput.style.border =
-							"2px solid var(--text-error)";
+						shortcutInput.classList.add("settings-shortcut-error");
+						shortcutInput.classList.remove("settings-shortcut-valid");
 						shortcutInput.focus();
 						return;
 					} else {
-						shortcutInput.style.border = "";
+						shortcutInput.classList.remove("settings-shortcut-error");
+						shortcutInput.classList.add("settings-shortcut-valid");
 					}
 
 					const newRole: Role = {
