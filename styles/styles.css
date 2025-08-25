@@ -9,6 +9,77 @@ If your plugin does not need CSS, delete this file.
 
 /* Task Roles Plugin Styles */
 
+/* Role Suggestion Dropdown Styles */
+.task-roles-suggestion-dropdown {
+    position: fixed;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-s);
+    padding: 4px 0;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10000;
+    font-size: var(--font-ui-small);
+}
+
+.task-roles-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 0 4px;
+}
+
+.task-roles-suggestion-item.selected {
+    background: var(--background-modifier-hover);
+}
+
+.task-roles-suggestion-item:hover {
+    background: var(--background-modifier-hover);
+}
+
+.task-roles-suggestion-no-roles {
+    padding: 12px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Role Edit Modal Styles */
+.role-edit-shortcut-error {
+    border: 2px solid var(--text-error);
+}
+
+.role-edit-shortcut-valid {
+    border: "";
+}
+
+/* Task Role Assignment Modal Styles */
+.task-role-assignment-icon-input {
+    width: 40px;
+}
+
+/* Settings Tab Styles */
+.settings-tab-content-hidden {
+    display: none;
+}
+
+.settings-tab-content-visible {
+    display: block;
+}
+
+.settings-shortcut-error {
+    border: 2px solid var(--text-error);
+}
+
+.settings-shortcut-valid {
+    border: "";
+}
+
 .roles-container {
     margin: 1em 0;
 }

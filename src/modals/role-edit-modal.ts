@@ -60,11 +60,13 @@ export class RoleEditModal extends Modal {
 
             // Check for duplicate shortcut (excluding this role)
             if (shortcut && this.isShortcutInUse(shortcut, this.role.id)) {
-                shortcutInput.style.border = "2px solid var(--text-error)";
+                shortcutInput.classList.add("role-edit-shortcut-error");
+                shortcutInput.classList.remove("role-edit-shortcut-valid");
                 shortcutInput.focus();
                 return;
             } else {
-                shortcutInput.style.border = "";
+                shortcutInput.classList.remove("role-edit-shortcut-error");
+                shortcutInput.classList.add("role-edit-shortcut-valid");
             }
 
             this.role.name = name;
