@@ -65,8 +65,12 @@ export class TaskQueryService {
 		instructionsEl.style.fontSize = "12px";
 		instructionsEl.style.color = "var(--text-muted)";
 		instructionsEl.style.marginBottom = "15px";
-		instructionsEl.innerHTML =
-			"Install the <strong>Tasks</strong> plugin from Community Plugins and enable it to use this feature.";
+		
+		// Create instruction text using DOM API instead of innerHTML
+		instructionsEl.appendChild(document.createTextNode("Install the "));
+		const strongEl = instructionsEl.createEl("strong");
+		strongEl.textContent = "Tasks";
+		instructionsEl.appendChild(document.createTextNode(" plugin from Community Plugins and enable it to use this feature."));
 
 		// Refresh button if callback provided
 		if (onRefresh) {
