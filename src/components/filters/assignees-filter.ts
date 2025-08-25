@@ -109,11 +109,6 @@ export class AssigneesFilter {
 
 	updateDisplay(): void {
 		const selectedAssignees = this.getSelectedAssignees();
-		console.log(
-			"Updating assignees display:",
-			selectedAssignees.length,
-			selectedAssignees
-		);
 		if (selectedAssignees.length === 0) {
 			this.assigneesInput.value = "";
 			this.tooltip.style.display = "none";
@@ -151,7 +146,6 @@ export class AssigneesFilter {
 					this.plugin.app,
 					this.plugin,
 					(selectedAssignee: string) => {
-						console.log("Selected assignee:", selectedAssignee);
 						const isPerson = selectedAssignee.startsWith(
 							this.plugin.settings.personSymbol
 						);
@@ -161,10 +155,6 @@ export class AssigneesFilter {
 						if (isPerson) {
 							const currentPeople =
 								this.currentFilters.people || [];
-							console.log(
-								"Current people before update:",
-								currentPeople
-							);
 							const newPeople = currentPeople.includes(
 								selectedAssignee
 							)
@@ -172,7 +162,6 @@ export class AssigneesFilter {
 										(p) => p !== selectedAssignee
 								  )
 								: [...currentPeople, selectedAssignee];
-							console.log("New people after update:", newPeople);
 							this.callbacks.updateFilters({ people: newPeople });
 							this.currentFilters.people = newPeople;
 						} else if (isCompany) {

@@ -209,9 +209,6 @@ export class RoleSuggestionDropdown {
 		if (this.availableRoles.length === 0 || !this.onInsertCallback) return;
 
 		const selectedRole = this.availableRoles[this.selectedIndex];
-		console.log(
-			`Inserting role: ${selectedRole.name} at index ${this.selectedIndex}`
-		);
 		this.onInsertCallback(selectedRole);
 		this.hide();
 	}
