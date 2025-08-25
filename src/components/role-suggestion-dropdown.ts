@@ -345,23 +345,44 @@ export class RoleSuggestionDropdown {
 	private renderRoles(): void {
 		if (!this.dropdownElement) return;
 
-		this.dropdownElement.innerHTML = "";
+		// Clear existing content using DOM API
+		while (this.dropdownElement.firstChild) {
+			this.dropdownElement.removeChild(this.dropdownElement.firstChild);
+		}
 
 		this.availableRoles.forEach((role, index) => {
 			const item = document.createElement("div");
 			item.className = "task-roles-suggestion-item";
 
-			// Highlight the current filter in the role name
-			let displayName = role.name;
-			if (this.currentFilter) {
-				const regex = new RegExp(`(${this.currentFilter})`, "gi");
-				displayName = role.name.replace(regex, "<mark>$1</mark>");
-			}
+			// Create role icon span
+			const iconSpan = document.createElement("span");
+			iconSpan.className = "role-icon";
+			iconSpan.textContent = role.icon;
+			item.appendChild(iconSpan);
 
-			item.innerHTML = `
-				<span class="role-icon">${role.icon}</span>
-				<span class="role-name">${displayName}</span>
-			`;
+			// Create role name span with highlighting support
+			const nameSpan = document.createElement("span");
+			nameSpan.className = "role-name";
+			
+			if (this.currentFilter) {
+				// Handle highlighting by splitting the text and creating mark elements
+				const regex = new RegExp(`(${this.currentFilter})`, "gi");
+				const parts = role.name.split(regex);
+				
+				parts.forEach((part, partIndex) => {
+					if (part.toLowerCase() === this.currentFilter.toLowerCase()) {
+						const mark = document.createElement("mark");
+						mark.textContent = part;
+						nameSpan.appendChild(mark);
+					} else if (part) {
+						const textNode = document.createTextNode(part);
+						nameSpan.appendChild(textNode);
+					}
+				});
+			} else {
+				nameSpan.textContent = role.name;
+			}
+			item.appendChild(nameSpan);
 
 			item.style.cssText = `
 				display: flex;
