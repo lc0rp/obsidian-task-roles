@@ -117,7 +117,7 @@ export class AssigneesFilter {
 			this.tooltip.style.display = "none";
 		} else {
 			this.assigneesInput.value = `${selectedAssignees.length} selected`;
-			this.tooltip.innerHTML = selectedAssignees.join(", ");
+			this.tooltip.textContent = selectedAssignees.join(", ");
 			this.tooltip.style.display = "block";
 			// Tooltip visibility is controlled by hover events.
 		}

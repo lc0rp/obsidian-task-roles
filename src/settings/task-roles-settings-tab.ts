@@ -75,10 +75,10 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.simpleAssigneeMode) {
 			// Show disabled message when simple mode is active
 			const messageDiv = containerEl.createDiv("simple-mode-message");
-			messageDiv.innerHTML = `
-				<p><strong>Advanced mode is disabled</strong></p>
-				<p>Go to the "Simple Assignee Role" tab and disable Simple Assignee Role mode to re-enable this tab.</p>
-			`;
+			const strongEl = messageDiv.createEl("p").createEl("strong");
+			strongEl.textContent = "Advanced mode is disabled";
+			const descEl = messageDiv.createEl("p");
+			descEl.textContent = 'Go to the "Simple Assignee Role" tab and disable Simple Assignee Role mode to re-enable this tab.';
 			return;
 		}
 		
