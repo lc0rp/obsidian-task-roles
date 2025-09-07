@@ -207,6 +207,16 @@ unhidden roles will be parsed and displayed.
   - Add, edit, and delete custom roles
   - Note: Editing custom roles won't update historical records
 
+### Default roles customization
+
+The default roles are flexible enough to support RACI (Responsible, Accountable, Consulted, Informed) and DACI (Driver, Approver, Contributor, Informed) frameworks, or simple single‑assignee workflows. Customize them in Settings → Task Roles:
+
+- Preferred name: choose between the role’s name and its aliases (e.g., Owner vs Driver). Updates the displayed label instantly.
+- Icon: click to type/paste an emoji. Must be unique among enabled roles. Updates everywhere instantly.
+- Shortcut: pick the backslash shortcut from the default and its aliases (e.g., \o or \d).
+- Enable/disable: toggle visibility of each default role.
+- Reset defaults: restore all default roles to their original names, icons, shortcuts, and re‑enable them.
+
 ## Installation
 
 ### From Obsidian Community Plugins

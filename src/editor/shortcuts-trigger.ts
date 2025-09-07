@@ -93,9 +93,9 @@ export function shortcutsTrigger(
 					beforeCursor.endsWith("\\") &&
 					this.isRoleShortcutKey(e.key, visibleRoles)
 				) {
-					const role = visibleRoles.find(
-						(r) => r.shortcut === e.key.toLowerCase()
-					);
+                const role = visibleRoles.find((r) =>
+                    (r.shortcuts || []).includes(e.key.toLowerCase())
+                );
 					if (role) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -173,8 +173,8 @@ export function shortcutsTrigger(
 				key: string,
 				visibleRoles: Role[]
 			): boolean {
-				const lowerKey = key.toLowerCase();
-				return visibleRoles.some((role) => role.shortcut === lowerKey);
+            const lowerKey = key.toLowerCase();
+            return visibleRoles.some((role) => (role.shortcuts || []).includes(lowerKey));
 			}
 
 			/**

@@ -28,7 +28,8 @@ export class RoleEditModal extends Modal {
             .setName('Role name')
             .addText(text => {
                 nameInput = text.inputEl;
-                text.setValue(this.role.name);
+                const primary = this.role.names?.[0] || '';
+                text.setValue(primary);
             });
 
         new Setting(contentEl)
@@ -43,7 +44,8 @@ export class RoleEditModal extends Modal {
             .setDesc('Single character used with \\ to insert this role')
             .addText(text => {
                 shortcutInput = text.inputEl;
-                text.setValue(this.role.shortcut || '');
+                const primaryShortcut = this.role.shortcuts?.[0] || '';
+                text.setValue(primaryShortcut);
             });
 
         const buttonDiv = contentEl.createDiv('button-container');
@@ -69,9 +71,17 @@ export class RoleEditModal extends Modal {
                 shortcutInput.classList.add("role-edit-shortcut-valid");
             }
 
-            this.role.name = name;
+            const nameLower = name.toLowerCase();
+            const restNames = (this.role.names || []).filter((n) => n !== nameLower);
+            this.role.names = [nameLower, ...restNames];
             this.role.icon = icon;
-            this.role.shortcut = shortcut || undefined;
+            const lowerShortcut = (shortcut || '').toLowerCase();
+            if (lowerShortcut) {
+                const restShortcuts = (this.role.shortcuts || []).filter((s) => s !== lowerShortcut);
+                this.role.shortcuts = [lowerShortcut, ...restShortcuts];
+            } else {
+                this.role.shortcuts = (this.role.shortcuts || []).filter(Boolean);
+            }
             await this.plugin.saveSettings();
             this.onSave();
             this.close();
@@ -86,8 +96,9 @@ export class RoleEditModal extends Modal {
      */
     private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
         if (!shortcut) return false;
-        return this.plugin.settings.roles.some(role => 
-            role.shortcut === shortcut && role.id !== excludeRoleId
+        const lower = shortcut.toLowerCase();
+        return this.plugin.settings.roles.some(role =>
+            (role.shortcuts || []).includes(lower) && role.id !== excludeRoleId
         );
     }
-} 
+}

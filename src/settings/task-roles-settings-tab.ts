@@ -1,63 +1,187 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import { DEFAULT_ROLES, Role } from "../types";
+import {
+    getPreferredNameOptions,
+    getShortcutOptions,
+    isIconUnique,
+} from "../utils/role-settings-utils";
 import { RoleEditModal } from "../modals/role-edit-modal";
 import type TaskRolesPlugin from "../main";
 
 export class TaskRolesSettingTab extends PluginSettingTab {
-	plugin: TaskRolesPlugin;
-	private abortController: AbortController | null = null;
+    plugin: TaskRolesPlugin;
+    private abortController: AbortController | null = null;
+    private activeDefaultRoleId: string | null = null;
 
 	constructor(app: App, plugin: TaskRolesPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
-	private createDefaultRolesTabs(containerEl: HTMLElement): void {
-		// Simplified: only show Driver Roles without tabs
-		const section = containerEl.createDiv("task-roles-tabs-container");
-		section.createEl("h4", { text: "Default roles" });
+    private createDefaultRolesTabs(containerEl: HTMLElement): void {
+        const section = containerEl.createDiv("task-roles-tabs-container");
+        section.createEl("h4", { text: "Default roles" });
+        section.createEl("p", {
+            text:
+                "The default roles are flexible enough to support project management techniques like RACI (Responsible, Accountable, Consulted & Informed) & DACI (Driver, Approver, Contributor, Informed), or simple task assignment. Customize the roles below.",
+        });
 
-		const allDriverRolesContent = section.createDiv(
-			"task-roles-tab-content"
-		);
+        // Determine active role
+        const defaultIds = DEFAULT_ROLES.map((r) => r.id);
+        if (!this.activeDefaultRoleId || !defaultIds.includes(this.activeDefaultRoleId)) {
+            this.activeDefaultRoleId = defaultIds[0];
+        }
 
-		// Show the default roles toggles
-		for (const role of DEFAULT_ROLES) {
-			new Setting(allDriverRolesContent)
-				.setName(`${role.icon} ${role.name}`)
-				.setDesc(
-					`Turn this off to hide the '${role.name}' role in future role assignment operations.\nShortcut: \\${role.shortcut}`
-				)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(
-							!this.plugin.settings.hiddenDefaultRoles.includes(
-								role.id
-							)
-						)
-						.onChange(async (value) => {
-							if (!value) {
-								if (
-									!this.plugin.settings.hiddenDefaultRoles.includes(
-										role.id
-									)
-								) {
-									this.plugin.settings.hiddenDefaultRoles.push(
-										role.id
-									);
-								}
-							} else {
-								this.plugin.settings.hiddenDefaultRoles =
-									this.plugin.settings.hiddenDefaultRoles.filter(
-										(id) => id !== role.id
-									);
-							}
-							await this.plugin.saveSettings();
-							await this.plugin.loadSettings(); // Refresh roles
-						})
-				);
-		}
-	}
+        // Tabs header
+        const header = section.createDiv("default-roles-tabs-header");
+        for (const base of DEFAULT_ROLES) {
+            const role = this.plugin.settings.roles.find((r) => r.id === base.id) || base;
+            const isHidden = this.plugin.settings.hiddenDefaultRoles.includes(role.id);
+            const primaryName = (role.names?.[0] || "");
+            const displayName = primaryName ? primaryName.charAt(0).toUpperCase() + primaryName.slice(1) : "";
+            const label = `${role.icon} ${displayName}`;
+            const btn = header.createEl("button", { text: label, cls: "default-role-tab" });
+            // Visual hint for disabled
+            if (isHidden) {
+                // Add a class; real styling handled via CSS
+                // @ts-ignore - addClass exists in Obsidian elements
+                btn.addClass?.("is-disabled");
+                // Fallback style for environments without addClass helpers
+                // @ts-ignore
+                btn.style && (btn.style.opacity = "0.45");
+            }
+            if (this.activeDefaultRoleId === role.id) {
+                // @ts-ignore
+                btn.addClass?.("is-active");
+                // @ts-ignore
+                btn.style && (btn.style.fontWeight = "600");
+            }
+            // Wire click
+            // @ts-ignore
+            btn.onclick = () => {
+                this.activeDefaultRoleId = role.id;
+                this.display();
+            };
+        }
+
+        // Details for active role only
+        const details = section.createDiv("default-roles-tab-details");
+        const activeBase = DEFAULT_ROLES.find((r) => r.id === this.activeDefaultRoleId)!;
+        const role = this.plugin.settings.roles.find((r) => r.id === activeBase.id) || activeBase;
+
+        const activePrimary = (role.names?.[0] || "");
+        const activeDisplayName = activePrimary ? activePrimary.charAt(0).toUpperCase() + activePrimary.slice(1) : "";
+        new Setting(details)
+            .setName(`${role.icon} ${activeDisplayName}`)
+            .setDesc(role.description);
+
+        new Setting(details)
+            .setName("Preferred name")
+            .setDesc("Pick the label shown for this role")
+            .addDropdown((dropdown) => {
+                const options = getPreferredNameOptions(role);
+                options.forEach((opt) => dropdown.addOption(opt, opt));
+                dropdown
+                    .setValue(role.names?.[0] ?? options[0])
+                    .onChange(async (value: string) => {
+                        const target = this.plugin.settings.roles.find((r) => r.id === role.id);
+                        if (target) {
+                            const lower = (value || "").toLowerCase();
+                            const rest = (target.names || []).filter((n) => n !== lower);
+                            target.names = [lower, ...rest];
+                            await this.plugin.saveSettings();
+                        }
+                        this.display();
+                    });
+            });
+
+        new Setting(details)
+            .setName("Icon")
+            .setDesc("Click and type/paste an emoji. Must be unique among enabled roles.")
+            .addText((text) => {
+                let previous = role.icon;
+                text
+                    .setPlaceholder(role.icon)
+                    .setValue(role.icon)
+                    .onChange(async (value: string) => {
+                        const icon = (value || "").trim();
+                        const unique = isIconUnique(icon, this.plugin.settings, role.id);
+                        const target = this.plugin.settings.roles.find((r) => r.id === role.id);
+                        if (!target) return;
+                        if (icon && unique) {
+                            previous = icon;
+                            target.icon = icon;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        } else if (!unique) {
+                            target.icon = previous;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }
+                    });
+            });
+
+        new Setting(details)
+            .setName("Shortcut")
+            .setDesc("Choose the backslash shortcut (e.g. \\o)")
+            .addDropdown((dropdown) => {
+                const options = getShortcutOptions(role);
+                options.forEach((opt) => dropdown.addOption(opt, `\\${opt}`));
+                dropdown
+                    .setValue(role.shortcuts?.[0] ?? options[0])
+                    .onChange(async (value: string) => {
+                        const target = this.plugin.settings.roles.find((r) => r.id === role.id);
+                        if (!target) return;
+                        const isInUse = this.isShortcutInUse(value, role.id);
+                        if (!isInUse) {
+                            const lower = (value || "").toLowerCase();
+                            const rest = (target.shortcuts || []).filter((s) => s !== lower);
+                            target.shortcuts = [lower, ...rest];
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }
+                    });
+            });
+
+        new Setting(details)
+            .setName("Enable")
+            .setDesc(`Turn this off to hide the '${activeDisplayName}' role in future role assignment operations.`)
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(!this.plugin.settings.hiddenDefaultRoles.includes(role.id))
+                    .onChange(async (value) => {
+                        if (!value) {
+                            if (!this.plugin.settings.hiddenDefaultRoles.includes(role.id)) {
+                                this.plugin.settings.hiddenDefaultRoles.push(role.id);
+                            }
+                        } else {
+                            this.plugin.settings.hiddenDefaultRoles = this.plugin.settings.hiddenDefaultRoles.filter(
+                                (id) => id !== role.id
+                            );
+                        }
+                        await this.plugin.saveSettings();
+                        await this.plugin.loadSettings();
+                        this.display();
+                    })
+            );
+
+        // Controls end; reset lives in footer below to avoid looking like part of the tab content
+
+        // Visual separation for reset row
+        const footer = section.createDiv("default-roles-footer");
+        new Setting(footer)
+            .setName("")
+            .setDesc("")
+            .addButton((btn) =>
+                btn
+                    .setButtonText("Reset defaults")
+                    .setCta()
+                    .onClick(async () => {
+                        await this.resetDefaultRoles();
+                        this.display();
+                    })
+            );
+    }
 
 	private createMePersonFileSetting(containerEl: HTMLElement): void {
 		const setting = new Setting(containerEl)
@@ -280,18 +404,19 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		this.createDefaultRolesTabs(containerEl);
 
 		// Custom roles
-		const customRoles = this.plugin.settings.roles.filter(
-			(r) => !r.isDefault
-		);
-		if (customRoles.length > 0) {
-			containerEl.createEl("h4", { text: "Custom roles" });
-			for (const role of customRoles) {
-				const shortcutText = role.shortcut
-					? `\nShortcut: \\${role.shortcut}`
-					: "";
-				const setting = new Setting(containerEl)
-					.setName(`${role.icon} ${role.name}`)
-					.setDesc(`Custom role${shortcutText}`);
+        const defaultIds = new Set(DEFAULT_ROLES.map((r) => r.id));
+        const customRoles = this.plugin.settings.roles.filter((r) => !defaultIds.has(r.id));
+        if (customRoles.length > 0) {
+            containerEl.createEl("h4", { text: "Custom roles" });
+            for (const role of customRoles) {
+                const shortcutText = (role.shortcuts && role.shortcuts[0])
+                    ? `\nShortcut: \\${role.shortcuts[0]}`
+                    : "";
+                const primary = role.names?.[0] || "";
+                const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
+                const setting = new Setting(containerEl)
+                    .setName(`${role.icon} ${display}`)
+                    .setDesc(`Custom role${shortcutText}`);
 
 				setting.addButton((button) =>
 					button.setButtonText("Edit").onClick(() => {
@@ -319,10 +444,10 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 		// Add new role
 		containerEl.createEl("h4", { text: "Add new role" });
-		let nameInput: HTMLInputElement;
-		let iconInput: HTMLInputElement;
-		let shortcutInput: HTMLInputElement;
-		let descriptionInput: HTMLInputElement;
+        let nameInput: HTMLInputElement;
+        let iconInput: HTMLInputElement;
+        let shortcutInput: HTMLInputElement;
+        let descriptionInput: HTMLInputElement;
 
 		new Setting(containerEl).setName("Role name").addText((text) => {
 			nameInput = text.inputEl;
@@ -355,14 +480,14 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 				.setButtonText("Add role")
 				.setCta()
 				.onClick(async () => {
-					const name = nameInput.value.trim();
-					const icon = iconInput.value.trim();
-					const shortcut = shortcutInput.value.trim();
-					const description = descriptionInput.value.trim();
+                const name = nameInput.value.trim();
+                const icon = iconInput.value.trim();
+                const shortcut = shortcutInput.value.trim();
+                const description = descriptionInput.value.trim();
 
-					if (!name || !icon) {
-						return;
-					}
+                if (!name || !icon) {
+                    return;
+                }
 
 					// Check for duplicate shortcut
 					if (shortcut && this.isShortcutInUse(shortcut)) {
@@ -379,18 +504,18 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 						shortcutInput.classList.add("settings-shortcut-valid");
 					}
 
-					const newRole: Role = {
-						id: name.toLowerCase().replace(/\s+/g, "-"),
-						name,
-						description,
-						icon,
-						shortcut: shortcut || undefined,
-						isDefault: false,
-						order: this.plugin.settings.roles.length + 1,
-					};
+                const nameLower = name.toLowerCase();
+                const newRole: Role = {
+                    id: nameLower.replace(/\s+/g, "-"),
+                    names: [nameLower],
+                    description,
+                    icon,
+                    shortcuts: shortcut ? [shortcut.toLowerCase()] : [],
+                    order: this.plugin.settings.roles.length + 1,
+                };
 
-					this.plugin.settings.roles.push(newRole);
-					await this.plugin.saveSettings();
+                this.plugin.settings.roles.push(newRole);
+                await this.plugin.saveSettings();
 
 					nameInput.value = "";
 					iconInput.value = "";
@@ -410,15 +535,31 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		helpLink.setAttribute("rel", "noopener noreferrer");
 	}
 
-	/**
-	 * Check if a shortcut is already in use by another role
-	 */
-	private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
-		if (!shortcut) return false;
-		return this.plugin.settings.roles.some(
-			(role) => role.shortcut === shortcut && role.id !== excludeRoleId
-		);
-	}
+    /**
+     * Check if a shortcut is already in use by another role
+     */
+    private isShortcutInUse(shortcut: string, excludeRoleId?: string): boolean {
+        if (!shortcut) return false;
+        const lower = shortcut.toLowerCase();
+        return this.plugin.settings.roles.some(
+            (role) => (role.shortcuts || []).includes(lower) && role.id !== excludeRoleId
+        );
+    }
+
+    /**
+     * Reset all default roles to their original values and re-enable them
+     */
+    async resetDefaultRoles(): Promise<void> {
+        // Restore default role entries (preserve custom roles)
+        const defaultIds = new Set(DEFAULT_ROLES.map((r) => r.id));
+        const customRoles = this.plugin.settings.roles.filter((r) => !defaultIds.has(r.id));
+        const defaultsCopy = DEFAULT_ROLES.map((r) => ({ ...r }));
+        this.plugin.settings.roles = [...defaultsCopy, ...customRoles];
+        // Re-enable all defaults
+        this.plugin.settings.hiddenDefaultRoles = [];
+        await this.plugin.saveSettings();
+        await this.plugin.loadSettings();
+    }
 
 	/**
 	 * Cleanup method to cancel pending async operations

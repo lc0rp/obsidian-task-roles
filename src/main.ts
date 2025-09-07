@@ -6,7 +6,7 @@ import {
 	MarkdownFileInfo,
 } from "obsidian";
 
-import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role } from "./types";
+import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role, DEFAULT_ROLES } from "./types";
 import { TaskRolesService } from "./services/task-roles.service";
 import { taskRolesExtension } from "./editor/task-roles-extension";
 // import { TaskRolesSuggest } from "./editor/task-roles-suggest";
@@ -132,34 +132,79 @@ export default class TaskRolesPlugin extends Plugin {
 		workspace.revealLeaf(leaf);
 	}
 
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData()
-		);
+    async loadSettings() {
+        this.settings = Object.assign(
+            {},
+            DEFAULT_SETTINGS,
+            await this.loadData()
+        );
 
-		// Ensure default roles exist and have correct icons and other properties
-		const { DEFAULT_ROLES } = await import("./types");
-		for (const defaultRole of DEFAULT_ROLES) {
-			const existingRole = this.settings.roles.find(
-				(r) => r.id === defaultRole.id
-			);
+        // Migrate legacy role fields (name/aliases/shortcut/isDefault) to new schema (names/shortcuts)
+        if (Array.isArray(this.settings.roles)) {
+            this.settings.roles = this.settings.roles.map((r: any) => {
+                const migrated: any = { ...r };
+                if (!Array.isArray(migrated.names)) {
+                    const base = (migrated.name ? String(migrated.name) : "").toLowerCase();
+                    const rest = Array.isArray(migrated.aliases)
+                        ? migrated.aliases.map((a: any) => String(a).toLowerCase())
+                        : [];
+                    const seen = new Set<string>();
+                    const names = [base, ...rest].filter((n) => {
+                        const key = String(n);
+                        if (!key) return false;
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    });
+                    migrated.names = names;
+                }
+                if (!Array.isArray(migrated.shortcuts)) {
+                    const primary = migrated.shortcut ? String(migrated.shortcut).toLowerCase() : "";
+                    const rest = Array.isArray(migrated.shortcutAliases)
+                        ? migrated.shortcutAliases.map((s: any) => String(s).toLowerCase())
+                        : [];
+                    const seenS = new Set<string>();
+                    const shortcuts = [primary, ...rest]
+                        .map((s) => s.trim())
+                        .filter((s) => {
+                            if (!s) return false;
+                            if (seenS.has(s)) return false;
+                            seenS.add(s);
+                            return true;
+                        });
+                    migrated.shortcuts = shortcuts;
+                }
+                // Remove legacy properties if present
+                delete migrated.name;
+                delete migrated.aliases;
+                delete migrated.shortcut;
+                delete migrated.shortcutAliases;
+                delete migrated.isDefault;
+                delete migrated.iconAliases;
+                return migrated as Role;
+            });
+        }
 
-			if (existingRole) {
-				// Update existing default role with correct icon and other properties
-				existingRole.icon = defaultRole.icon;
-				existingRole.name = defaultRole.name;
-				existingRole.shortcut = defaultRole.shortcut;
-				existingRole.isDefault = defaultRole.isDefault;
-				existingRole.order = defaultRole.order;
-			} else if (
-				!this.settings.hiddenDefaultRoles.includes(defaultRole.id)
-			) {
-				// Add missing default role if not hidden
-				this.settings.roles.push(defaultRole);
-			}
-		}
+        // Ensure default roles exist and have correct icons and other properties
+        const { DEFAULT_ROLES } = await import("./types");
+        for (const defaultRole of DEFAULT_ROLES) {
+            const existingRole = this.settings.roles.find(
+                (r) => r.id === defaultRole.id
+            );
+
+            if (existingRole) {
+                // Update existing default role with correct icon and other properties
+                existingRole.icon = defaultRole.icon;
+                existingRole.names = [...(defaultRole.names || [])];
+                existingRole.shortcuts = [...(defaultRole.shortcuts || [])];
+                existingRole.order = defaultRole.order;
+            } else if (
+                !this.settings.hiddenDefaultRoles.includes(defaultRole.id)
+            ) {
+                // Add missing default role if not hidden
+                this.settings.roles.push(defaultRole);
+            }
+        }
 
 		const existingAssigneeRole = this.settings.roles.find(
 			(r) => r.id === "assignees"
@@ -209,14 +254,16 @@ export default class TaskRolesPlugin extends Plugin {
 		new TaskRoleAssignmentModal(this.app, this, editor).open();
 	}
 
-	getVisibleRoles(): Role[] {
-		// Default behavior: filter based on hiddenDefaultRoles
-		return this.settings.roles.filter(
-			(role) =>
-				!role.isDefault ||
-				!this.settings.hiddenDefaultRoles.includes(role.id)
-		);
-	}
+    getVisibleRoles(): Role[] {
+        // Default behavior: filter based on hiddenDefaultRoles
+        const defaultIds = new Set(DEFAULT_ROLES.map((r) => r.id));
+        return this.settings.roles.filter((role) => {
+            if (this.settings.hiddenDefaultRoles.includes(role.id) && defaultIds.has(role.id)) {
+                return false;
+            }
+            return true;
+        });
+    }
 
 	isInTaskCodeBlock(editor: Editor, line: number): boolean {
 		/** ---------- 1. CM6 fast‑path ---------- */

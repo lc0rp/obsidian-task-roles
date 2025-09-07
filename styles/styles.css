@@ -442,6 +442,81 @@ If your plugin does not need CSS, delete this file.
     text-align: center;
 }
 
+/* Default roles - compact tabs styling */
+.task-roles-tabs-container {
+    margin: 1.25em 0 1.5em;
+    padding: 16px 16px 8px;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-s);
+}
+
+.task-roles-tabs-container > h4 {
+    margin: 0 0 8px 0;
+}
+
+.task-roles-tabs-container > p {
+    margin: 0 0 12px 0;
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    line-height: 1.4;
+}
+
+.default-roles-tabs-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+}
+
+.default-role-tab {
+    appearance: none;
+    border: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: var(--font-ui-small);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.default-role-tab:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.default-role-tab.is-active {
+    color: var(--text-normal);
+    background: var(--background-primary);
+    border-color: var(--interactive-accent);
+    box-shadow: inset 0 -2px 0 var(--interactive-accent);
+}
+
+.default-role-tab.is-disabled {
+    opacity: 0.45;
+    filter: grayscale(0.2);
+}
+
+.default-roles-tab-details {
+    margin-top: 12px;
+    padding: 12px 6px 4px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    background: var(--background-primary);
+}
+
+.default-roles-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--background-modifier-border);
+}
+
 .help-link {
     color: var(--text-muted);
     text-decoration: none;

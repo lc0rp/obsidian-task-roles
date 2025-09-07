@@ -10,9 +10,13 @@ export class RolesFilter extends MultiSelectFilterBase<string> {
 		// Prepend the "None Set" option, then add visible roles.
 		const noneOption: Option<string> = { value: 'none-set', label: 'None Set' };
 		// Retrieve visible roles from the plugin.
-		const visibleRoles = this.plugin.getVisibleRoles();
-		const roleOptions = visibleRoles.map(role => ({ value: role.id, label: role.name, icon: role.icon }));
-		return [noneOption, ...roleOptions];
+        const visibleRoles = this.plugin.getVisibleRoles();
+        const roleOptions = visibleRoles.map(role => {
+            const primary = role.names?.[0] || '';
+            const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : '';
+            return { value: role.id, label: display, icon: role.icon };
+        });
+        return [noneOption, ...roleOptions];
 	}
 
 	protected updateDisplayText(button: HTMLElement): void {

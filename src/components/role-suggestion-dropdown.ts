@@ -161,18 +161,19 @@ export class RoleSuggestionDropdown {
 		return false;
 	}
 
-	private updateFilter(filter: string): void {
-		this.currentFilter = filter;
+    private updateFilter(filter: string): void {
+        this.currentFilter = filter;
 
-		if (filter === "") {
-			// Show all available roles when filter is empty
-			this.availableRoles = this.getAvailableRoles([]);
-		} else {
-			// Filter roles by name
-			const allRoles = this.getAvailableRoles([]);
-			const filteredRoles = allRoles.filter((role) =>
-				role.name.toLowerCase().startsWith(filter.toLowerCase())
-			);
+        if (filter === "") {
+            // Show all available roles when filter is empty
+            this.availableRoles = this.getAvailableRoles([]);
+        } else {
+            // Filter roles by name
+            const allRoles = this.getAvailableRoles([]);
+            const fl = filter.toLowerCase();
+            const filteredRoles = allRoles.filter((role) =>
+                (role.names || []).some((n) => n.toLowerCase().startsWith(fl))
+            );
 
 			// If no matches, show all roles (as specified in requirements)
 			this.availableRoles =
@@ -334,9 +335,9 @@ export class RoleSuggestionDropdown {
 			this.dropdownElement.removeChild(this.dropdownElement.firstChild);
 		}
 
-		this.availableRoles.forEach((role, index) => {
-			const item = document.createElement("div");
-			item.className = "task-roles-suggestion-item";
+        this.availableRoles.forEach((role, index) => {
+            const item = document.createElement("div");
+            item.className = "task-roles-suggestion-item";
 
 			// Create role icon span
 			const iconSpan = document.createElement("span");
@@ -344,29 +345,33 @@ export class RoleSuggestionDropdown {
 			iconSpan.textContent = role.icon;
 			item.appendChild(iconSpan);
 
-			// Create role name span with highlighting support
-			const nameSpan = document.createElement("span");
-			nameSpan.className = "role-name";
-			
-			if (this.currentFilter) {
-				// Handle highlighting by splitting the text and creating mark elements
-				const regex = new RegExp(`(${this.currentFilter})`, "gi");
-				const parts = role.name.split(regex);
-				
-				parts.forEach((part, partIndex) => {
-					if (part.toLowerCase() === this.currentFilter.toLowerCase()) {
-						const mark = document.createElement("mark");
-						mark.textContent = part;
-						nameSpan.appendChild(mark);
-					} else if (part) {
-						const textNode = document.createTextNode(part);
-						nameSpan.appendChild(textNode);
-					}
-				});
-			} else {
-				nameSpan.textContent = role.name;
-			}
-			item.appendChild(nameSpan);
+            // Create role name span with highlighting support
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "role-name";
+            const primaryName = (role.names?.[0] || "");
+            const displayName = primaryName
+                ? primaryName.charAt(0).toUpperCase() + primaryName.slice(1)
+                : "";
+
+            if (this.currentFilter) {
+                // Handle highlighting by splitting the text and creating mark elements
+                const regex = new RegExp(`(${this.currentFilter})`, "gi");
+                const parts = displayName.split(regex);
+
+                parts.forEach((part, partIndex) => {
+                    if (part.toLowerCase() === this.currentFilter.toLowerCase()) {
+                        const mark = document.createElement("mark");
+                        mark.textContent = part;
+                        nameSpan.appendChild(mark);
+                    } else if (part) {
+                        const textNode = document.createTextNode(part);
+                        nameSpan.appendChild(textNode);
+                    }
+                });
+            } else {
+                nameSpan.textContent = displayName;
+            }
+            item.appendChild(nameSpan);
 
 			// Set selected class if this is the selected index
 			if (index === this.selectedIndex) {

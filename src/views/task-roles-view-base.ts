@@ -382,13 +382,15 @@ export abstract class TaskRolesViewBase extends ItemView {
 		const visibleRoles = this.plugin.getVisibleRoles();
 
 		// Create columns for each role
-		for (const role of visibleRoles) {
-			roleColumns.set(role.id, {
-				id: role.id,
-				title: `${role.icon} ${role.name}`,
-				tasks: [],
-			});
-		}
+        for (const role of visibleRoles) {
+            const primary = role.names?.[0] || "";
+            const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
+            roleColumns.set(role.id, {
+                id: role.id,
+                title: `${role.icon} ${display}`,
+                tasks: [],
+            });
+        }
 
 		// Add tasks to appropriate role columns
 		for (const task of tasks) {

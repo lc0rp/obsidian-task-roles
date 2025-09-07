@@ -326,17 +326,19 @@ export class TaskQueryService {
 		switch (layout) {
 			case ViewLayout.ROLE:
 				const visibleRoles = this.plugin.getVisibleRoles();
-				for (const role of visibleRoles) {
-					const roleQuery = baseQuery
-						? `${baseQuery}\ndescription includes ${role.icon}`
-						: `description includes ${role.icon}`;
-					columnQueries.push({
-						title: role.name,
-						query: roleQuery,
-						icon: role.icon,
-						isEmoji: true,
-					});
-				}
+                for (const role of visibleRoles) {
+                    const roleQuery = baseQuery
+                        ? `${baseQuery}\ndescription includes ${role.icon}`
+                        : `description includes ${role.icon}`;
+                    const primary = role.names?.[0] || "";
+                    const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
+                    columnQueries.push({
+                        title: display,
+                        query: roleQuery,
+                        icon: role.icon,
+                        isEmoji: true,
+                    });
+                }
 				// Add "No Role" column
 				const noRoleConditions = visibleRoles.map(
 					(role) => `description does not include ${role.icon}`

@@ -1,5 +1,5 @@
 import { App, Modal, Editor } from "obsidian";
-import { TaskRoleAssignment, ParsedTaskRoleAssignment, Role } from "../types";
+import { TaskRoleAssignment, ParsedTaskRoleAssignment, Role, DEFAULT_ROLES } from "../types";
 import { PersonCompanyPickerModal } from "./person-company-picker-modal";
 import type TaskRolesPlugin from "../main";
 
@@ -67,17 +67,20 @@ export class TaskRoleAssignmentModal extends Modal {
 			const roleHeader = roleDiv.createDiv("role-header");
 			roleHeader.createSpan("role-icon").setText(role.icon);
 
-			const roleNameContainer = roleHeader.createDiv(
-				"role-name-container"
-			);
-			roleNameContainer.createSpan("role-name").setText(role.name);
+            const roleNameContainer = roleHeader.createDiv(
+                "role-name-container"
+            );
+            const primary = role.names?.[0] || "";
+            const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
+            roleNameContainer.createSpan("role-name").setText(display);
 
 			// Add description for default roles
-			if (role.isDefault && roleDescriptions[role.id]) {
-				const description =
-					roleNameContainer.createSpan("role-description");
-				description.setText(roleDescriptions[role.id]);
-			}
+            const defaultIds = new Set(DEFAULT_ROLES.map((r) => r.id));
+            if (defaultIds.has(role.id) && roleDescriptions[role.id]) {
+                const description =
+                    roleNameContainer.createSpan("role-description");
+                description.setText(roleDescriptions[role.id]);
+            }
 
 			const addButton = roleHeader.createEl("button", {
 				text: "+",
@@ -253,15 +256,16 @@ export class TaskRoleAssignmentModal extends Modal {
 			const description = descriptionInput.value.trim();
 			const icon = iconInput.value.trim();
 
-			if (name && icon) {
-				const newRole: Role = {
-					id: name.toLowerCase().replace(/\s+/g, "-"),
-					name,
-					description,
-					icon,
-					isDefault: false,
-					order: this.plugin.settings.roles.length + 1,
-				};
+            if (name && icon) {
+                const nameLower = name.toLowerCase();
+                const newRole: Role = {
+                    id: nameLower.replace(/\s+/g, "-"),
+                    names: [nameLower],
+                    description,
+                    icon,
+                    shortcuts: [],
+                    order: this.plugin.settings.roles.length + 1,
+                };
 
 				this.plugin.settings.roles.push(newRole);
 				await this.plugin.saveSettings();

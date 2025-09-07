@@ -26,21 +26,21 @@ describe("Role Shortcuts", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		mockSettings = {
-			roles: DEFAULT_ROLES,
-			hiddenDefaultRoles: [],
-		};
+    mockSettings = {
+        roles: DEFAULT_ROLES,
+        hiddenDefaultRoles: [],
+    };
 
 		// Create a mock instance of the backslash trigger class
-		const mockInstance = {
-			isRoleShortcutKey: vi.fn((key: string, visibleRoles: any[]) => {
-				const lowerKey = key.toLowerCase();
-				return visibleRoles.some((role) => role.shortcut === lowerKey);
-			}),
-			insertRoleDirectly: vi.fn(),
-			isInTaskCodeBlock: vi.fn(() => false),
-			onKey: vi.fn(),
-		};
+        const mockInstance = {
+            isRoleShortcutKey: vi.fn((key: string, visibleRoles: any[]) => {
+                const lowerKey = key.toLowerCase();
+                return visibleRoles.some((role) => (role.shortcuts || []).includes(lowerKey));
+            }),
+            insertRoleDirectly: vi.fn(),
+            isInTaskCodeBlock: vi.fn(() => false),
+            onKey: vi.fn(),
+        };
 
 		// Simulate the key handler logic
 		onKeyHandler = (e: KeyboardEvent) => {
@@ -63,46 +63,44 @@ describe("Role Shortcuts", () => {
 			}
 
 			// Handle direct role shortcuts (\o, \a, \c, \i)
-			const visibleRoles = mockSettings.roles.filter(
-				(role: any) =>
-					!role.isDefault ||
-					!mockSettings.hiddenDefaultRoles.includes(role.id)
-			);
+            const visibleRoles = mockSettings.roles.filter(
+                (role: any) => !mockSettings.hiddenDefaultRoles.includes(role.id)
+            );
 
 			const beforeCursor = line.substring(0, cursor.ch);
 			if (
 				beforeCursor.endsWith("\\") &&
 				mockInstance.isRoleShortcutKey(e.key, visibleRoles)
 			) {
-				const role = visibleRoles.find(
-					(r: any) => r.shortcut === e.key.toLowerCase()
-				);
-				if (role) {
-					e.preventDefault();
-					return { action: "insertRole", role };
-				}
-			}
-		};
+                const role = visibleRoles.find(
+                    (r: any) => (r.shortcuts || []).includes(e.key.toLowerCase())
+                );
+                if (role) {
+                    e.preventDefault();
+                    return { action: "insertRole", role };
+                }
+            }
+        };
 	});
 
 	describe("Test Role Shortcuts", () => {
-		it("should handle \\o for owner role", () => {
-			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
+    it("should handle \\o for owner role", () => {
+        mockEditor.getLine.mockReturnValue("- [ ] Task \\");
 
-			const mockEvent = new KeyboardEvent("keydown", { key: "d" });
-			const preventDefault = vi.fn();
-			Object.defineProperty(mockEvent, "preventDefault", {
-				value: preventDefault,
-			});
+        const mockEvent = new KeyboardEvent("keydown", { key: "o" });
+        const preventDefault = vi.fn();
+        Object.defineProperty(mockEvent, "preventDefault", {
+            value: preventDefault,
+        });
 
-			const result = onKeyHandler(mockEvent);
+        const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "d"),
-			});
-			expect(preventDefault).toHaveBeenCalled();
-		});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("o")),
+        });
+        expect(preventDefault).toHaveBeenCalled();
+    });
 
 		it("should handle \\a for approver role", () => {
 			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
@@ -115,10 +113,10 @@ describe("Role Shortcuts", () => {
 
 			const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "a"),
-			});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("a")),
+        });
 			expect(preventDefault).toHaveBeenCalled();
 		});
 
@@ -133,10 +131,10 @@ describe("Role Shortcuts", () => {
 
 			const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "c"),
-			});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("c")),
+        });
 		});
 
 		it("should handle \\i for informed role", () => {
@@ -150,10 +148,10 @@ describe("Role Shortcuts", () => {
 
 			const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "i"),
-			});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("i")),
+        });
 		});
 
 		it("should handle : for popup trigger", () => {
@@ -231,15 +229,15 @@ describe("Role Shortcuts", () => {
 
 			const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "o"),
-			});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("o")),
+        });
 			expect(preventDefault).toHaveBeenCalled();
 
 			// Verify that no new line characters would be inserted
 			// The role should be inserted inline, not on a new line
-			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "o");
+        const expectedRole = DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("o"));
 			expect(expectedRole).toBeDefined();
 
 			// The role format should be inline dataview format [👤:: ]
@@ -268,14 +266,14 @@ describe("Role Shortcuts", () => {
 
 			const result = onKeyHandler(mockEvent);
 
-			expect(result).toEqual({
-				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "a"),
-			});
+        expect(result).toEqual({
+            action: "insertRole",
+            role: DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("a")),
+        });
 			expect(preventDefault).toHaveBeenCalled();
 
 			// Verify the role insertion doesn't add extra newlines
-			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "a");
+        const expectedRole = DEFAULT_ROLES.find((r) => (r.shortcuts || []).includes("a"));
 			expect(expectedRole).toBeDefined();
 
 			// The role format should remain inline without additional line breaks

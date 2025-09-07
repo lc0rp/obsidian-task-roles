@@ -16,17 +16,13 @@ export interface TaskRolesPluginSettings {
 }
 
 export interface Role {
-	id: string;
-	name: string;
-	aliases?: string[];
-	description: string;
-	icon: string;
-	iconAliases?: string[];
-	/** Single letter shortcut used for quick role selection */
-	shortcut?: string;
-	shortcutAliases?: string[];
-	isDefault: boolean;
-	order: number;
+    id: string;
+    names: string[];
+    pluralNames?: Record<string, string>;
+    description: string;
+    icon: string;
+    shortcuts: string[];
+    order: number;
 }
 
 export interface TaskRoleAssignment {
@@ -160,52 +156,42 @@ export interface ViewColumn {
 }
 
 export const DEFAULT_ROLES: Role[] = [
-	{
-		id: "owner",
-		name: "Owner",
-		aliases: ["user", "responsible", "driver", "assignee"],
-		description:
-			"Executes the task, or drives the decision. For basic task assignment, keep this role and disable the rest.",
-		icon: "👤",
-		shortcut: "o",
-		shortcutAliases: ["u", "r", "d", "a"],
-		isDefault: true,
-		order: 1,
-	},
-	{
-		id: "approver",
-		name: "Approver",
-		aliases: ["accountable", "reviewer", "authorizer"],
-		description:
-			"Signs-off and has ultimate accoutability for the task or decision.",
-		icon: "👍",
-		shortcut: "a",
-		shortcutAliases: ["r"],
-		isDefault: true,
-		order: 2,
-	},
-	{
-		id: "contributor",
-		name: "Contributor",
-		aliases: ["consulted", "supporter", "participant"],
-		description:
-			"Provides input, data or other contributions to the task or decision.",
-		icon: "👥",
-		shortcut: "c",
-		shortcutAliases: ["s", "p"],
-		isDefault: true,
-		order: 3,
-	},
-	{
-		id: "informed",
-		name: "Informed",
-		aliases: ["stakeholder"],
-		description: "Kept in the loop and informed of progress or outcomes.",
-		icon: "📢",
-		shortcut: "i",
-		isDefault: true,
-		order: 4,
-	},
+    {
+        id: "owner",
+        names: ["owner", "user", "responsible", "driver", "assignee"],
+        pluralNames: { responsible: "responsible" },
+        description:
+            "Executes the task, or drives the decision. For basic task assignment, keep this role and disable the rest.",
+        icon: "👤",
+        shortcuts: ["o", "u", "r", "d", "a"],
+        order: 1,
+    },
+    {
+        id: "approver",
+        names: ["approver", "accountable", "reviewer", "authorizer"],
+        description:
+            "Signs-off and has ultimate accoutability for the task or decision.",
+        icon: "👍",
+        shortcuts: ["a", "r"],
+        order: 2,
+    },
+    {
+        id: "contributor",
+        names: ["contributor", "consulted", "supporter", "participant"],
+        description:
+            "Provides input, data or other contributions to the task or decision.",
+        icon: "👥",
+        shortcuts: ["c", "s", "p"],
+        order: 3,
+    },
+    {
+        id: "informed",
+        names: ["informed", "stakeholder"],
+        description: "Kept in the loop and informed of progress or outcomes.",
+        icon: "📢",
+        shortcuts: ["i"],
+        order: 4,
+    },
 ];
 
 export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
