@@ -19,9 +19,13 @@ export interface TaskRolesPluginSettings {
 export interface Role {
 	id: string;
 	name: string;
+	aliases?: string[];
+	description: string;
 	icon: string;
+	iconAliases?: string[];
 	/** Single letter shortcut used for quick role selection */
 	shortcut?: string;
+	shortcutAliases?: string[];
 	isDefault: boolean;
 	order: number;
 }
@@ -158,47 +162,52 @@ export interface ViewColumn {
 
 export const DEFAULT_ROLES: Role[] = [
 	{
-		id: "drivers",
-		name: "Drivers",
-		icon: "🚗",
-		shortcut: "d",
+		id: "owner",
+		name: "Owner",
+		aliases: ["user", "responsible", "driver", "assignee"],
+		description:
+			"Executes the task, or drives the decision. For basic task assignment, keep this role and disable the rest.",
+		icon: "👤",
+		shortcut: "o",
+		shortcutAliases: ["u", "r", "d", "a"],
 		isDefault: true,
 		order: 1,
 	},
 	{
-		id: "approvers",
-		name: "Approvers",
+		id: "approver",
+		name: "Approver",
+		aliases: ["accountable", "reviewer", "authorizer"],
+		description:
+			"Signs-off and has ultimate accoutability for the task or decision.",
 		icon: "👍",
 		shortcut: "a",
+		shortcutAliases: ["r"],
 		isDefault: true,
 		order: 2,
 	},
 	{
-		id: "contributors",
-		name: "Contributors",
+		id: "contributor",
+		name: "Contributor",
+		aliases: ["consulted", "supporter", "participant"],
+		description:
+			"Provides input, data or other contributions to the task or decision.",
 		icon: "👥",
 		shortcut: "c",
+		shortcutAliases: ["s", "p"],
 		isDefault: true,
 		order: 3,
 	},
 	{
 		id: "informed",
 		name: "Informed",
+		aliases: ["stakeholder"],
+		description: "Kept in the loop and informed of progress or outcomes.",
 		icon: "📢",
 		shortcut: "i",
 		isDefault: true,
 		order: 4,
 	},
 ];
-
-export const SIMPLE_ASSIGNEE_ROLE: Role = {
-	id: "assignees",
-	name: "Assignees",
-	icon: "👤",
-	shortcut: "a",
-	isDefault: true,
-	order: 1,
-};
 
 export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	personSymbol: "@",
