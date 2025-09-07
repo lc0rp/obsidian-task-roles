@@ -31,13 +31,11 @@ If you find this helpful or have ideas to improve it, I'd love to hear from you!
 
 * **One-click role assignment** – a tiny 👤 icon appears at the end of every task line; click to pick people/companies
 and their role.
-* **Choose simple or advanced roles** - choose between "Assigneee" mode for simple task assignment, or DACI-style roles
- for more complex tracking.
-* **Inline shortcuts** – type `\d`, `\a`, `\c`, or `\i` to drop in Driver, Approver, Contributor, Informed fields without
+* **Custom roles & icons** – Choose some or all of the flexible default roles, or roll out your own (e.g. `Reviewer 🔍`).  
+* **Inline shortcuts** – type `\o`, `\a`, `\c`, or `\i` to drop in Driver, Approver, Contributor, Informed fields without
 leaving the keyboard.  In single Assignee mode, \a works for Assignee.
 * **@People & +Companies autocompletion**  – link tasks to people (`@Jane`) or companies (`+AcmeCorp`) pulled from
 folders you specify.
-* **Custom roles & icons** – hide DACI defaults you don’t need or add your own (e.g. `Reviewer 🔍`).  
 * **Task Center dashboard** – filter by status, role, person, due date and more in real time.
 
 ### Examples
@@ -127,6 +125,13 @@ Full settings reference lives in the in‑app **Settings → Task Roles** tab.
 | **Obsidian Tasks** | Role shortcuts fall back to `\` triggers when Tasks’ own suggestions are active. |
 | **Dataview** | Inline roles are stored as Dataview properties (`[👤:: @Alice]`), so you can query them. |
 | **Symbol Linking** | Align the symbols used for @people & +companies. |
+
+---
+
+## Other plugins
+
+* [KeepSidian](https://github.com/lc0rp/keepsidian) - Intelligently sync Google Keep notes to Obsidian.
+* [Checkbox Bulk Dates](https://github.com/lc0rp/obsidian-checkbox-bulk-dates) - Add creation dates to unchecked checkboxes.
 
 ---
 

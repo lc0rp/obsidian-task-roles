@@ -2,7 +2,7 @@
 
 Track who owns a task, who needs to be informed about it, who to follow up with, and more.
 
-"Task Roles" lets you assign roles, people, and companies to tasks using DACI (Driver, Approver, Contributors
+"Task Roles" lets you assign roles, people, and companies to tasks using DACI (Driver, Approver, Contributor
 , Informed) methodology.
 
 ## Features
@@ -22,12 +22,12 @@ Track who owns a task, who needs to be informed about it, who to follow up with,
 
 ### 🎭 Default Roles, based on DACI methodology
 
-- **Drivers** 🚗: Who is responsible for driving the task forward
-- **Approvers** 👍: Who needs to approve the task
-- **Contributors** 👥: Who will contribute to the task
+- **Owner** 👤: Who is responsible for driving the task forward
+- **Approver** 👍: Who needs to approve the task
+- **Contributor** 👥: Who will contribute to the task
 - **Informed** 📢: Who needs to be kept informed
-- **Quick shortcuts**: Type `\d`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
-  This also works inside `tasks` or `taskview` query blocks, where the shortcut inserts `🚗 =` style markup.
+- **Quick shortcuts**: Type `\o`, `\a`, `\c` or `\i` to insert role fields. Custom roles can define their own letter.
+  This also works inside `tasks` or `taskview` query blocks, where the shortcut inserts `👤 =` style markup.
 - **Smart filtering**: Role suggestions only show roles that aren't already present on the task line
 
 ### ⚙️ Customizable Roles
@@ -145,7 +145,7 @@ The Task Center uses task queries to process tasks in real-time:
 When you assign a role to a task, it gets formatted using dataview inline format:
 `[icon:: comma-separated assignees]`
 
-Example: `[🚗:: @John, @Jane] [👍:: @Manager]`
+Example: `[👤:: @John, @Jane] [👍:: @Manager]`
 
 The plugin also supports reading the legacy format for backward compatibility.
 
@@ -185,7 +185,7 @@ The plugin recognizes and parses various task metadata formats:
 2. **"Assign task roles to People/Companies" command**: Use on any checkbox item (task)
 3. **Keyboard shortcut**: Configurable shortcut to trigger the role edit dialog
 4. **Inline typing**: Type role icon + space + `@` or `+` to trigger auto-suggest
-5. **Role shortcuts**: Type `\` followed by a role shortcut letter (e.g., `\d` for Drivers) - only shows roles not already
+5. **Role shortcuts**: Type `\` followed by a role shortcut letter (e.g., `\o` for Owner) - only shows roles not already
    assigned
 
 ## Editing Roles

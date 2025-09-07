@@ -1,4 +1,4 @@
-import { App, TFile, TFolder, Notice } from "obsidian";
+import { App, TFile, TFolder, Notice, TAbstractFile } from "obsidian";
 import {
 	TaskRolesPluginSettings,
 	Role,
@@ -16,7 +16,7 @@ export class TaskRolesService {
 	constructor(private app: App, private settings: TaskRolesPluginSettings) {
 		// Defer heavy cache initialization - will be triggered on first use
 		this.setupCacheWatchers();
-		
+
 		// Initialize cache in background without blocking
 		this.initializeCacheInBackground();
 	}
@@ -29,7 +29,8 @@ export class TaskRolesService {
 	}
 
 	private setupCacheWatchers(): void {
-		const refresh = (file: TFile) => {
+		const refresh = (file: TAbstractFile) => {
+			if (!(file instanceof TFile)) return;
 			if (file.extension !== "md") return;
 			const path = file.path;
 			if (
@@ -104,7 +105,7 @@ export class TaskRolesService {
 	): ParsedTaskRoleAssignment[] {
 		const roleAssignments: ParsedTaskRoleAssignment[] = [];
 
-		// First, try to parse new dataview inline format [🚗:: @John]
+		// First, try to parse new dataview inline format [👤:: @John]
 		const dataviewAssignedRoles = this.parseDataviewAssignedRoles(
 			taskText,
 			visibleRoles
@@ -129,7 +130,7 @@ export class TaskRolesService {
 	): ParsedTaskRoleAssignment[] {
 		const roleAssignments: ParsedTaskRoleAssignment[] = [];
 
-		// Parse dataview inline format: [🚗:: @John, @Jane]
+		// Parse dataview inline format: [👤:: @John, @Jane]
 		for (const role of visibleRoles) {
 			const escapedIcon = this.escapeRegex(role.icon);
 			const startPattern = `\\[${escapedIcon}::\\s*`;
@@ -270,7 +271,7 @@ export class TaskRolesService {
 				(r) => r.id === roleAssignment.roleId
 			);
 			if (role) {
-				// Format as dataview inline with links: [🚗:: [[/path/to/person|@@person]], [[/path/to/company|+company]]]
+				// Format as dataview inline with links: [👤:: [[/path/to/person|@@person]], [[/path/to/company|+company]]]
 				const assigneeList = roleAssignment.assignees
 					.map((assignee) => {
 						const isPerson = assignee.startsWith(

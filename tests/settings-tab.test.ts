@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { App } from "obsidian";
 import { DEFAULT_SETTINGS } from "../src/types/index";
 
-// Simple test to verify the async fix works
+// Test to verify the async fix works
 describe("Settings Tab - Async Behavior Fix", () => {
 	it("should demonstrate that async setting creation no longer blocks synchronous display", async () => {
 		// Create a mock service that simulates slow async operation
@@ -26,7 +26,7 @@ describe("Settings Tab - Async Behavior Fix", () => {
 			taskRolesService: mockService,
 		};
 
-		// Mock a simple container element
+		// Mock a container element
 		const mockContainer = {
 			children: [] as any[],
 			empty: vi.fn(),

@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { DEFAULT_ROLES, Role, SIMPLE_ASSIGNEE_ROLE } from "../types";
+import { DEFAULT_ROLES, Role } from "../types";
 import { RoleEditModal } from "../modals/role-edit-modal";
 import type TaskRolesPlugin from "../main";
 
@@ -13,78 +13,17 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 	}
 
 	private createDefaultRolesTabs(containerEl: HTMLElement): void {
-		const tabsContainer = containerEl.createDiv("task-roles-tabs-container");
-		
-		// Header
-		tabsContainer.createEl("h4", { text: "Default roles" });
-		
-		// Tab buttons
-		const tabButtonsContainer = tabsContainer.createDiv("task-roles-tab-buttons");
-		const allDriverRolesTab = tabButtonsContainer.createEl("button", {
-			text: "All Driver Roles",
-			cls: "task-roles-tab-button"
-		});
-		const simpleAssigneeTab = tabButtonsContainer.createEl("button", {
-			text: "Simple Assignee Role",
-			cls: "task-roles-tab-button"
-		});
-		
-		// Tab content containers
-		const allDriverRolesContent = tabsContainer.createDiv("task-roles-tab-content");
-		const simpleAssigneeContent = tabsContainer.createDiv("task-roles-tab-content");
-		
-		// State management
-		let activeTab: "driver" | "simple" = this.plugin.settings.simpleAssigneeMode ? "simple" : "driver";
-		
-		const showTab = (tab: "driver" | "simple") => {
-			activeTab = tab;
-			
-			// Update button states
-			allDriverRolesTab.classList.toggle("active", tab === "driver");
-			simpleAssigneeTab.classList.toggle("active", tab === "simple");
-			
-			// Update content visibility
-			if (tab === "driver") {
-				allDriverRolesContent.classList.remove("settings-tab-content-hidden");
-				allDriverRolesContent.classList.add("settings-tab-content-visible");
-				simpleAssigneeContent.classList.remove("settings-tab-content-visible");
-				simpleAssigneeContent.classList.add("settings-tab-content-hidden");
-			} else {
-				allDriverRolesContent.classList.remove("settings-tab-content-visible");
-				allDriverRolesContent.classList.add("settings-tab-content-hidden");
-				simpleAssigneeContent.classList.remove("settings-tab-content-hidden");
-				simpleAssigneeContent.classList.add("settings-tab-content-visible");
-			}
-		};
-		
-		// Tab click handlers
-		allDriverRolesTab.onclick = () => showTab("driver");
-		simpleAssigneeTab.onclick = () => showTab("simple");
-		
-		// Create All Driver Roles content
-		this.createAllDriverRolesContent(allDriverRolesContent);
-		
-		// Create Simple Assignee Role content
-		this.createSimpleAssigneeRoleContent(simpleAssigneeContent);
-		
-		// Initialize to correct tab
-		showTab(activeTab);
-	}
+		// Simplified: only show Driver Roles without tabs
+		const section = containerEl.createDiv("task-roles-tabs-container");
+		section.createEl("h4", { text: "Default roles" });
 
-	private createAllDriverRolesContent(containerEl: HTMLElement): void {
-		if (this.plugin.settings.simpleAssigneeMode) {
-			// Show disabled message when simple mode is active
-			const messageDiv = containerEl.createDiv("simple-mode-message");
-			const strongEl = messageDiv.createEl("p").createEl("strong");
-			strongEl.textContent = "Advanced mode is disabled";
-			const descEl = messageDiv.createEl("p");
-			descEl.textContent = 'Go to the "Simple Assignee Role" tab and disable Simple Assignee Role mode to re-enable this tab.';
-			return;
-		}
-		
-		// Show the normal default roles toggles
+		const allDriverRolesContent = section.createDiv(
+			"task-roles-tab-content"
+		);
+
+		// Show the default roles toggles
 		for (const role of DEFAULT_ROLES) {
-			new Setting(containerEl)
+			new Setting(allDriverRolesContent)
 				.setName(`${role.icon} ${role.name}`)
 				.setDesc(
 					`Turn this off to hide the '${role.name}' role in future role assignment operations.\nShortcut: \\${role.shortcut}`
@@ -117,44 +56,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 							await this.plugin.loadSettings(); // Refresh roles
 						})
 				);
-		}
-	}
-
-	private createSimpleAssigneeRoleContent(containerEl: HTMLElement): void {
-		// Simple Assignee Mode toggle
-		new Setting(containerEl)
-			.setName("Enable Simple Assignee Role mode")
-			.setDesc("This will disable all the driver roles, and create only one role called \"Assignees\"")
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.simpleAssigneeMode)
-					.onChange(async (value) => {
-						this.plugin.settings.simpleAssigneeMode = value;
-						await this.plugin.saveSettings();
-						await this.plugin.loadSettings(); // Refresh roles and UI
-						this.display(); // Refresh the entire settings display
-					})
-			);
-
-		// Assignees role setting (disabled when simple mode is off)
-		const assigneeSetting = new Setting(containerEl)
-			.setName(`${SIMPLE_ASSIGNEE_ROLE.icon} ${SIMPLE_ASSIGNEE_ROLE.name}`)
-			.setDesc(`Shortcut: \\${SIMPLE_ASSIGNEE_ROLE.shortcut}`);
-
-		if (this.plugin.settings.simpleAssigneeMode) {
-			// Show as enabled but not toggleable when simple mode is on
-			assigneeSetting.addToggle((toggle) =>
-				toggle
-					.setValue(true)
-					.setDisabled(true)
-			);
-		} else {
-			// Show as disabled when simple mode is off
-			assigneeSetting.addToggle((toggle) =>
-				toggle
-					.setValue(false)
-					.setDisabled(true)
-			);
 		}
 	}
 
@@ -309,7 +210,9 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		// Inline widget display toggle
 		new Setting(containerEl)
 			.setName("Show inline role assignment icons")
-			.setDesc("Display clickable role assignment icons at the end of task lines")
+			.setDesc(
+				"Display clickable role assignment icons at the end of task lines"
+			)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.showInlineWidgets)
@@ -344,8 +247,12 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					.addOption("minimal", "Minimal (hover to show details)")
 					.addOption("detailed", "Detailed (always show metadata)")
 					.setValue(this.plugin.settings.taskDisplayMode)
-					.onChange(async (value: "minimal" | "detailed") => {
-						this.plugin.settings.taskDisplayMode = value;
+					.onChange(async (value) => {
+						const mode =
+							value === "detailed" || value === "minimal"
+								? (value as "minimal" | "detailed")
+								: this.plugin.settings.taskDisplayMode;
+						this.plugin.settings.taskDisplayMode = mode;
 						await this.plugin.saveSettings();
 					})
 			);
@@ -369,7 +276,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Default roles with tabs
+		// Default roles (drivers only)
 		this.createDefaultRolesTabs(containerEl);
 
 		// Custom roles
@@ -415,11 +322,20 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		let nameInput: HTMLInputElement;
 		let iconInput: HTMLInputElement;
 		let shortcutInput: HTMLInputElement;
+		let descriptionInput: HTMLInputElement;
 
 		new Setting(containerEl).setName("Role name").addText((text) => {
 			nameInput = text.inputEl;
 			text.setPlaceholder("Enter role name");
 		});
+
+		new Setting(containerEl)
+			.setName("Role description")
+			.setDesc("Brief description of the role.")
+			.addText((text) => {
+				descriptionInput = text.inputEl;
+				text.setPlaceholder("E.g. Responsible for executing the task");
+			});
 
 		new Setting(containerEl).setName("Role icon").addText((text) => {
 			iconInput = text.inputEl;
@@ -442,6 +358,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					const name = nameInput.value.trim();
 					const icon = iconInput.value.trim();
 					const shortcut = shortcutInput.value.trim();
+					const description = descriptionInput.value.trim();
 
 					if (!name || !icon) {
 						return;
@@ -450,17 +367,22 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 					// Check for duplicate shortcut
 					if (shortcut && this.isShortcutInUse(shortcut)) {
 						shortcutInput.classList.add("settings-shortcut-error");
-						shortcutInput.classList.remove("settings-shortcut-valid");
+						shortcutInput.classList.remove(
+							"settings-shortcut-valid"
+						);
 						shortcutInput.focus();
 						return;
 					} else {
-						shortcutInput.classList.remove("settings-shortcut-error");
+						shortcutInput.classList.remove(
+							"settings-shortcut-error"
+						);
 						shortcutInput.classList.add("settings-shortcut-valid");
 					}
 
 					const newRole: Role = {
 						id: name.toLowerCase().replace(/\s+/g, "-"),
 						name,
+						description,
 						icon,
 						shortcut: shortcut || undefined,
 						isDefault: false,

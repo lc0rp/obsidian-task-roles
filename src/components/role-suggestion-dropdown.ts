@@ -418,7 +418,7 @@ export class RoleSuggestionDropdown {
 	}
 
 	private getAvailableRoles(existingRoles: string[]): Role[] {
-		// Use the plugin's getVisibleRoles method which respects Simple Assignee Role mode
+		// Use the plugin's getVisibleRoles method
 		return this.getVisibleRoles().filter((role) => {
 			// Filter out roles already present in task
 			if (existingRoles.includes(role.id)) {

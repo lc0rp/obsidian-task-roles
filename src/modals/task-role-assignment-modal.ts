@@ -55,9 +55,9 @@ export class TaskRoleAssignmentModal extends Modal {
 
 		// Define descriptions for default roles
 		const roleDescriptions: { [key: string]: string } = {
-			drivers: "execute the task",
-			approvers: "sign-off the task or decision",
-			contributors: "provide input or data",
+			owner: "execute the task",
+			approver: "sign-off the task or decision",
+			contributor: "provide input or data",
 			informed: "stakeholders, kept in the loop",
 		};
 
@@ -237,6 +237,10 @@ export class TaskRoleAssignmentModal extends Modal {
 			type: "text",
 			placeholder: "Role name",
 		});
+		const descriptionInput = newRoleDiv.createEl("input", {
+			type: "text",
+			placeholder: "Role description",
+		});
 		const iconInput = newRoleDiv.createEl("input", {
 			type: "text",
 			placeholder: "🎯",
@@ -246,12 +250,14 @@ export class TaskRoleAssignmentModal extends Modal {
 		const addBtn = newRoleDiv.createEl("button", { text: "Add Role" });
 		addBtn.onclick = async () => {
 			const name = nameInput.value.trim();
+			const description = descriptionInput.value.trim();
 			const icon = iconInput.value.trim();
 
 			if (name && icon) {
 				const newRole: Role = {
 					id: name.toLowerCase().replace(/\s+/g, "-"),
 					name,
+					description,
 					icon,
 					isDefault: false,
 					order: this.plugin.settings.roles.length + 1,

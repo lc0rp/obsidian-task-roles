@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-Obsidian Task Roles is a TypeScript plugin for Obsidian that enables DACI-style role assignment (Drivers, Approvers, Contributors, Informed) for tasks. The plugin provides inline task editing with role icons and a comprehensive Task Center dashboard.
+Obsidian Task Roles is a TypeScript plugin for Obsidian that enables DACI-style role assignment (Owner, Approver, Contributor, Informed) for tasks. The plugin provides inline task editing with role icons and a comprehensive Task Center dashboard.
 
 ## Essential Setup and Build Commands
 
@@ -136,7 +136,7 @@ docs/                       # Documentation including CLAUDE.md
 
 -   `TaskRolesExtension` - CodeMirror extension for task decoration
 -   `TaskRolesSuggest` - Auto-completion for @person and +company
--   `BackslashTrigger` - Keyboard shortcuts (\d, \a, \c, \i)
+-   `BackslashTrigger` - Keyboard shortcuts (\o, \a, \c, \i)
 
 ## Common Development Tasks
 

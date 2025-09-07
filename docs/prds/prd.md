@@ -127,9 +127,9 @@ and real-time task tracking.
 
 ## Default roles: based on DACI concept
 
-- Drivers: car icon
-- Approvers: thumbs up icon
-- Contributors: two people icon
+- Owner: car icon
+- Approver: thumbs up icon
+- Contributor: two people icon
 - Informed: loudspeaker icon
 
 ## Ways of assigning people

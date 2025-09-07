@@ -35,7 +35,7 @@ This file provides guidance to LLMS/autonomous agents when working with code in 
 ### Plugin Structure
 
 This is an Obsidian plugin built with TypeScript that implements task role assignment using the DACI methodology
-(Drivers, Approvers, Contributors, Informed). The plugin provides both inline task editing and a comprehensive Task Center
+(Owner, Approver, Contributor, Informed). The plugin provides both inline task editing and a comprehensive Task Center
  view.
 
 ### Key Architectural Components
@@ -230,6 +230,7 @@ The esbuild configuration (`esbuild.config.mjs`) handles:
 
 ## Also
 
+- DO use detailed conventional commit messages for git
 - DO NOT add your signature to git commit messages
 - DO NOT add "Generated with Claud Code" or anthing like that anywhere
 - DO NOT add "Co-Authored-By" anywhere

@@ -19,7 +19,7 @@ const mockPlugin = {
 		autoApplyFilters: true,
 	},
 	getVisibleRoles: vi.fn(() => [
-		{ id: "driver", name: "Driver", icon: "🚗" },
+		{ id: "driver", name: "Driver", icon: "👤" },
 		{ id: "approver", name: "Approver", icon: "✅" },
 	]),
 	saveSettings: vi.fn(),

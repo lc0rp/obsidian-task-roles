@@ -62,7 +62,7 @@ describe("Role Shortcuts", () => {
 				return "popup";
 			}
 
-			// Handle direct role shortcuts (\d, \a, \c, \i)
+			// Handle direct role shortcuts (\o, \a, \c, \i)
 			const visibleRoles = mockSettings.roles.filter(
 				(role: any) =>
 					!role.isDefault ||
@@ -86,7 +86,7 @@ describe("Role Shortcuts", () => {
 	});
 
 	describe("Test Role Shortcuts", () => {
-		it("should handle \\d for drivers role", () => {
+		it("should handle \\o for owner role", () => {
 			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
 
 			const mockEvent = new KeyboardEvent("keydown", { key: "d" });
@@ -104,7 +104,7 @@ describe("Role Shortcuts", () => {
 			expect(preventDefault).toHaveBeenCalled();
 		});
 
-		it("should handle \\a for approvers role", () => {
+		it("should handle \\a for approver role", () => {
 			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
 
 			const mockEvent = new KeyboardEvent("keydown", { key: "a" });
@@ -122,7 +122,7 @@ describe("Role Shortcuts", () => {
 			expect(preventDefault).toHaveBeenCalled();
 		});
 
-		it("should handle \\c for contributors role", () => {
+		it("should handle \\c for contributor role", () => {
 			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
 
 			const mockEvent = new KeyboardEvent("keydown", { key: "c" });
@@ -223,7 +223,7 @@ describe("Role Shortcuts", () => {
 			mockEditor.getLine.mockReturnValue(taskLine + "\\");
 			mockEditor.getCursor.mockReturnValue({ line: 0, ch: cursorAtEnd });
 
-			const mockEvent = new KeyboardEvent("keydown", { key: "d" });
+			const mockEvent = new KeyboardEvent("keydown", { key: "o" });
 			const preventDefault = vi.fn();
 			Object.defineProperty(mockEvent, "preventDefault", {
 				value: preventDefault,
@@ -233,20 +233,20 @@ describe("Role Shortcuts", () => {
 
 			expect(result).toEqual({
 				action: "insertRole",
-				role: DEFAULT_ROLES.find((r) => r.shortcut === "d"),
+				role: DEFAULT_ROLES.find((r) => r.shortcut === "o"),
 			});
 			expect(preventDefault).toHaveBeenCalled();
 
 			// Verify that no new line characters would be inserted
 			// The role should be inserted inline, not on a new line
-			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "d");
+			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "o");
 			expect(expectedRole).toBeDefined();
-			
-			// The role format should be inline dataview format [🚗:: ] 
+
+			// The role format should be inline dataview format [👤:: ]
 			// not contain any newline characters
-			const roleFormat = `[${expectedRole.icon}:: ]`;
-			expect(roleFormat).not.toContain('\n');
-			expect(roleFormat).not.toContain('\r');
+			const roleFormat = `[${expectedRole?.icon}:: ]`;
+			expect(roleFormat).not.toContain("\n");
+			expect(roleFormat).not.toContain("\r");
 		});
 
 		it("should insert role inline when task already has newline in multi-line file", () => {
@@ -255,7 +255,10 @@ describe("Role Shortcuts", () => {
 			const taskLine = "- [ ] Task description here";
 			const cursorBeforeNewline = taskLine.length + 1; // +1 for the backslash, positioned before the existing newline
 			mockEditor.getLine.mockReturnValue(taskLine + "\\"); // getLine returns content without \n
-			mockEditor.getCursor.mockReturnValue({ line: 0, ch: cursorBeforeNewline });
+			mockEditor.getCursor.mockReturnValue({
+				line: 0,
+				ch: cursorBeforeNewline,
+			});
 
 			const mockEvent = new KeyboardEvent("keydown", { key: "a" });
 			const preventDefault = vi.fn();
@@ -274,12 +277,12 @@ describe("Role Shortcuts", () => {
 			// Verify the role insertion doesn't add extra newlines
 			const expectedRole = DEFAULT_ROLES.find((r) => r.shortcut === "a");
 			expect(expectedRole).toBeDefined();
-			
+
 			// The role format should remain inline without additional line breaks
-			const roleFormat = `[${expectedRole.icon}:: ]`;
-			expect(roleFormat).not.toContain('\n');
-			expect(roleFormat).not.toContain('\r');
-			
+			const roleFormat = `[${expectedRole?.icon}:: ]`;
+			expect(roleFormat).not.toContain("\n");
+			expect(roleFormat).not.toContain("\r");
+
 			// Ensure the insertion preserves the existing file structure
 			// by not introducing additional line breaks in the role format
 			expect(roleFormat.length).toBeGreaterThan(0);
@@ -289,7 +292,7 @@ describe("Role Shortcuts", () => {
 
 	describe("Hidden Roles", () => {
 		it("should not trigger shortcuts for hidden roles", () => {
-			mockSettings.hiddenDefaultRoles = ["drivers"];
+			mockSettings.hiddenDefaultRoles = ["owner"];
 
 			mockEditor.getLine.mockReturnValue("- [ ] Task \\");
 

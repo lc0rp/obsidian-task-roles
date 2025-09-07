@@ -4,7 +4,7 @@
 
 The Role Suggestion Dropdown is a DOM-based menu system that provides an intuitive way to insert role assignments
 into tasks using a double backslash (`\\`) trigger. This feature complements the existing single backslash shortcuts
-(`\d`, `\a`, `\c`, `\i`) by offering a visual selection interface for all available roles.
+(`\o`, `\a`, `\c`, `\i`) by offering a visual selection interface for all available roles.
 
 ## Trigger Mechanism
 
@@ -32,15 +32,15 @@ When the double backslash is typed, the system:
 
 The dropdown shows all available roles with:
 
-- **Role icon**: The emoji representation (🚗, 👍, 👥, 📢)
-- **Role name**: The full descriptive name (Drivers, Approvers, Contributors, Informed)
+- **Role icon**: The emoji representation (👤, 👍, 👥, 📢)
+- **Role name**: The full descriptive name (Owner, Approver, Contributor, Informed)
 - **Visual highlighting**: The currently selected role is highlighted
 
 ### Intelligent Filtering
 
 - **Available roles only**: Only shows roles that are not hidden in settings
 - **Exclude existing**: Automatically filters out roles already present on the current task line
-- **Real-time filtering**: Type letters to filter roles by name (e.g., "d", "dr", "dri" for "Drivers")
+- **Real-time filtering**: Type letters to filter roles by name (e.g., "d", "dr", "dri" for "Owner")
 
 ### Navigation Methods
 
@@ -88,15 +88,15 @@ The system uses the same legal insertion point logic as existing shortcuts:
 
 Inserted roles maintain consistency with the existing system:
 
-- **Dataview format**: `[🚗::]` for standard task lines
-- **Task block format**: `🚗 =` for tasks/dataview codeblocks
+- **Dataview format**: `[👤::]` for standard task lines
+- **Task block format**: `👤 =` for tasks/dataview codeblocks
 - **Cursor positioning**: Places cursor in the assignee area for immediate editing
 
 ## Integration with Existing Features
 
 ### Compatibility with Single Backslash Shortcuts
 
-- **Non-interfering**: Double backslash trigger doesn't affect existing `\d`, `\a`, `\c`, `\i` shortcuts
+- **Non-interfering**: Double backslash trigger doesn't affect existing `\o`, `\a`, `\c`, `\i` shortcuts
 - **Shared insertion logic**: Uses the same role insertion methods for consistency
 - **Setting respect**: Honors the same hidden roles settings
 
@@ -154,12 +154,12 @@ Inserted roles maintain consistency with the existing system:
 - [ ] Review the proposal \\
 ```
 
-Types double backslash, dropdown appears, user selects "Drivers" role
+Types double backslash, dropdown appears, user selects "Owner" role
 
 Result:
 
 ```markdown
-- [ ] Review the proposal [🚗:: ]
+- [ ] Review the proposal [👤:: ]
 ```
 
 ### With Filtering
@@ -168,7 +168,7 @@ Result:
 - [ ] Update documentation \\ap
 ```
 
-User types "ap" to filter for "Approvers"
+User types "ap" to filter for "Approver"
 
 Result after selection:
 
@@ -190,7 +190,7 @@ Result:
 
 ```markdown
 \```tasks
-- [ ] Complete feature 🚗 = 
+- [ ] Complete feature 👤 = 
 \```
 ```
 

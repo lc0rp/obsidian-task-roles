@@ -7,7 +7,7 @@ const mockPlugin = {
 	getVisibleRoles: vi.fn(
 		() =>
 			[
-				{ id: "driver", name: "Driver", icon: "🚗" },
+				{ id: "driver", name: "Driver", icon: "👤" },
 				{ id: "approver", name: "Approver", icon: "👍" },
 			] as Role[]
 	),
@@ -36,7 +36,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"((description includes 🚗) OR (description includes 👍))\nlimit 50"
+			"((description includes 👤) OR (description includes 👍))\nlimit 50"
 		);
 	});
 
@@ -52,7 +52,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"((description does not include 🚗) AND (description does not include 👍))\nlimit 50"
+			"((description does not include 👤) AND (description does not include 👍))\nlimit 50"
 		);
 	});
 
@@ -68,7 +68,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)) OR ((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*jane/)))\nlimit 50"
+			"(((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)) OR ((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*jane/)))\nlimit 50"
 		);
 	});
 
@@ -84,7 +84,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/)) OR ((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/)))\nlimit 50"
+			"(((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+acme/)) OR ((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*\\+corp/)))\nlimit 50"
 		);
 	});
 
@@ -146,7 +146,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"(description includes 🚗)\nnot done\nfilter by function task.status.type !== 'IN_PROGRESS'\npriority is high\n#urgent\nlimit 50"
+			"(description includes 👤)\nnot done\nfilter by function task.status.type !== 'IN_PROGRESS'\npriority is high\n#urgent\nlimit 50"
 		);
 	});
 
@@ -190,7 +190,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"((description includes 🚗) OR ((description does not include 🚗) AND (description does not include 👍)))\nlimit 50"
+			"((description includes 👤) OR ((description does not include 👤) AND (description does not include 👍)))\nlimit 50"
 		);
 	});
 
@@ -207,7 +207,7 @@ describe("TaskQueryService", () => {
 		const query = service.buildTaskQueryFromFilters(filters);
 		// Should only include role filter, not status filter to avoid Boolean combination error
 		expect(query).toBe(
-			"(description includes 🚗)\nfilter by function task.status.type !== 'IN_PROGRESS'\nfilter by function task.status.type !== 'CANCELLED'\nlimit 50"
+			"(description includes 👤)\nfilter by function task.status.type !== 'IN_PROGRESS'\nfilter by function task.status.type !== 'CANCELLED'\nlimit 50"
 		);
 	});
 
@@ -223,7 +223,7 @@ describe("TaskQueryService", () => {
 
 		const query = service.buildTaskQueryFromFilters(filters);
 		expect(query).toBe(
-			"(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)))\nlimit 50"
+			"(((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*john/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*john/)))\nlimit 50"
 		);
 	});
 
@@ -255,7 +255,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should create (role1::assignee1) OR (role1::assignee2) OR (role2::assignee1) OR (role2::assignee2)
 			expect(query).toBe(
-				"((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Jane/))\nlimit 50"
+				"((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Jane/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Jane/))\nlimit 50"
 			);
 		});
 
@@ -272,7 +272,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should create (role1::company1) OR (role1::company2)
 			expect(query).toBe(
-				"((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Corp/))\nlimit 50"
+				"((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/) OR (description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*\\+Corp/))\nlimit 50"
 			);
 		});
 
@@ -289,7 +289,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should create (role1::person1) OR (role1::company1)
 			expect(query).toBe(
-				"((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/))\nlimit 50"
+				"((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*\\+Acme/))\nlimit 50"
 			);
 		});
 
@@ -306,7 +306,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should only create cross product for actual roles, not "none-set"
 			expect(query).toBe(
-				"(description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)\nlimit 50"
+				"(description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)\nlimit 50"
 			);
 		});
 
@@ -340,7 +340,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should create assignee patterns for all visible roles (same as current behavior)
 			expect(query).toBe(
-				"(((description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)))\nlimit 50"
+				"(((description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Luke/) OR (description regex matches /👍::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)))\nlimit 50"
 			);
 		});
 
@@ -357,7 +357,7 @@ describe("TaskQueryService", () => {
 			const query = service.buildTaskQueryFromFilters(filters);
 			// Should include cross product AND other filters
 			expect(query).toBe(
-				"(description regex matches /🚗::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)\nnot done\nfilter by function task.status.type !== 'IN_PROGRESS'\n#urgent\nlimit 50"
+				"(description regex matches /👤::(?:(?!\\s+\\[[^\\]]+::).)*Luke/)\nnot done\nfilter by function task.status.type !== 'IN_PROGRESS'\n#urgent\nlimit 50"
 			);
 		});
 	});
@@ -414,7 +414,7 @@ describe("TaskQueryService", () => {
 
 			const query = service.buildTaskQueryFromFilters(filters);
 			expect(query).not.toContain("limit");
-			expect(query).toBe("(description includes 🚗)");
+			expect(query).toBe("(description includes 👤)");
 
 			// Reset for other tests
 			mockPlugin.settings.resultLimit = 50;
@@ -435,7 +435,7 @@ describe("TaskQueryService", () => {
 
 			const query = service.buildTaskQueryFromFilters(filters);
 			expect(query).not.toContain("limit");
-			expect(query).toBe("(description includes 🚗)");
+			expect(query).toBe("(description includes 👤)");
 
 			// Reset for other tests
 			mockPlugin.settings.resultLimit = 50;
@@ -470,7 +470,7 @@ describe("TaskQueryService", () => {
 			expect(query.endsWith("limit 50")).toBe(true);
 
 			// Verify the query contains all expected parts
-			expect(query).toContain("description regex matches /🚗::");
+			expect(query).toContain("description regex matches /👤::");
 			expect(query).toContain("john");
 			expect(query).toContain("acme");
 			expect(query).toContain("not done");

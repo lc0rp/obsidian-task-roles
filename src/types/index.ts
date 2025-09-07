@@ -5,7 +5,6 @@ export interface TaskRolesPluginSettings {
 	companyDirectory: string;
 	roles: Role[];
 	hiddenDefaultRoles: string[];
-	simpleAssigneeMode: boolean;
 	savedViews: ViewConfiguration[];
 	autoApplyFilters: boolean;
 	taskDisplayMode: "minimal" | "detailed";
@@ -216,7 +215,6 @@ export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	companyDirectory: "Companies",
 	roles: DEFAULT_ROLES,
 	hiddenDefaultRoles: [],
-	simpleAssigneeMode: false,
 	savedViews: [],
 	autoApplyFilters: true,
 	taskDisplayMode: "detailed",

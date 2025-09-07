@@ -1,6 +1,12 @@
-import { Editor, MarkdownView, Plugin, WorkspaceLeaf } from "obsidian";
+import {
+	Editor,
+	MarkdownView,
+	Plugin,
+	WorkspaceLeaf,
+	MarkdownFileInfo,
+} from "obsidian";
 
-import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role, SIMPLE_ASSIGNEE_ROLE } from "./types";
+import { TaskRolesPluginSettings, DEFAULT_SETTINGS, Role } from "./types";
 import { TaskRolesService } from "./services/task-roles.service";
 import { taskRolesExtension } from "./editor/task-roles-extension";
 // import { TaskRolesSuggest } from "./editor/task-roles-suggest";
@@ -32,7 +38,7 @@ export default class TaskRolesPlugin extends Plugin {
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
-				view: MarkdownView
+				_ctx: MarkdownView | MarkdownFileInfo
 			) => {
 				const line = editor.getLine(editor.getCursor().line);
 				const isTask = /^\s*- \[[ x]\]/.test(line);
@@ -56,7 +62,7 @@ export default class TaskRolesPlugin extends Plugin {
 		});
 
 		// Add sidebar ribbon icon
-		this.addRibbonIcon('layout-grid', 'Open Task Center', () => {
+		this.addRibbonIcon("layout-grid", "Open Task Center", () => {
 			this.activateView();
 		});
 
@@ -67,7 +73,9 @@ export default class TaskRolesPlugin extends Plugin {
 		if (this.app.workspace.layoutReady) {
 			this.initializeHeavyComponents();
 		} else {
-			this.app.workspace.onLayoutReady(() => this.initializeHeavyComponents());
+			this.app.workspace.onLayoutReady(() =>
+				this.initializeHeavyComponents()
+			);
 		}
 	}
 
@@ -79,15 +87,25 @@ export default class TaskRolesPlugin extends Plugin {
 	private async performHeavyInitialization() {
 		try {
 			// Initialize services with potential file system operations
-			this.taskRolesService = new TaskRolesService(this.app, this.settings);
+			this.taskRolesService = new TaskRolesService(
+				this.app,
+				this.settings
+			);
 
 			// Register editor extensions that may be heavy
-			this.registerEditorExtension(shortcutsTrigger(this.app, this.settings, () => this.getVisibleRoles()));
+			this.registerEditorExtension(
+				shortcutsTrigger(this.app, this.settings, () =>
+					this.getVisibleRoles()
+				)
+			);
 			this.registerEditorExtension(taskRolesExtension(this));
 
 			this.initializationComplete = true;
 		} catch (error) {
-			console.error('TaskRoles plugin: Error during heavy initialization:', error);
+			console.error(
+				"TaskRoles plugin: Error during heavy initialization:",
+				error
+			);
 		}
 	}
 
@@ -143,26 +161,13 @@ export default class TaskRolesPlugin extends Plugin {
 			}
 		}
 
-		// Handle Simple Assignee Role mode
-		const existingAssigneeRole = this.settings.roles.find(r => r.id === "assignees");
-		
-		if (this.settings.simpleAssigneeMode) {
-			// Add the assignee role if it doesn't exist
-			if (!existingAssigneeRole) {
-				this.settings.roles.push({ ...SIMPLE_ASSIGNEE_ROLE });
-			} else {
-				// Update existing assignee role with correct properties
-				existingAssigneeRole.icon = SIMPLE_ASSIGNEE_ROLE.icon;
-				existingAssigneeRole.name = SIMPLE_ASSIGNEE_ROLE.name;
-				existingAssigneeRole.shortcut = SIMPLE_ASSIGNEE_ROLE.shortcut;
-				existingAssigneeRole.isDefault = SIMPLE_ASSIGNEE_ROLE.isDefault;
-				existingAssigneeRole.order = SIMPLE_ASSIGNEE_ROLE.order;
-			}
-		} else {
-			// Remove the assignee role if simple mode is disabled
-			if (existingAssigneeRole) {
-				this.settings.roles = this.settings.roles.filter(r => r.id !== "assignees");
-			}
+		const existingAssigneeRole = this.settings.roles.find(
+			(r) => r.id === "assignees"
+		);
+		if (existingAssigneeRole) {
+			this.settings.roles = this.settings.roles.filter(
+				(r) => r.id !== "assignees"
+			);
 		}
 
 		// Sort roles by order
@@ -181,31 +186,30 @@ export default class TaskRolesPlugin extends Plugin {
 		await this.saveData(this.settings);
 		// Update services with new settings if initialized
 		if (this.initializationComplete) {
-			this.taskRolesService = new TaskRolesService(this.app, this.settings);
+			this.taskRolesService = new TaskRolesService(
+				this.app,
+				this.settings
+			);
 		}
 	}
 
 	openRolesModal(editor: Editor) {
 		// Ensure initialization is complete before opening modal
 		if (!this.initializationComplete) {
-			console.warn('TaskRoles plugin: Initialization not complete, deferring modal opening');
-			this.performHeavyInitialization().then(() => {
-				new TaskRoleAssignmentModal(this.app, this, editor).open();
-			}).catch(console.error);
+			console.warn(
+				"TaskRoles plugin: Initialization not complete, deferring modal opening"
+			);
+			this.performHeavyInitialization()
+				.then(() => {
+					new TaskRoleAssignmentModal(this.app, this, editor).open();
+				})
+				.catch(console.error);
 			return;
 		}
 		new TaskRoleAssignmentModal(this.app, this, editor).open();
 	}
 
 	getVisibleRoles(): Role[] {
-		if (this.settings.simpleAssigneeMode) {
-			// In simple assignee mode, return only the assignee role and custom roles
-			const customRoles = this.settings.roles.filter(role => !role.isDefault);
-			const assigneeRole = this.settings.roles.find(role => role.id === "assignees");
-			
-			return assigneeRole ? [assigneeRole, ...customRoles] : customRoles;
-		}
-		
 		// Default behavior: filter based on hiddenDefaultRoles
 		return this.settings.roles.filter(
 			(role) =>
