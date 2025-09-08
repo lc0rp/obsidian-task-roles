@@ -129,13 +129,6 @@ describe("Smart Insertion Point Detection", () => {
 				true
 			);
 
-			console.log("Line:", line);
-			console.log("Cursor position:", cursorPos);
-			console.log("Nearest legal position:", nearestPos);
-			console.log(
-				"Character at nearest position:",
-				`"${line[nearestPos]}"`
-			);
 		});
 
 		it("should prefer positions after existing roles", () => {

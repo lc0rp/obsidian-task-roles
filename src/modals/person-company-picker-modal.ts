@@ -179,16 +179,16 @@ export class PersonCompanyPickerModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-		if (this.plugin.settings.debug) {
-			console.log(
-				"No suggestions for input: ",
-				this.inputEl.value,
-				" with query: ",
-				query,
-				" and query length ",
-				query.length
-			);
-		}
+                if (this.plugin.settings.debug) {
+                        console.debug(
+                                "No suggestions for input: ",
+                                this.inputEl.value,
+                                " with query: ",
+                                query,
+                                " and query length ",
+                                query.length
+                        );
+                }
 		if (
 			!query.startsWith(this.plugin.settings.personSymbol) &&
 			!query.startsWith(this.plugin.settings.companySymbol)
@@ -202,14 +202,14 @@ export class PersonCompanyPickerModal extends FuzzySuggestModal<string> {
 			return;
 		}
 
-		if (this.plugin.settings.debug) {
-			console.log(
-				"No results, setting noResults to true for ",
-				this.inputEl.value,
-				" with query ",
-				query
-			);
-		}
+                if (this.plugin.settings.debug) {
+                        console.debug(
+                                "No results, setting noResults to true for ",
+                                this.inputEl.value,
+                                " with query ",
+                                query
+                        );
+                }
 		this.noResults = true;
 
 		// In add mode, show creation hint

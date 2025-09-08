@@ -397,11 +397,10 @@ describe("Role Suggestion Dropdown", () => {
 				roleSuggestionDropdown.show(
 					cursor,
 					existingRoles,
-					(role: any) => {
-						// Mock callback for role insertion - this will be captured in tests
-						console.log("Role selected:", role);
-					}
-				);
+                                        (_role: any) => {
+                                                // Mock callback for role insertion - this will be captured in tests
+                                        }
+                                );
 				return { action: "showDropdown" };
 			}
 		};

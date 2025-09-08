@@ -54,19 +54,17 @@ export class AssigneesFilter {
 		this.assigneesInput.readOnly = true;
 
 		// Create clear button
-		this.clearButton = inputWrapper.createEl("button", {
-			cls: "compact-filter-clear-btn",
-			title: "Clear assignees",
-		});
-		const clearIcon = this.clearButton.createEl("span", {
-			cls: "compact-filter-clear-icon",
-		});
-		setIcon(clearIcon, "x");
-		this.clearButton.style.display = "none"; // Initially hidden
+                this.clearButton = inputWrapper.createEl("button", {
+                        cls: "compact-filter-clear-btn task-roles-hidden",
+                        title: "Clear assignees",
+                });
+                const clearIcon = this.clearButton.createEl("span", {
+                        cls: "compact-filter-clear-icon",
+                });
+                setIcon(clearIcon, "x");
 
 		// Create tooltip for showing full list
-		this.tooltip = inputWrapper.createDiv("assignee-tooltip");
-		this.tooltip.style.display = "none";
+                this.tooltip = inputWrapper.createDiv("assignee-tooltip task-roles-hidden");
 
 		// Add hover events for tooltip
 		let hoverTimeout: number | null = null;
@@ -75,7 +73,7 @@ export class AssigneesFilter {
 			if (selectedAssignees.length > 3) {
 				if (hoverTimeout) clearTimeout(hoverTimeout);
 				hoverTimeout = window.setTimeout(() => {
-					this.tooltip.style.display = "block";
+                                        this.tooltip.classList.remove("task-roles-hidden");
 				}, 500);
 			}
 		});
@@ -84,7 +82,7 @@ export class AssigneesFilter {
 				clearTimeout(hoverTimeout);
 				hoverTimeout = null;
 			}
-			this.tooltip.style.display = "none";
+                        this.tooltip.classList.add("task-roles-hidden");
 		});
 
 		// Initial display update
@@ -111,18 +109,20 @@ export class AssigneesFilter {
 		const selectedAssignees = this.getSelectedAssignees();
 		if (selectedAssignees.length === 0) {
 			this.assigneesInput.value = "";
-			this.tooltip.style.display = "none";
+                        this.tooltip.classList.add("task-roles-hidden");
 		} else if (selectedAssignees.length <= 3) {
 			this.assigneesInput.value = selectedAssignees.join(", ");
-			this.tooltip.style.display = "none";
+                        this.tooltip.classList.add("task-roles-hidden");
 		} else {
 			this.assigneesInput.value = `${selectedAssignees.length} selected`;
 			this.tooltip.textContent = selectedAssignees.join(", ");
-			this.tooltip.style.display = "block";
+                        this.tooltip.classList.remove("task-roles-hidden");
 			// Tooltip visibility is controlled by hover events.
 		}
-		this.clearButton.style.display =
-			selectedAssignees.length > 0 ? "block" : "none";
+                this.clearButton.classList.toggle(
+                        "task-roles-hidden",
+                        selectedAssignees.length === 0
+                );
 	}
 
 	private getSelectedAssignees(): string[] {

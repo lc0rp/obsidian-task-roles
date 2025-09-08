@@ -64,12 +64,12 @@ export class TaskRolesSaveViewModal extends Modal {
             });
 
         // Overwrite warning (initially hidden)
-        const overwriteWarning = contentEl.createDiv('overwrite-warning');
-        overwriteWarning.style.display = 'none';
-        overwriteWarning.style.color = 'var(--text-warning)';
-        overwriteWarning.style.marginTop = '8px';
-        overwriteWarning.style.fontSize = '14px';
-        overwriteWarning.setText('⚠️ This will overwrite an existing configuration with the same name.');
+        const overwriteWarning = contentEl.createDiv(
+            'overwrite-warning task-roles-hidden'
+        );
+        overwriteWarning.setText(
+            '⚠️ This will overwrite an existing configuration with the same name.'
+        );
 
         // Show current configuration summary
         const summaryEl = contentEl.createDiv('view-config-summary');
@@ -190,7 +190,7 @@ export class TaskRolesSaveViewModal extends Modal {
     private updateOverwriteWarning(exists: boolean): void {
         const warning = this.contentEl.querySelector('.overwrite-warning') as HTMLElement;
         if (warning) {
-            warning.style.display = exists ? 'block' : 'none';
+            warning.toggleClass('task-roles-hidden', !exists);
         }
     }
 
@@ -204,8 +204,5 @@ export class TaskRolesSaveViewModal extends Modal {
         // Show new error
         const error = this.contentEl.createDiv('view-name-error');
         error.setText(message);
-        error.style.color = 'var(--text-error)';
-        error.style.marginTop = '8px';
-        error.style.fontSize = '14px';
     }
 } 

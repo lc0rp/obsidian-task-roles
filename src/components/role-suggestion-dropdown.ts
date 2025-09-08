@@ -8,11 +8,13 @@ export class RoleSuggestionDropdown {
 	private dropdownElement: HTMLElement | null = null;
 	private isVisible = false;
 	private availableRoles: Role[] = [];
-	private selectedIndex = 0;
-	private currentFilter = "";
-	private triggerPos: { line: number; ch: number } | null = null;
-	private onInsertCallback: ((role: Role) => void) | null = null;
-	private autoHideTimeout: number | null = null;
+        private selectedIndex = 0;
+        private currentFilter = "";
+        private triggerPos: { line: number; ch: number } | null = null;
+        private onInsertCallback: ((role: Role) => void) | null = null;
+        private autoHideTimeout: number | null = null;
+        private dropdownLeft = 0;
+        private dropdownTop = 0;
 
 	constructor(app: App, settings: TaskRolesPluginSettings, getVisibleRoles: () => Role[]) {
 		this.app = app;
@@ -291,8 +293,16 @@ export class RoleSuggestionDropdown {
 		const maxLeft = window.innerWidth - dropdownRect.width - 20;
 		const maxTop = window.innerHeight - dropdownRect.height - 20;
 
-		this.dropdownElement.style.left = Math.min(left, maxLeft) + "px";
-		this.dropdownElement.style.top = Math.min(top, maxTop) + "px";
+                this.dropdownLeft = Math.min(left, maxLeft);
+                this.dropdownTop = Math.min(top, maxTop);
+                this.dropdownElement.style.setProperty(
+                        "--task-roles-dropdown-left",
+                        `${this.dropdownLeft}px`
+                );
+                this.dropdownElement.style.setProperty(
+                        "--task-roles-dropdown-top",
+                        `${this.dropdownTop}px`
+                );
 
 		// Check if dropdown is covered by other elements
 		this.checkForCoverage();
@@ -311,15 +321,22 @@ export class RoleSuggestionDropdown {
 
 			// Loop 10 times adding 30px to left position
 			for (let i = 0; i < 10; i++) {
-				const newLeft = parseInt(this.dropdownElement.style.left) + 30;
-				this.dropdownElement.style.left = newLeft + "px";
+                                const newLeft = this.dropdownLeft + 30;
+                                this.dropdownLeft = newLeft;
+                                this.dropdownElement.style.setProperty(
+                                        "--task-roles-dropdown-left",
+                                        `${this.dropdownLeft}px`
+                                );
 
 				if (!this.isCovered(this.dropdownElement)) {
 					if (this.settings.debug) {
-						console.warn("Adjusted position to avoid coverage:", {
-							left: this.dropdownElement.style.left,
-							top: this.dropdownElement.style.top,
-						});
+                                                console.warn(
+                                                        "Adjusted position to avoid coverage:",
+                                                        {
+                                                                left: `${this.dropdownLeft}px`,
+                                                                top: `${this.dropdownTop}px`,
+                                                        }
+                                                );
 					}
 					break;
 				}
