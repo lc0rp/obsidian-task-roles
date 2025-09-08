@@ -62,12 +62,12 @@ describe("Default Roles Settings UI", () => {
 		tab.containerEl = containerEl;
 		tab.display();
 
-		const descTextFragment = "The default roles are ";
+		const descTextFragment = "default roles are provided to get you started";
 
 		// Expect the description paragraph to be created somewhere
 		const calls = sectionObj.createEl.mock.calls as any[];
 		const hasDescription = calls.some(
-			(c) => c[0] === "p" && c[1]?.text.contains(descTextFragment)
+			(c) => c[0] === "p" && typeof c[1]?.text === "string" && c[1].text.includes(descTextFragment)
 		);
 		expect(hasDescription).toBe(true);
 	});

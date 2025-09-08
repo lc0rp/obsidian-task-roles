@@ -195,17 +195,24 @@ unhidden roles will be parsed and displayed.
 
 ## Settings
 
-- **Change @ symbol**: Customize person prefix (affects future data only)
-- **Change + symbol**: Customize company prefix (affects future data only)
-- **Select @ directory**: Choose directory for people (affects future data only)
-- **Select + directory**: Choose directory for companies (affects future data only)
-- **Create @me person**: Button to create the special @me person if it doesn't exist
-- **Use compact filters**: Display all filters in a single horizontal line instead of the collapsible panel
-- **Enable debug logging**: Log additional information to the console
-- **Assign or Update Roles**:
-  - Hide default roles (prevents them from appearing in future dialogs)
-  - Add, edit, and delete custom roles
-  - Note: Editing custom roles won't update historical records
+- Assignees
+  - Person
+    - Change @ symbol: customize person prefix (affects future data only)
+    - Select @ directory: choose directory for people (affects future data only)
+    - Create @me person: create the special @me person if it doesn't exist
+  - Company
+    - Change + symbol: customize company prefix (affects future data only)
+    - Select + directory: choose directory for companies (affects future data only)
+  - Show inline role assignment icons: display clickable icons at end of task lines
+- Default Roles
+  - Configure preferred name, icon, shortcut, and enable/disable per role
+  - Reset defaults to restore original names, icons, shortcuts, and visibility
+- Custom Roles
+  - Left panel: view existing custom roles (edit or delete)
+  - Right panel: add a new custom role (name, description, icon, shortcut)
+- Other
+  - Use compact filters: display all filters in a single horizontal line instead of the collapsible panel
+  - Enable debug logging: log additional information to the console
 
 ### Default roles customization
 
