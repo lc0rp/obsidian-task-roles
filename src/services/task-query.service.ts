@@ -13,64 +13,68 @@ export class TaskQueryService {
 		// Check if the Tasks plugin is installed and enabled
 		const pluginManager = (this.plugin.app as any).plugins;
 		const tasksPluginName = "obsidian-tasks-plugin";
-                const isInstalled = tasksPluginName in pluginManager.manifests;
-                if (this.plugin.settings.debug)
-                        console.debug(pluginManager.manifests, tasksPluginName, isInstalled);
+		const isInstalled = tasksPluginName in pluginManager.manifests;
+		if (this.plugin.settings.debug)
+			console.debug(
+				pluginManager.manifests,
+				tasksPluginName,
+				isInstalled
+			);
 		const isEnabled = pluginManager.enabledPlugins.has(tasksPluginName);
 		const targetInstance = pluginManager.getPlugin(tasksPluginName);
 		const isLoaded = targetInstance !== undefined;
 		return isInstalled && isEnabled && isLoaded;
 	}
 
-        private displayTasksPluginNotice(
-                columnDiv: HTMLElement,
-                onRefresh?: () => void
-        ): void {
-                const noticeDiv = columnDiv.createDiv("tasks-plugin-notice");
+	private displayTasksPluginNotice(
+		columnDiv: HTMLElement,
+		onRefresh?: () => void
+	): void {
+		const noticeDiv = columnDiv.createDiv("tasks-plugin-notice");
 
-                // Warning icon
-                const iconDiv = noticeDiv.createDiv("tasks-plugin-notice-icon");
-                const iconSpan = iconDiv.createSpan("tasks-plugin-notice-icon-span");
-                setIcon(iconSpan, "alert-triangle");
+		// Warning icon
+		const iconDiv = noticeDiv.createDiv("tasks-plugin-notice-icon");
+		const iconSpan = iconDiv.createSpan("tasks-plugin-notice-icon-span");
+		setIcon(iconSpan, "alert-triangle");
 
-                // Notice text
-                const textDiv = noticeDiv.createDiv("tasks-plugin-notice-text");
+		// Notice text
+		const textDiv = noticeDiv.createDiv("tasks-plugin-notice-text");
 
-                const titleEl = textDiv.createEl("div", {
-                        cls: "tasks-plugin-notice-title",
-                });
-                titleEl.textContent = "Tasks Plugin Required";
+		const titleEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-title",
+		});
+		titleEl.textContent = "Tasks Plugin Required";
 
-                const descEl = textDiv.createEl("div", {
-                        cls: "tasks-plugin-notice-desc",
-                });
-                descEl.textContent =
-                        "The Task Center requires the Tasks plugin to be installed and enabled to display task columns.";
+		const descEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-desc",
+		});
+		descEl.textContent =
+			"The Task Center requires the Tasks plugin to be installed and enabled to display task columns.";
 
-                // Instructions
-                const instructionsEl = textDiv.createEl("div", {
-                        cls: "tasks-plugin-notice-instructions",
-                });
+		// Instructions
+		const instructionsEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-instructions",
+		});
 
-                // Create instruction text using DOM API instead of innerHTML
-                instructionsEl.appendChild(document.createTextNode("Install the "));
-                const strongEl = instructionsEl.createEl("strong");
-                strongEl.textContent = "Tasks";
-                instructionsEl.appendChild(
-                        document.createTextNode(
-                                " plugin from Community Plugins and enable it to use this feature."
-                        )
-                );
+		// Create instruction text using DOM API instead of innerHTML
+		instructionsEl.appendChild(document.createTextNode("Install the "));
+		const strongEl = instructionsEl.createEl("strong");
+		strongEl.textContent = "Tasks";
+		instructionsEl.appendChild(
+			document.createTextNode(
+				" plugin from Community Plugins and enable it to use this feature."
+			)
+		);
 
-                // Refresh button if callback provided
-                if (onRefresh) {
-                        const refreshButton = noticeDiv.createEl("button", {
-                                cls: "mod-cta tasks-plugin-notice-refresh",
-                        });
-                        refreshButton.textContent = "Check Again";
-                        refreshButton.onclick = onRefresh;
-                }
-        }
+		// Refresh button if callback provided
+		if (onRefresh) {
+			const refreshButton = noticeDiv.createEl("button", {
+				cls: "mod-cta tasks-plugin-notice-refresh",
+			});
+			refreshButton.textContent = "Check Again";
+			refreshButton.onclick = onRefresh;
+		}
+	}
 
 	buildTaskQueryFromFilters(filters: ViewFilters): string {
 		const queryLines: string[] = [];
@@ -310,19 +314,21 @@ export class TaskQueryService {
 		switch (layout) {
 			case ViewLayout.ROLE:
 				const visibleRoles = this.plugin.getVisibleRoles();
-                for (const role of visibleRoles) {
-                    const roleQuery = baseQuery
-                        ? `${baseQuery}\ndescription includes ${role.icon}`
-                        : `description includes ${role.icon}`;
-                    const primary = role.names?.[0] || "";
-                    const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
-                    columnQueries.push({
-                        title: display,
-                        query: roleQuery,
-                        icon: role.icon,
-                        isEmoji: true,
-                    });
-                }
+				for (const role of visibleRoles) {
+					const roleQuery = baseQuery
+						? `${baseQuery}\ndescription includes ${role.icon}`
+						: `description includes ${role.icon}`;
+					const primary = role.names?.[0] || "";
+					const display = primary
+						? primary.charAt(0).toUpperCase() + primary.slice(1)
+						: "";
+					columnQueries.push({
+						title: display,
+						query: roleQuery,
+						icon: role.icon,
+						isEmoji: true,
+					});
+				}
 				// Add "No Role" column
 				const noRoleConditions = visibleRoles.map(
 					(role) => `description does not include ${role.icon}`
@@ -480,18 +486,18 @@ export class TaskQueryService {
 		if (columnQuery.icon) {
 			if (columnQuery.isEmoji) {
 				// Use emoji icon
-                                const emojiIcon = titleEl.createSpan("column-icon-emoji");
-                                emojiIcon.setText(columnQuery.icon);
-                        } else {
-                                // Use Obsidian system icon
-                                const iconSpan = titleEl.createSpan("column-icon");
-                                setIcon(iconSpan, columnQuery.icon);
-                        }
-                }
+				const emojiIcon = titleEl.createSpan("column-icon-emoji");
+				emojiIcon.setText(columnQuery.icon);
+			} else {
+				// Use Obsidian system icon
+				const iconSpan = titleEl.createSpan("column-icon");
+				setIcon(iconSpan, columnQuery.icon);
+			}
+		}
 
-                // Add title text
-                const titleText = titleEl.createSpan("column-title-text");
-                titleText.setText(columnQuery.title);
+		// Add title text
+		const titleText = titleEl.createSpan("column-title-text");
+		titleText.setText(columnQuery.title);
 
 		// Check if Tasks plugin is installed before rendering content
 		if (!this.isTasksPluginInstalled()) {
@@ -782,19 +788,19 @@ export class TaskQueryService {
 		const metadata = taskItem.querySelector(".task-metadata");
 		if (!metadata) return;
 
-                // Add hover handlers for minimal mode
-                taskItem.addEventListener("mouseenter", () => {
-                        if (taskItem.closest(".tasks-styled--minimal")) {
-                                (metadata as HTMLElement).addClass("task-metadata-visible");
-                        }
-                });
+		// Add hover handlers for minimal mode
+		taskItem.addEventListener("mouseenter", () => {
+			if (taskItem.closest(".tasks-styled--minimal")) {
+				(metadata as HTMLElement).addClass("task-metadata-visible");
+			}
+		});
 
-                taskItem.addEventListener("mouseleave", () => {
-                        if (taskItem.closest(".tasks-styled--minimal")) {
-                                (metadata as HTMLElement).removeClass("task-metadata-visible");
-                        }
-                });
-        }
+		taskItem.addEventListener("mouseleave", () => {
+			if (taskItem.closest(".tasks-styled--minimal")) {
+				(metadata as HTMLElement).removeClass("task-metadata-visible");
+			}
+		});
+	}
 
 	private buildCrossProductQuery(
 		filters: ViewFilters,

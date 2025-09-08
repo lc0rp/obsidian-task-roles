@@ -183,11 +183,11 @@ export class CompactFiltersComponent {
 		});
 		const applyFiltersIcon = applyFiltersBtn.createEl("span");
 		setIcon(applyFiltersIcon, "play-circle");
-                applyFiltersBtn.title = "Apply";
-                applyFiltersBtn.classList.toggle(
-                        "task-roles-hidden",
-                        this.plugin.settings.autoApplyFilters
-                );
+		applyFiltersBtn.title = "Apply";
+		applyFiltersBtn.classList.toggle(
+			"task-roles-hidden",
+			this.plugin.settings.autoApplyFilters
+		);
 		applyFiltersBtn.onclick = () => {
 			// Apply current filters
 			this.updateFiltersCallback(this.currentFilters);
@@ -207,11 +207,11 @@ export class CompactFiltersComponent {
 			await this.plugin.saveSettings();
 
 			// Show/hide buttons based on Auto Apply setting
-                        const shouldHide = autoApplyCheckbox.checked;
-                        applyFiltersBtn.classList.toggle(
-                                "task-roles-hidden",
-                                shouldHide
-                        );
+			const shouldHide = autoApplyCheckbox.checked;
+			applyFiltersBtn.classList.toggle(
+				"task-roles-hidden",
+				shouldHide
+			);
 
 			// If Auto Apply is enabled, apply filters immediately
 			if (autoApplyCheckbox.checked) {
@@ -249,9 +249,9 @@ export class CompactFiltersComponent {
 		cancelBtn.onclick = (e) => {
 			e.stopPropagation();
 			tempArray.length = 0;
-                        tempArray.push(...originalArray);
-                        dropdown.addClass("task-roles-hidden");
-                };
+			tempArray.push(...originalArray);
+			dropdown.addClass("task-roles-hidden");
+		};
 
 		const okBtn = actions.createEl("button", {
 			cls: "compact-multiselect-btn compact-multiselect-ok",
@@ -264,11 +264,11 @@ export class CompactFiltersComponent {
 	}
 
 	private setupGlobalClickHandler(allDropdowns: HTMLElement[]): void {
-                const closeAllDropdowns = () => {
-                        allDropdowns.forEach((dropdown) => {
-                                dropdown.addClass("task-roles-hidden");
-                        });
-                };
+		const closeAllDropdowns = () => {
+			allDropdowns.forEach((dropdown) => {
+				dropdown.addClass("task-roles-hidden");
+			});
+		};
 
 		const handleOutsideClick = (event: MouseEvent) => {
 			const target = event.target as HTMLElement;

@@ -205,7 +205,8 @@
 }
 
 .compact-filter-input-wrapper .compact-filter-input {
-    padding-right: 24px; /* Make room for clear button */
+    padding-right: 24px;
+    /* Make room for clear button */
 }
 
 .compact-filter-clear-btn {
@@ -885,7 +886,7 @@
 
 /* Task content wrapper - positioned below checkbox and priority with better typography */
 .task-query-display .task-list-item .task-description,
-.task-query-display .task-list-item > p {
+.task-query-display .task-list-item>p {
     margin-left: 0 !important;
     margin-top: 22px !important;
     margin-bottom: 0 !important;
@@ -899,7 +900,7 @@
 
 /* Force re-apply for styled items */
 .task-query-display .task-list-item.task-roles-styled .task-description,
-.task-query-display .task-list-item.task-roles-styled > p {
+.task-query-display .task-list-item.task-roles-styled>p {
     margin-left: 0 !important;
     margin-top: 22px !important;
     margin-bottom: 0 !important;
@@ -1128,7 +1129,7 @@
     flex: 1;
 }
 
-.task-roles-column .task-query-display > div {
+.task-roles-column .task-query-display>div {
     height: 100%;
     overflow-y: auto;
     max-height: 100%;

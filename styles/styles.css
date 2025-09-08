@@ -482,11 +482,11 @@ If your plugin does not need CSS, delete this file.
     box-shadow: var(--shadow-s);
 }
 
-.task-roles-tabs-container > h4 {
+.task-roles-tabs-container>h4 {
     margin: 0 0 8px 0;
 }
 
-.task-roles-tabs-container > p {
+.task-roles-tabs-container>p {
     margin: 0 0 12px 0;
     color: var(--text-muted);
     font-size: var(--font-ui-small);
