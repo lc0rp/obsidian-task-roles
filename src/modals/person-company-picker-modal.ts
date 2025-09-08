@@ -180,7 +180,7 @@ export class PersonCompanyPickerModal extends FuzzySuggestModal<string> {
 		}
 
 		if (this.plugin.settings.debug) {
-			console.log(
+			console.debug(
 				"No suggestions for input: ",
 				this.inputEl.value,
 				" with query: ",
@@ -203,7 +203,7 @@ export class PersonCompanyPickerModal extends FuzzySuggestModal<string> {
 		}
 
 		if (this.plugin.settings.debug) {
-			console.log(
+			console.debug(
 				"No results, setting noResults to true for ",
 				this.inputEl.value,
 				" with query ",

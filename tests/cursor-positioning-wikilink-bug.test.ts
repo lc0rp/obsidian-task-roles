@@ -43,17 +43,7 @@ describe("Cursor Positioning Bug - Wikilink Format", () => {
 				}
 			}
 
-			console.log("Line:", line);
-			console.log("Expected closing position:", roleClosingPos);
-			console.log("Actual returned position:", result?.position);
-			console.log(
-				"Character at expected position:",
-				line[roleClosingPos]
-			);
-			console.log(
-				"Character at returned position:",
-				line[result?.position || -1]
-			);
+
 
 			expect(result?.position).toBe(roleClosingPos);
 		});
@@ -111,17 +101,12 @@ describe("Cursor Positioning Bug - Wikilink Format", () => {
 			);
 			const match = dataviewPattern.exec(line);
 
-			console.log("Full match:", match?.[0]);
-			console.log("Captured assignees:", match?.[1]);
 
 			if (match) {
 				const assigneesText = match[1].trim();
 				const hasAssignees = assigneesText.length > 0;
 				const position = match.index + match[0].length - 1;
 
-				console.log("Assignees text:", `"${assigneesText}"`);
-				console.log("Has assignees:", hasAssignees);
-				console.log("Calculated position:", position);
 
 				// The problem is that the regex `[^\\]]*` stops at the first `]`
 				// which is inside the wikilink `[[Task Roles Demo/People/Me|@Me]]`

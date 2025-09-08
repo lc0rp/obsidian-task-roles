@@ -15,7 +15,11 @@ export class TaskQueryService {
 		const tasksPluginName = "obsidian-tasks-plugin";
 		const isInstalled = tasksPluginName in pluginManager.manifests;
 		if (this.plugin.settings.debug)
-			console.log(pluginManager.manifests, tasksPluginName, isInstalled);
+			console.debug(
+				pluginManager.manifests,
+				tasksPluginName,
+				isInstalled
+			);
 		const isEnabled = pluginManager.enabledPlugins.has(tasksPluginName);
 		const targetInstance = pluginManager.getPlugin(tasksPluginName);
 		const isLoaded = targetInstance !== undefined;
@@ -27,44 +31,30 @@ export class TaskQueryService {
 		onRefresh?: () => void
 	): void {
 		const noticeDiv = columnDiv.createDiv("tasks-plugin-notice");
-		noticeDiv.style.padding = "20px";
-		noticeDiv.style.textAlign = "center";
-		noticeDiv.style.color = "var(--text-muted)";
-		noticeDiv.style.border = "2px dashed var(--background-modifier-border)";
-		noticeDiv.style.borderRadius = "8px";
-		noticeDiv.style.margin = "10px 0";
-		noticeDiv.style.backgroundColor = "var(--background-secondary)";
 
 		// Warning icon
-		const iconDiv = noticeDiv.createDiv();
-		iconDiv.style.marginBottom = "10px";
-		const iconSpan = iconDiv.createSpan();
+		const iconDiv = noticeDiv.createDiv("tasks-plugin-notice-icon");
+		const iconSpan = iconDiv.createSpan("tasks-plugin-notice-icon-span");
 		setIcon(iconSpan, "alert-triangle");
-		iconSpan.style.width = "24px";
-		iconSpan.style.height = "24px";
-		iconSpan.style.color = "var(--text-warning)";
 
 		// Notice text
-		const textDiv = noticeDiv.createDiv();
-		textDiv.style.fontSize = "14px";
-		textDiv.style.lineHeight = "1.4";
+		const textDiv = noticeDiv.createDiv("tasks-plugin-notice-text");
 
-		const titleEl = textDiv.createEl("div");
-		titleEl.style.fontWeight = "bold";
-		titleEl.style.marginBottom = "8px";
-		titleEl.style.color = "var(--text-normal)";
+		const titleEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-title",
+		});
 		titleEl.textContent = "Tasks Plugin Required";
 
-		const descEl = textDiv.createEl("div");
-		descEl.style.marginBottom = "12px";
+		const descEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-desc",
+		});
 		descEl.textContent =
 			"The Task Center requires the Tasks plugin to be installed and enabled to display task columns.";
 
 		// Instructions
-		const instructionsEl = textDiv.createEl("div");
-		instructionsEl.style.fontSize = "12px";
-		instructionsEl.style.color = "var(--text-muted)";
-		instructionsEl.style.marginBottom = "15px";
+		const instructionsEl = textDiv.createEl("div", {
+			cls: "tasks-plugin-notice-instructions",
+		});
 
 		// Create instruction text using DOM API instead of innerHTML
 		instructionsEl.appendChild(document.createTextNode("Install the "));
@@ -79,11 +69,9 @@ export class TaskQueryService {
 		// Refresh button if callback provided
 		if (onRefresh) {
 			const refreshButton = noticeDiv.createEl("button", {
-				cls: "mod-cta",
+				cls: "mod-cta tasks-plugin-notice-refresh",
 			});
 			refreshButton.textContent = "Check Again";
-			refreshButton.style.marginTop = "10px";
-			refreshButton.style.padding = "6px 12px";
 			refreshButton.onclick = onRefresh;
 		}
 	}
@@ -326,19 +314,21 @@ export class TaskQueryService {
 		switch (layout) {
 			case ViewLayout.ROLE:
 				const visibleRoles = this.plugin.getVisibleRoles();
-                for (const role of visibleRoles) {
-                    const roleQuery = baseQuery
-                        ? `${baseQuery}\ndescription includes ${role.icon}`
-                        : `description includes ${role.icon}`;
-                    const primary = role.names?.[0] || "";
-                    const display = primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : "";
-                    columnQueries.push({
-                        title: display,
-                        query: roleQuery,
-                        icon: role.icon,
-                        isEmoji: true,
-                    });
-                }
+				for (const role of visibleRoles) {
+					const roleQuery = baseQuery
+						? `${baseQuery}\ndescription includes ${role.icon}`
+						: `description includes ${role.icon}`;
+					const primary = role.names?.[0] || "";
+					const display = primary
+						? primary.charAt(0).toUpperCase() + primary.slice(1)
+						: "";
+					columnQueries.push({
+						title: display,
+						query: roleQuery,
+						icon: role.icon,
+						isEmoji: true,
+					});
+				}
 				// Add "No Role" column
 				const noRoleConditions = visibleRoles.map(
 					(role) => `description does not include ${role.icon}`
@@ -498,32 +488,16 @@ export class TaskQueryService {
 				// Use emoji icon
 				const emojiIcon = titleEl.createSpan("column-icon-emoji");
 				emojiIcon.setText(columnQuery.icon);
-				emojiIcon.style.marginRight = "8px";
-				emojiIcon.style.fontSize = "16px";
-				emojiIcon.style.lineHeight = "1";
-				emojiIcon.style.verticalAlign = "middle";
 			} else {
 				// Use Obsidian system icon
 				const iconSpan = titleEl.createSpan("column-icon");
 				setIcon(iconSpan, columnQuery.icon);
-				iconSpan.style.marginRight = "8px";
-				iconSpan.style.display = "inline-flex";
-				iconSpan.style.alignItems = "center";
-				iconSpan.style.verticalAlign = "middle";
-				iconSpan.style.width = "16px";
-				iconSpan.style.height = "16px";
 			}
 		}
 
 		// Add title text
 		const titleText = titleEl.createSpan("column-title-text");
 		titleText.setText(columnQuery.title);
-		titleText.style.verticalAlign = "middle";
-
-		// Style the title element for better alignment
-		titleEl.style.display = "flex";
-		titleEl.style.alignItems = "center";
-		titleEl.style.gap = "0";
 
 		// Check if Tasks plugin is installed before rendering content
 		if (!this.isTasksPluginInstalled()) {
@@ -814,16 +788,16 @@ export class TaskQueryService {
 		const metadata = taskItem.querySelector(".task-metadata");
 		if (!metadata) return;
 
-		// Add click handler for minimal mode
+		// Add hover handlers for minimal mode
 		taskItem.addEventListener("mouseenter", () => {
 			if (taskItem.closest(".tasks-styled--minimal")) {
-				(metadata as HTMLElement).style.display = "flex";
+				(metadata as HTMLElement).addClass("task-metadata-visible");
 			}
 		});
 
 		taskItem.addEventListener("mouseleave", () => {
 			if (taskItem.closest(".tasks-styled--minimal")) {
-				(metadata as HTMLElement).style.display = "none";
+				(metadata as HTMLElement).removeClass("task-metadata-visible");
 			}
 		});
 	}

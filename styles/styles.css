@@ -12,6 +12,8 @@ If your plugin does not need CSS, delete this file.
 /* Role Suggestion Dropdown Styles */
 .task-roles-suggestion-dropdown {
     position: fixed;
+    left: var(--task-roles-dropdown-left, 0);
+    top: var(--task-roles-dropdown-top, 0);
     background: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 8px;
@@ -78,6 +80,34 @@ If your plugin does not need CSS, delete this file.
 
 .settings-shortcut-valid {
     border: "";
+}
+
+.task-roles-btn-active {
+    font-weight: 600;
+}
+
+.task-roles-btn-disabled {
+    opacity: 0.45;
+}
+
+.task-roles-hidden {
+    display: none;
+}
+
+.compact-multiselect-display.has-white-arrow {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.overwrite-warning {
+    color: var(--text-warning);
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.view-name-error {
+    color: var(--text-error);
+    margin-top: 8px;
+    font-size: 14px;
 }
 
 .roles-container {
@@ -452,11 +482,11 @@ If your plugin does not need CSS, delete this file.
     box-shadow: var(--shadow-s);
 }
 
-.task-roles-tabs-container > h4 {
+.task-roles-tabs-container>h4 {
     margin: 0 0 8px 0;
 }
 
-.task-roles-tabs-container > p {
+.task-roles-tabs-container>p {
     margin: 0 0 12px 0;
     color: var(--text-muted);
     font-size: var(--font-ui-small);

@@ -270,15 +270,15 @@ describe("Role Suggestion Dropdown", () => {
 							!mockSettings.hiddenDefaultRoles.includes(role.id)
 					);
 				} else {
-                this.availableRoles = mockSettings.roles.filter(
-                    (role: any) =>
-                        !mockSettings.hiddenDefaultRoles.includes(
-                            role.id
-                        ) &&
-                        ((role.names?.[0] || "")
-                            .toLowerCase()
-                            .startsWith(filter.toLowerCase()))
-                );
+					this.availableRoles = mockSettings.roles.filter(
+						(role: any) =>
+							!mockSettings.hiddenDefaultRoles.includes(
+								role.id
+							) &&
+							((role.names?.[0] || "")
+								.toLowerCase()
+								.startsWith(filter.toLowerCase()))
+					);
 				}
 				// Reset selection if no matches
 				if (this.availableRoles.length === 0) {
@@ -397,9 +397,8 @@ describe("Role Suggestion Dropdown", () => {
 				roleSuggestionDropdown.show(
 					cursor,
 					existingRoles,
-					(role: any) => {
+					(_role: any) => {
 						// Mock callback for role insertion - this will be captured in tests
-						console.log("Role selected:", role);
 					}
 				);
 				return { action: "showDropdown" };
@@ -790,11 +789,11 @@ describe("Role Suggestion Dropdown", () => {
 				action: "insertRole",
 				role: DEFAULT_ROLES[0],
 			});
-            // Should use the same role object structure as existing shortcuts
-            expect(result.role).toHaveProperty("id");
-            expect(result.role).toHaveProperty("names");
-            expect(result.role).toHaveProperty("icon");
-        });
+			// Should use the same role object structure as existing shortcuts
+			expect(result.role).toHaveProperty("id");
+			expect(result.role).toHaveProperty("names");
+			expect(result.role).toHaveProperty("icon");
+		});
 	});
 
 	describe("Bug Fixes", () => {

@@ -22,7 +22,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 	private createAssigneesSection(containerEl: HTMLElement): void {
 		const section = containerEl.createDiv("task-roles-tabs-container");
-		section.createEl("h4", { text: "Assigning tasks" });
+		section.createEl("h4", { text: "Assignees" });
 		section.createEl("p", {
 			text: "You can assign tasks to people or companies. Each person or company is stored as a note. Customize the directory location and other settings below.",
 		});
@@ -34,11 +34,6 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (!this.activeAssigneesTab) this.activeAssigneesTab = "person";
 
 		// Mark active
-		// @ts-ignore
-		const headerButtons = (header as any).createEl?.mock ? [] : undefined;
-		// Set class hints
-		// @ts-ignore
-		const headerChildren: any[] = [];
 		// Recreate buttons with active styles and click handlers
 		const personBtn = header.createEl("button", {
 			text: "Person settings",
@@ -52,13 +47,12 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (this.activeAssigneesTab === "person") {
 			// @ts-ignore
 			personBtn.addClass?.("is-active");
-			// @ts-ignore
-			personBtn.style && (personBtn.style.fontWeight = "600");
+			personBtn.addClass?.("task-roles-btn-active");
 		} else {
 			// @ts-ignore
 			companyBtn.addClass?.("is-active");
 			// @ts-ignore
-			companyBtn.style && (companyBtn.style.fontWeight = "600");
+			companyBtn.addClass?.("task-roles-btn-active");
 		}
 		// Handlers
 		// @ts-ignore
@@ -75,6 +69,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		// Details container rendered for active tab only
 		const details = section.createDiv("default-roles-tab-details");
 		if (this.activeAssigneesTab === "person") {
+			details.createEl("h4", { text: "Person" });
 			new Setting(details)
 				.setName("Person settings")
 				.setDesc(
@@ -110,6 +105,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 			this.createMePersonFileSetting(details);
 		} else {
+			details.createEl("h4", { text: "Company" });
 			new Setting(details)
 				.setName("Company settings")
 				.setDesc(
@@ -204,15 +200,13 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 				// Add a class; real styling handled via CSS
 				// @ts-ignore - addClass exists in Obsidian elements
 				btn.addClass?.("is-disabled");
-				// Fallback style for environments without addClass helpers
-				// @ts-ignore
-				btn.style && (btn.style.opacity = "0.45");
+				btn.addClass?.("task-roles-btn-disabled");
 			}
 			if (this.activeDefaultRoleId === role.id) {
 				// @ts-ignore
 				btn.addClass?.("is-active");
 				// @ts-ignore
-				btn.style && (btn.style.fontWeight = "600");
+				btn.addClass?.("task-roles-btn-active");
 			}
 			// Wire click
 			// @ts-ignore
@@ -452,7 +446,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		const section = containerEl.createDiv("task-roles-tabs-container");
 		section.createEl("h4", { text: "Custom roles" });
 		section.createEl("p", {
-			text: "Create custom roles to fit your workflow below.",
+			text: "You can create custom roles to fit your workflow below.",
 		});
 
 		if (!this.activeCustomRolesTab) this.activeCustomRolesTab = "list";
@@ -469,13 +463,12 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		if (this.activeCustomRolesTab === "list") {
 			// @ts-ignore
 			listBtn.addClass?.("is-active");
-			// @ts-ignore
-			listBtn.style && (listBtn.style.fontWeight = "600");
+			listBtn.addClass?.("task-roles-btn-active");
 		} else {
 			// @ts-ignore
 			addBtn.addClass?.("is-active");
 			// @ts-ignore
-			addBtn.style && (addBtn.style.fontWeight = "600");
+			addBtn.addClass?.("task-roles-btn-active");
 		}
 		// Click handlers
 		// @ts-ignore
@@ -491,6 +484,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 
 		const details = section.createDiv("default-roles-tab-details");
 		if (this.activeCustomRolesTab === "list") {
+			details.createEl("h4", { text: "Custom Roles" });
 			new Setting(details)
 				.setName("Custom roles")
 				.setDesc("Custom roles you have created are listed below.");
@@ -536,6 +530,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 				}
 			}
 		} else {
+			details.createEl("h4", { text: "Add New Role" });
 			new Setting(details)
 				.setName("Add new role")
 				.setDesc("Use the form below to create a new custom role.");

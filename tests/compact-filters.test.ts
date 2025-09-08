@@ -170,7 +170,7 @@ describe("CompactFiltersComponent", () => {
 				".compact-filter-clear-btn"
 			) as HTMLElement;
 			expect(clearButton).toBeTruthy();
-			expect(clearButton.style.display).toBe("block");
+			expect(clearButton.classList.contains("task-roles-hidden")).toBe(false);
 		});
 
 		it("should hide clear button when no assignees are selected", async () => {
@@ -194,7 +194,7 @@ describe("CompactFiltersComponent", () => {
 				".compact-filter-clear-btn"
 			) as HTMLElement;
 			expect(clearButton).toBeTruthy();
-			expect(clearButton.style.display).toBe("none");
+			expect(clearButton.classList.contains("task-roles-hidden")).toBe(true);
 		});
 
 		it("should clear all assignees when clear button is clicked", async () => {

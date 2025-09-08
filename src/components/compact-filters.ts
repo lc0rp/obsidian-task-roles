@@ -184,9 +184,10 @@ export class CompactFiltersComponent {
 		const applyFiltersIcon = applyFiltersBtn.createEl("span");
 		setIcon(applyFiltersIcon, "play-circle");
 		applyFiltersBtn.title = "Apply";
-		applyFiltersBtn.style.display = this.plugin.settings.autoApplyFilters
-			? "none"
-			: "block";
+		applyFiltersBtn.classList.toggle(
+			"task-roles-hidden",
+			this.plugin.settings.autoApplyFilters
+		);
 		applyFiltersBtn.onclick = () => {
 			// Apply current filters
 			this.updateFiltersCallback(this.currentFilters);
@@ -207,7 +208,10 @@ export class CompactFiltersComponent {
 
 			// Show/hide buttons based on Auto Apply setting
 			const shouldHide = autoApplyCheckbox.checked;
-			applyFiltersBtn.style.display = shouldHide ? "none" : "block";
+			applyFiltersBtn.classList.toggle(
+				"task-roles-hidden",
+				shouldHide
+			);
 
 			// If Auto Apply is enabled, apply filters immediately
 			if (autoApplyCheckbox.checked) {
@@ -246,7 +250,7 @@ export class CompactFiltersComponent {
 			e.stopPropagation();
 			tempArray.length = 0;
 			tempArray.push(...originalArray);
-			dropdown.style.display = "none";
+			dropdown.addClass("task-roles-hidden");
 		};
 
 		const okBtn = actions.createEl("button", {
@@ -262,7 +266,7 @@ export class CompactFiltersComponent {
 	private setupGlobalClickHandler(allDropdowns: HTMLElement[]): void {
 		const closeAllDropdowns = () => {
 			allDropdowns.forEach((dropdown) => {
-				dropdown.style.display = "none";
+				dropdown.addClass("task-roles-hidden");
 			});
 		};
 

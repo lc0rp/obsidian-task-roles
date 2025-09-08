@@ -46,7 +46,7 @@ const context = await esbuild.context({
 const copyStyles = () => {
     try {
         fs.copyFileSync("styles/styles.css", "styles.css");
-        console.log("✓ Copied styles.css");
+        console.info("✓ Copied styles.css");
     } catch (error) {
         console.error("Failed to copy styles.css:", error.message);
     }
@@ -57,7 +57,7 @@ const copyStyles = () => {
             const mainStyles = fs.readFileSync("styles.css", "utf8");
             const viewStyles = fs.readFileSync("styles/task-roles-view.css", "utf8");
             fs.writeFileSync("styles.css", mainStyles + "\n\n" + viewStyles);
-            console.log("✓ Merged task roles view styles");
+            console.info("✓ Merged task roles view styles");
         }
     } catch (error) {
         console.error("Failed to merge task roles view styles:", error.message);
@@ -70,7 +70,7 @@ const watchStyles = () => {
         fs.watchFile("styles/styles.css", (curr, prev) => {
             if (curr.mtime !== prev.mtime) {
                 copyStyles();
-                console.log("✓ Styles updated");
+                console.info("✓ Styles updated");
             }
         });
 
@@ -79,7 +79,7 @@ const watchStyles = () => {
             fs.watchFile("styles/task-roles-view.css", (curr, prev) => {
                 if (curr.mtime !== prev.mtime) {
                     copyStyles();
-                    console.log("✓ Task roles view styles updated");
+                    console.info("✓ Task roles view styles updated");
                 }
             });
         }
