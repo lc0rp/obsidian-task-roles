@@ -93,9 +93,9 @@ export function shortcutsTrigger(
 					beforeCursor.endsWith("\\") &&
 					this.isRoleShortcutKey(e.key, visibleRoles)
 				) {
-                const role = visibleRoles.find((r) =>
-                    (r.shortcuts || []).includes(e.key.toLowerCase())
-                );
+					const role = visibleRoles.find((r) =>
+						(r.shortcuts || []).includes(e.key.toLowerCase())
+					);
 					if (role) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -173,8 +173,10 @@ export function shortcutsTrigger(
 				key: string,
 				visibleRoles: Role[]
 			): boolean {
-            const lowerKey = key.toLowerCase();
-            return visibleRoles.some((role) => (role.shortcuts || []).includes(lowerKey));
+				const lowerKey = key.toLowerCase();
+				return visibleRoles.some((role) =>
+					(role.shortcuts || []).includes(lowerKey)
+				);
 			}
 
 			/**
@@ -300,7 +302,7 @@ export function shortcutsTrigger(
 			}
 
 			private isInTaskCodeBlock(editor: any, line: number): boolean {
-				// Simple implementation - check for task code blocks
+				// Basic implementation - check for task code blocks
 				let inside = false;
 				let lang = "";
 
