@@ -198,11 +198,11 @@ unhidden roles will be parsed and displayed.
 - Assignees
   - Person
     - Change @ symbol: customize person prefix (affects future data only)
-    - Select @ directory: choose directory for people (affects future data only)
+    - Select @ folder: choose folder for people (affects future data only)
     - Create @me person: create the special @me person if it doesn't exist
   - Company
     - Change + symbol: customize company prefix (affects future data only)
-    - Select + directory: choose directory for companies (affects future data only)
+    - Select + folder: choose folder for companies (affects future data only)
   - Show inline role assignment icons: display clickable icons at end of task lines
 - Default Roles
   - Configure preferred name, icon, shortcut, and enable/disable per role
@@ -218,7 +218,7 @@ unhidden roles will be parsed and displayed.
 
 The default roles are flexible enough to support RACI (Responsible, Accountable, Consulted, Informed) and DACI (Driver, Approver, Contributor, Informed) frameworks, or standard single‑assignee workflows. Customize them in Settings → Task Roles:
 
-- Preferred name: choose between the role’s name and its aliases (e.g., Owner vs Driver). Updates the displayed label instantly.
+- Preferred label: choose between the role’s names (e.g., Owner vs Driver). Updates the displayed label instantly.
 - Icon: click to type/paste an emoji. Must be unique among enabled roles. Updates everywhere instantly.
 - Shortcut: pick the backslash shortcut from the default and its aliases (e.g., \o or \d).
 - Enable/disable: toggle visibility of each default role.

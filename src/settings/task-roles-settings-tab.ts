@@ -24,7 +24,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 		const section = containerEl.createDiv("task-roles-tabs-container");
 		section.createEl("h4", { text: "Assignees" });
 		section.createEl("p", {
-			text: "You can assign tasks to people or companies. Each person or company is stored as a note. Customize the directory location and other settings below.",
+			text: "You can assign tasks to people or companies. Each person or company is stored as a note. Customize the folder location and other settings below.",
 		});
 
 		// Tabs header
@@ -73,17 +73,17 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			new Setting(details)
 				.setName("Person settings")
 				.setDesc(
-					"A person is anyone you assign a task to. If you already have a directory of contacts, you can use that."
+					"A person is anyone you assign a task to. If you already have a folder of contacts, you can use that."
 				);
 			new Setting(details)
-				.setName("Person directory")
-				.setDesc("Directory where people note files are stored")
+				.setName("Person folder")
+				.setDesc("Folder where people note files are stored")
 				.addText((text) =>
 					text
 						.setPlaceholder("People")
-						.setValue(this.plugin.settings.personDirectory)
+						.setValue(this.plugin.settings.personFolder)
 						.onChange(async (value) => {
-							this.plugin.settings.personDirectory =
+							this.plugin.settings.personFolder =
 								value || "People";
 							await this.plugin.saveSettings();
 						})
@@ -91,7 +91,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			new Setting(details)
 				.setName("Person prefix")
 				.setDesc(
-					"Typing this symbol in the editor will trigger a people search in the directory above"
+					"Typing this symbol in the editor will trigger a people search in the folder above"
 				)
 				.addText((text) =>
 					text
@@ -113,14 +113,14 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 				);
 
 			new Setting(details)
-				.setName("Company directory")
-				.setDesc("Directory where company note files are stored")
+				.setName("Company folder")
+				.setDesc("Folder where company note files are stored")
 				.addText((text) =>
 					text
 						.setPlaceholder("Companies")
-						.setValue(this.plugin.settings.companyDirectory)
+						.setValue(this.plugin.settings.companyFolder)
 						.onChange(async (value) => {
-							this.plugin.settings.companyDirectory =
+							this.plugin.settings.companyFolder =
 								value || "Companies";
 							await this.plugin.saveSettings();
 						})
@@ -129,7 +129,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			new Setting(details)
 				.setName("Company prefix")
 				.setDesc(
-					"Typing this symbol in the editor will trigger a company search in the directory above"
+					"Typing this symbol in the editor will trigger a company search in the folder above"
 				)
 				.addText((text) =>
 					text
@@ -234,7 +234,7 @@ export class TaskRolesSettingTab extends PluginSettingTab {
 			.setDesc(role.description);
 
 		new Setting(details)
-			.setName("Preferred name")
+			.setName("Preferred label")
 			.setDesc("Pick the label shown for this role")
 			.addDropdown((dropdown) => {
 				const options = getPreferredNameOptions(role);

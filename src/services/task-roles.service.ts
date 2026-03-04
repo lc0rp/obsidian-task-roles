@@ -34,8 +34,8 @@ export class TaskRolesService {
 			if (file.extension !== "md") return;
 			const path = file.path;
 			if (
-				path.startsWith(`${this.settings.personDirectory}/`) ||
-				path.startsWith(`${this.settings.companyDirectory}/`)
+				path.startsWith(`${this.settings.personFolder}/`) ||
+				path.startsWith(`${this.settings.companyFolder}/`)
 			) {
 				this.refreshAssigneeCache().catch((error) =>
 					console.error("Error refreshing assignee cache:", error)
@@ -78,19 +78,19 @@ export class TaskRolesService {
 			return;
 		}
 
-		this.personCache = this.readDirectory(this.settings.personDirectory);
-		this.companyCache = this.readDirectory(this.settings.companyDirectory);
+		this.personCache = this.readFolder(this.settings.personFolder);
+		this.companyCache = this.readFolder(this.settings.companyFolder);
 		this.cacheInitialized = true;
 	}
 
-	private readDirectory(directory: string): string[] {
-		const folder = this.app.vault.getAbstractFileByPath(directory);
-		if (!folder || !(folder instanceof TFolder)) {
+	private readFolder(folder: string): string[] {
+		const resolvedFolder = this.app.vault.getAbstractFileByPath(folder);
+		if (!resolvedFolder || !(resolvedFolder instanceof TFolder)) {
 			return [];
 		}
 
 		const files: string[] = [];
-		for (const file of folder.children) {
+		for (const file of resolvedFolder.children) {
 			if (file instanceof TFile && file.extension === "md") {
 				files.push(file.basename);
 			}
@@ -277,11 +277,11 @@ export class TaskRolesService {
 						const isPerson = assignee.startsWith(
 							this.settings.personSymbol
 						);
-						const directory = isPerson
-							? this.settings.personDirectory
-							: this.settings.companyDirectory;
+						const folder = isPerson
+							? this.settings.personFolder
+							: this.settings.companyFolder;
 						const cleanName = assignee.substring(1); // Remove @ or +
-						return `[[${directory}/${cleanName}|${assignee}]]`;
+						return `[[${folder}/${cleanName}|${assignee}]]`;
 					})
 					.join(", ");
 				parts.push(`[${role.icon}:: ${assigneeList}]`);
@@ -419,10 +419,10 @@ export class TaskRolesService {
 			return;
 		}
 
-		const personPath = `${this.settings.personDirectory}/Me.md`;
+		const personPath = `${this.settings.personFolder}/Me.md`;
 
-		// Ensure directory exists
-		const dir = this.settings.personDirectory;
+		// Ensure folder exists
+		const dir = this.settings.personFolder;
 		if (!(await this.app.vault.adapter.exists(dir))) {
 			await this.app.vault.createFolder(dir);
 		}
@@ -437,9 +437,9 @@ export class TaskRolesService {
 
 	async mePersonExists(): Promise<boolean> {
 		const possiblePaths = [
-			`${this.settings.personDirectory}/Me.md`,
-			`${this.settings.personDirectory}/me.md`,
-			`${this.settings.personDirectory}/ME.md`,
+			`${this.settings.personFolder}/Me.md`,
+			`${this.settings.personFolder}/me.md`,
+			`${this.settings.personFolder}/ME.md`,
 		];
 
 		for (const path of possiblePaths) {
@@ -459,19 +459,19 @@ export class TaskRolesService {
 		}
 
 		const name = assignee.substring(1); // Remove @ or +
-		const directory = isPerson
-			? this.settings.personDirectory
-			: this.settings.companyDirectory;
-		const filePath = `${directory}/${name}.md`;
+		const folder = isPerson
+			? this.settings.personFolder
+			: this.settings.companyFolder;
+		const filePath = `${folder}/${name}.md`;
 
 		// Check if file already exists
 		if (await this.app.vault.adapter.exists(filePath)) {
 			return; // File already exists, no need to create
 		}
 
-		// Ensure directory exists
-		if (!(await this.app.vault.adapter.exists(directory))) {
-			await this.app.vault.createFolder(directory);
+		// Ensure folder exists
+		if (!(await this.app.vault.adapter.exists(folder))) {
+			await this.app.vault.createFolder(folder);
 		}
 
 		// Create the file with basic content

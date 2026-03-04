@@ -112,11 +112,11 @@ export class TaskRolesSuggest extends EditorSuggest<string> {
 		const isPerson = suggestion.startsWith(
 			this.plugin.settings.personSymbol
 		);
-		const directory = isPerson
-			? this.plugin.settings.personDirectory
-			: this.plugin.settings.companyDirectory;
+		const folder = isPerson
+			? this.plugin.settings.personFolder
+			: this.plugin.settings.companyFolder;
 		const cleanName = suggestion.substring(1);
-		const link = `[[${directory}/${cleanName}|${suggestion}]]`;
+		const link = `[[${folder}/${cleanName}|${suggestion}]]`;
 
 		editor.replaceRange(link, context.start, context.end);
 	}

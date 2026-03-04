@@ -94,7 +94,7 @@ npm run lint:fix       # Works
 
 ## Project Architecture and Navigation
 
-### Core Directory Structure
+### Core Folder Structure
 
 ```
 src/

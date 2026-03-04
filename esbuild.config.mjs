@@ -42,7 +42,7 @@ const context = await esbuild.context({
     minify: prod,
 });
 
-// Copy styles.css to root directory
+// Copy styles.css to root folder
 const copyStyles = () => {
     try {
         fs.copyFileSync("styles/styles.css", "styles.css");
@@ -64,7 +64,7 @@ const copyStyles = () => {
     }
 };
 
-// Watch styles directory in development mode
+// Watch styles folder in development mode
 const watchStyles = () => {
     if (!prod) {
         fs.watchFile("styles/styles.css", (curr, prev) => {

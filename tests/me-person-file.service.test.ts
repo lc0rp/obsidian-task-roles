@@ -106,10 +106,10 @@ describe("TaskRolesService - @me Person Functions", () => {
 			);
 		});
 
-		it("uses custom person directory from settings", async () => {
+		it("uses custom person folder from settings", async () => {
 			const customSettings = {
 				...DEFAULT_SETTINGS,
-				personDirectory: "MyPeople",
+				personFolder: "MyPeople",
 			};
 			const service = new TaskRolesService(appStub, customSettings);
 			service.refreshAssigneeCache = vi.fn();
@@ -183,7 +183,7 @@ describe("TaskRolesService - @me Person Functions", () => {
 		it("creates Me.md file when no @me file exists", async () => {
 			const service = createService();
 			mockVault.adapter.exists.mockImplementation((path) => {
-				// Directory exists, but no @me files exist
+				// Folder exists, but no @me files exist
 				return Promise.resolve(path === "People");
 			});
 
@@ -196,7 +196,7 @@ describe("TaskRolesService - @me Person Functions", () => {
 			expect(service.refreshAssigneeCache).toHaveBeenCalled();
 		});
 
-		it("creates directory if it does not exist", async () => {
+		it("creates folder if it does not exist", async () => {
 			const service = createService();
 			mockVault.adapter.exists.mockResolvedValue(false);
 
@@ -209,10 +209,10 @@ describe("TaskRolesService - @me Person Functions", () => {
 			);
 		});
 
-		it("uses custom person directory from settings", async () => {
+		it("uses custom person folder from settings", async () => {
 			const customSettings = {
 				...DEFAULT_SETTINGS,
-				personDirectory: "People",
+				personFolder: "People",
 			};
 			const service = new TaskRolesService(appStub, customSettings);
 			service.refreshAssigneeCache = vi.fn();
@@ -230,7 +230,7 @@ describe("TaskRolesService - @me Person Functions", () => {
 		it("always creates file with capitalized name even if other cases exist", async () => {
 			const service = createService();
 			mockVault.adapter.exists.mockImplementation((path) => {
-				// Directory exists, no @me files exist
+				// Folder exists, no @me files exist
 				return Promise.resolve(path === "People");
 			});
 

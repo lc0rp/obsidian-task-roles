@@ -1,8 +1,8 @@
 export interface TaskRolesPluginSettings {
 	personSymbol: string;
 	companySymbol: string;
-	personDirectory: string;
-	companyDirectory: string;
+	personFolder: string;
+	companyFolder: string;
 	roles: Role[];
 	hiddenDefaultRoles: string[];
 	savedViews: ViewConfiguration[];
@@ -16,13 +16,13 @@ export interface TaskRolesPluginSettings {
 }
 
 export interface Role {
-    id: string;
-    names: string[];
-    pluralNames?: Record<string, string>;
-    description: string;
-    icon: string;
-    shortcuts: string[];
-    order: number;
+	id: string;
+	names: string[];
+	pluralNames?: Record<string, string>;
+	description: string;
+	icon: string;
+	shortcuts: string[];
+	order: number;
 }
 
 export interface TaskRoleAssignment {
@@ -156,49 +156,49 @@ export interface ViewColumn {
 }
 
 export const DEFAULT_ROLES: Role[] = [
-    {
-        id: "owner",
-        names: ["owner", "user", "responsible", "driver", "assignee"],
-        pluralNames: { responsible: "responsible" },
-        description:
-            "Executes the task, or drives the decision. For basic task assignment, keep this role and disable the rest.",
-        icon: "👤",
-        shortcuts: ["o", "u", "r", "d", "a"],
-        order: 1,
-    },
-    {
-        id: "approver",
-        names: ["approver", "accountable", "reviewer", "authorizer"],
-        description:
-            "Signs-off and has ultimate accoutability for the task or decision.",
-        icon: "👍",
-        shortcuts: ["a", "r"],
-        order: 2,
-    },
-    {
-        id: "contributor",
-        names: ["contributor", "consulted", "supporter", "participant"],
-        description:
-            "Provides input, data or other contributions to the task or decision.",
-        icon: "👥",
-        shortcuts: ["c", "s", "p"],
-        order: 3,
-    },
-    {
-        id: "informed",
-        names: ["informed", "stakeholder"],
-        description: "Kept in the loop and informed of progress or outcomes.",
-        icon: "📢",
-        shortcuts: ["i"],
-        order: 4,
-    },
+	{
+		id: "owner",
+		names: ["owner", "user", "responsible", "driver", "assignee"],
+		pluralNames: { responsible: "responsible" },
+		description:
+			"Executes the task, or drives the decision. For basic task assignment, keep this role and disable the rest.",
+		icon: "👤",
+		shortcuts: ["o", "u", "r", "d", "a"],
+		order: 1,
+	},
+	{
+		id: "approver",
+		names: ["approver", "accountable", "reviewer", "authorizer"],
+		description:
+			"Signs-off and has ultimate accoutability for the task or decision.",
+		icon: "👍",
+		shortcuts: ["a", "r"],
+		order: 2,
+	},
+	{
+		id: "contributor",
+		names: ["contributor", "consulted", "supporter", "participant"],
+		description:
+			"Provides input, data or other contributions to the task or decision.",
+		icon: "👥",
+		shortcuts: ["c", "s", "p"],
+		order: 3,
+	},
+	{
+		id: "informed",
+		names: ["informed", "stakeholder"],
+		description: "Kept in the loop and informed of progress or outcomes.",
+		icon: "📢",
+		shortcuts: ["i"],
+		order: 4,
+	},
 ];
 
 export const DEFAULT_SETTINGS: TaskRolesPluginSettings = {
 	personSymbol: "@",
 	companySymbol: "+",
-	personDirectory: "People",
-	companyDirectory: "Companies",
+	personFolder: "People",
+	companyFolder: "Companies",
 	roles: DEFAULT_ROLES,
 	hiddenDefaultRoles: [],
 	savedViews: [],
