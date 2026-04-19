@@ -1,1 +1,0 @@
-/Users/luke/Documents/dev/obsidian-task-roles-dev/plugin/AGENTS.md
